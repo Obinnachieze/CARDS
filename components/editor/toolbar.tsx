@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useEditor } from "./editor-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +11,21 @@ import { Textarea } from "@/components/ui/textarea";
 import {
     Type, Image as ImageIcon, Smile,
     Palette, LayoutTemplate, Pencil, Upload,
-    MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight
+    MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight, Loader2
 } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { cn } from "@/lib/utils";
-
-const fonts = [
-    "Inter", "Playfair Display", "Roboto", "Lato", "Montserrat", "Open Sans",
-    "Dancing Script", "Pacifico", "Great Vibes", "Caveat", "Mountains of Christmas"
-];
+import { fetchGoogleFonts, loadFont, GoogleFont } from "@/lib/google-fonts";
 
 const colors = [
     "#000000", "#ffffff", "#ef4444", "#f97316", "#eab308", "#22c55e",
     "#06b6d4", "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#f43f5e"
+];
+
+// Fallback fonts if API fails or while loading
+const fallbackFonts = [
+    "Inter", "Playfair Display", "Roboto", "Lato", "Montserrat", "Open Sans",
+    "Dancing Script", "Pacifico", "Great Vibes", "Caveat"
 ];
 
 type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design";
@@ -49,24 +51,62 @@ export const Toolbar = () => {
     const [activeTab, setActiveTab] = useState<Tab | null>("templates");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-    // Auto-open Text tab if text is selected? Or just show properties?
-    // Let's show properties inside the active panel if relevant, OR switch to a "Properties" view if we had one.
-    // For now, if text is selected, we show the Edit Text UI at the top of the Text tab.
+    // Google Fonts State
+    const [googleFonts, setGoogleFonts] = useState<GoogleFont[]>([]);
+    const [fontSearch, setFontSearch] = useState("");
+    const [isLoadingFonts, setIsLoadingFonts] = useState(false);
+    const [fontError, setFontError] = useState<string | null>(null);
 
-    // BUT user might be in "Templates" tab.
-    // Let's make a decision: If an element is selected, we show its properties in a special "Edit" panel that overrides the current tab?
-    // Or we just add it to the top of the relevant tab.
+    // Fetch fonts on mount
+    useEffect(() => {
+        const loadFonts = async () => {
+            setIsLoadingFonts(true);
+            setFontError(null);
+            const { items, error } = await fetchGoogleFonts();
+            if (error) {
+                console.error("Font loading error:", error);
+                setFontError(error);
+            }
+            if (items && items.length > 0) {
+                setGoogleFonts(items);
+            }
+            setIsLoadingFonts(false);
+        };
+        loadFonts();
+    }, []);
 
-    // Simplest UX: If element selected, open a "Edit" tab automatically?
-    // Or just put it in the "Design" tab?
+    // Filtered fonts
+    const filteredFonts = useMemo(() => {
+        if (!googleFonts.length) return fallbackFonts;
+        const search = fontSearch.toLowerCase();
+        return googleFonts
+            .filter(f => f.family.toLowerCase().includes(search))
+            .slice(0, 50); // Limit to top 50 matches for performance
+    }, [googleFonts, fontSearch]);
 
-    // Let's put text editing in "Text" tab at the top.
+    // Handle font selection
+    const handleFontSelect = (family: string) => {
+        loadFont(family);
+        if (selectedElement) {
+            updateElement(selectedElement.id, { fontFamily: family });
+        } else {
+            addElement("text", family, { fontFamily: family, fontSize: 32 });
+        }
+    };
+
+    // Auto-load current font of selected element if needed
+    useEffect(() => {
+        if (selectedElement?.fontFamily) {
+            loadFont(selectedElement.fontFamily);
+        }
+    }, [selectedElement?.fontFamily]);
+
 
     useEffect(() => {
         if (selectedElement?.type === "text") {
             setActiveTab("text");
         }
-    }, [selectedElement?.id]); // Only switch when selection changes to a text element
+    }, [selectedElement?.id]);
 
     const handleAddEmoji = (emojiData: EmojiClickData) => {
         addElement("emoji", emojiData.emoji, { x: 50, y: 50 });
@@ -128,7 +168,7 @@ export const Toolbar = () => {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-6 w-6 text-red-500 hover:bg-red-100 placeholder:text-red-500"
+                                                    className="h-6 w-6 text-red-500 hover:bg-red-100"
                                                     onClick={() => removeElement(selectedElement.id)}
                                                     title="Delete Element"
                                                 >
@@ -160,25 +200,22 @@ export const Toolbar = () => {
 
                                             <div className="space-y-2">
                                                 <Label className="text-xs text-muted-foreground">Font Family</Label>
-                                                <select
-                                                    className="w-full border rounded-md p-2 text-sm"
-                                                    value={selectedElement.fontFamily || "Inter"}
-                                                    onChange={(e) => updateElement(selectedElement.id, { fontFamily: e.target.value })}
-                                                >
-                                                    {fonts.map(f => (
-                                                        <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>
-                                                    ))}
-                                                </select>
+                                                {/* Using filtered list for dropdown too? Or simpler one? 
+                                                     Let's stick to the list below for selection, or add a search here.
+                                                     For now, simple select showing current + fallbacks + favorites? 
+                                                     Actually, standard behavior is clicking the list below applies it.
+                                                     The select here might be redundant if we have the list.
+                                                     I'll render the current font name here.
+                                                 */}
+                                                <div className="border rounded-md p-2 text-sm bg-white truncate">
+                                                    {selectedElement.fontFamily || "Inter"}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
 
-                                    <div className="bg-gray-100 p-2 rounded-md flex gap-2">
-                                        <Search size={16} className="text-gray-400 mt-1" />
-                                        <input className="bg-transparent text-sm w-full outline-none" placeholder="Search fonts" />
-                                    </div>
-
                                     <div className="space-y-2">
+                                        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Add Text</Label>
                                         <Button className="w-full justify-start h-12 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg" onClick={() => addElement("text", "Add a heading", { fontSize: 32, fontWeight: "bold" })}>
                                             Add a heading
                                         </Button>
@@ -190,20 +227,56 @@ export const Toolbar = () => {
                                         </Button>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Font Combinations</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {fonts.map(font => (
-                                                <Button
-                                                    key={font}
-                                                    variant="outline"
-                                                    className="h-16 justify-center text-center px-1 overflow-hidden hover:bg-gray-50 bg-white border-gray-200"
-                                                    style={{ fontFamily: font }}
-                                                    onClick={() => addElement("text", font, { fontFamily: font })}
-                                                >
-                                                    <span className="truncate text-lg">{font}</span>
-                                                </Button>
-                                            ))}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                                                Fonts ({googleFonts.length > 0 ? googleFonts.length : fallbackFonts.length})
+                                            </Label>
+                                            {isLoadingFonts && <Loader2 className="animate-spin text-purple-600" size={14} />}
+                                        </div>
+
+                                        <div className="bg-gray-100 p-2 rounded-md flex flex-col gap-2 sticky top-0 z-10">
+                                            <div className="flex gap-2 items-center">
+                                                <Search size={16} className="text-gray-400" />
+                                                <input
+                                                    className="bg-transparent text-sm w-full outline-none"
+                                                    placeholder="Type to search fonts..."
+                                                    value={fontSearch}
+                                                    onChange={(e) => setFontSearch(e.target.value)}
+                                                />
+                                            </div>
+                                            {fontError && (
+                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 break-words">
+                                                    {fontError}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-2 min-h-[100px]">
+                                            {filteredFonts.length === 0 ? (
+                                                <div className="text-center py-8 text-gray-400 text-xs text-balance px-4">
+                                                    No fonts found matching "{fontSearch}". <br />Try "Roboto", "Open Sans", "Lato"...
+                                                </div>
+                                            ) : (
+                                                filteredFonts.map((font, index) => {
+                                                    const familyName = typeof font === 'string' ? font : font.family;
+                                                    // Auto-load visible fonts (top 10)
+                                                    if (index < 10) loadFont(familyName);
+
+                                                    return (
+                                                        <Button
+                                                            key={familyName}
+                                                            variant="outline"
+                                                            className="h-12 justify-start px-3 overflow-hidden hover:bg-gray-50 bg-white border-gray-200 w-full text-left font-normal group relative"
+                                                            onClick={() => handleFontSelect(familyName)}
+                                                            onMouseEnter={() => loadFont(familyName)}
+                                                        >
+                                                            <span className="truncate text-lg group-hover:text-purple-600 transition-colors" style={{ fontFamily: familyName }}>{familyName}</span>
+                                                            {/* <div className="absolute right-2 opacity-0 group-hover:opacity-100 text-xs text-gray-400 bg-white px-1">Apply</div> */}
+                                                        </Button>
+                                                    );
+                                                })
+                                            )}
                                         </div>
                                     </div>
                                 </div>
