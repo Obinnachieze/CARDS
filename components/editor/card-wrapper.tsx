@@ -2,117 +2,111 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { CardFace, CardMode } from "./types";
 import { useEditor } from "./editor-context";
 import { cn } from "@/lib/utils";
 
 interface CardWrapperProps {
-    children: React.ReactNode; // The canvas content (will be filtered by face)
+    frontContent: React.ReactNode;
+    insideLeftContent: React.ReactNode;
+    insideRightContent: React.ReactNode;
+    backContent?: React.ReactNode;
+    interactive?: boolean; // If true, clicking toggles open/close
 }
 
-export const CardWrapper = ({ children }: CardWrapperProps) => {
+export const CardWrapper = ({
+    frontContent,
+    insideLeftContent,
+    insideRightContent,
+    backContent,
+    interactive = true
+}: CardWrapperProps) => {
     const { cardMode, currentFace, setCurrentFace, backgroundColor } = useEditor();
 
     const isFoldable = cardMode === "foldable";
-    const isOpen = currentFace.startsWith("inside");
+    // Define "isOpen" based on whether we are looking at the inside
+    const isOpen = currentFace === "inside-left" || currentFace === "inside-right";
 
-    // Dimensions for the card (A5 ish ratio)
-    const width = 600;
-    const height = 800;
+    // Dimensions
+    const width = 450;
+    const height = 600;
+
+    const handleFaceClick = (targetFace: "front" | "inside-left" | "inside-right" | "back") => {
+        if (!interactive) return;
+        // Logic for interactive preview toggle
+        if (targetFace === "front") {
+            setCurrentFace("inside-right"); // Open to inside
+        } else if (targetFace === "inside-right" || targetFace === "inside-left") {
+            setCurrentFace("front"); // Close to front
+        }
+    };
 
     if (!isFoldable) {
-        // ENVELOPE MODE
+        // ENVELOPE MODE (Simplified for now)
         return (
-            <div className="relative flex items-center justify-center w-full h-full bg-gray-100 p-8 overflow-hidden">
-                <div className="relative w-[700px] h-[500px] bg-red-100 flex items-center justify-center shadow-2xl">
-                    {/* Envelope Body */}
-                    <div className="absolute inset-0 bg-amber-200 z-10 clip-path-envelope" style={{ clipPath: "polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)" }} />
-
-                    {/* The Card Sliding Out */}
-                    <motion.div
-                        className="absolute bg-white shadow-lg z-0"
-                        style={{ width: 550, height: 400, backgroundColor }}
-                        animate={{
-                            y: isOpen ? -200 : 0,
-                            zIndex: isOpen ? 20 : 0
-                        }}
-                        transition={{ duration: 1, type: "spring" }}
-                        onClick={() => setCurrentFace(isOpen ? "front" : "inside-left")}
-                    >
-                        {/* Render all content here for now, or specific face */}
-                        <div className="relative w-full h-full overflow-hidden">
-                            {children}
-                        </div>
-                    </motion.div>
-
-                    {/* Envelope Flap */}
-                    <motion.div
-                        className="absolute top-0 left-0 w-full h-1/2 bg-amber-300 z-20 origin-top"
-                        style={{ clipPath: "polygon(0 0, 50% 100%, 100% 0)" }}
-                        animate={{ rotateX: isOpen ? 180 : 0 }}
-                        transition={{ duration: 0.5 }}
-                    />
+            <div className="relative flex items-center justify-center w-full h-full p-8">
+                <div className="relative w-[500px] h-[350px] bg-red-100 flex items-center justify-center shadow-2xl">
+                    <div className="absolute inset-0 bg-blue-100/50 flex items-center justify-center text-gray-400">
+                        Envelope Preview (Coming Soon)
+                    </div>
                 </div>
             </div>
-        );
+        )
     }
 
     // FOLDABLE MODE
     return (
-        <div className="perspective-1000 flex items-center justify-center w-full h-full bg-gray-200">
-            <motion.div
-                className="relative transform-style-3d transition-transform duration-700"
-                style={{ width, height }}
-                animate={{
-                    rotateY: isOpen ? -180 : 0,
-                    x: isOpen ? width / 2 : 0 // Shift to center the open spread
-                }}
-            >
-                {/* FRONT COVER */}
-                <div
-                    className="absolute inset-0 backface-hidden bg-white shadow-xl cursor-pointer"
-                    style={{ backgroundColor }}
-                    onClick={() => setCurrentFace("inside-right")}
-                >
-                    {/* We need to filter children for 'front' face usually, but here we just render everything and rely on the canvas to filter */}
-                    {/* Actually, the Canvas component calls this wrapper? Or this wrapper is inside Canvas? */}
-                    {/* Better approach: This wrapper renders multiple 'CanvasFaces' */}
-                    {/* But standard implementation is: Wrapper contains the visual structure, and slots for content */}
+        <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
+            <div className="relative transform-style-3d transition-all duration-700 w-full h-full flex items-center justify-center">
 
-                    <div className="pointer-events-none text-center mt-10 text-gray-400">Front Cover</div>
-                    {children}
+                {/* LEFT SIDE (Front Cover + Inside Left) */}
+                <motion.div
+                    className="relative transform-style-3d origin-right z-10"
+                    style={{ width, height }}
+                    animate={{
+                        rotateY: isOpen ? -180 : 0,
+                    }}
+                    transition={{ duration: 0.8, type: "spring", stiffness: 60 }}
+                >
+                    {/* FRONT FACE */}
+                    <div
+                        className="absolute inset-0 backface-hidden bg-white shadow-xl cursor-pointer rounded-r-md overflow-hidden"
+                        style={{ backgroundColor }}
+                        onClick={() => handleFaceClick("front")}
+                    >
+                        {frontContent}
+                        {!interactive && !isOpen && (
+                            <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Front</div>
+                        )}
+                    </div>
+
+                    {/* INSIDE LEFT FACE (Back of Front Cover) */}
+                    <div
+                        className="absolute inset-0 backface-hidden rotate-y-180 bg-white shadow-sm border-r border-gray-100 rounded-l-md overflow-hidden"
+                        style={{ backgroundColor }}
+                        onClick={() => handleFaceClick("inside-left")}
+                    >
+                        {insideLeftContent}
+                        {!interactive && isOpen && (
+                            <div className="absolute top-2 left-2 text-xs text-gray-300 pointer-events-none">Inside Left</div>
+                        )}
+                    </div>
+                </motion.div>
+
+                {/* RIGHT SIDE (Inside Right + Back Cover) */}
+                {/* Ideally this would also be a motion div if we want to show the Back Cover by flipping the whole thing */}
+                {/* For now, let's assume standard greeting card where Right side is static base */}
+                <div
+                    className="relative bg-white shadow-xl z-0 rounded-r-md overflow-hidden"
+                    style={{ width, height, backgroundColor }}
+                    onClick={() => handleFaceClick("inside-right")}
+                >
+                    {insideRightContent}
+                    {!interactive && isOpen && (
+                        <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Inside Right</div>
+                    )}
                 </div>
 
-                {/* INSIDE LEFT (Back of cover) */}
-                <div
-                    className="absolute inset-0 backface-hidden rotate-y-180 bg-white shadow-xl border-r border-gray-200"
-                    style={{ backgroundColor }}
-                >
-                    <div className="pointer-events-none text-center mt-10 text-gray-400">Inside Left</div>
-                    {/* Render Inside Left Content */}
-                </div>
-            </motion.div>
-
-            {/* INSIDE RIGHT (Static back page) */}
-            <motion.div
-                className="absolute shadow-xl"
-                style={{
-                    width,
-                    height,
-                    x: isOpen ? width / 2 : 0, // Moves with the opening
-                    zIndex: -1,
-                    backgroundColor
-                }}
-            >
-                <div
-                    className="w-full h-full cursor-pointer"
-                    onClick={() => setCurrentFace("front")}
-                >
-                    <div className="pointer-events-none text-center mt-10 text-gray-400">Inside Right (Main Message)</div>
-                    {/* Render Inside Right Content */}
-                    {/* Wait, if children is the filtered list of elements, we can't easily split them here unless we pass slots */}
-                </div>
-            </motion.div>
+            </div>
         </div>
     );
 };

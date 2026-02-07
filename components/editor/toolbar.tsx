@@ -10,14 +10,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Type, Image as ImageIcon, Smile,
     Palette, LayoutTemplate, Pencil, Upload,
-    MousePointer2, Move, CreditCard, Mail
+    MousePointer2, Move, ChevronLeft, Search
 } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const fonts = [
@@ -30,7 +25,7 @@ const colors = [
     "#06b6d4", "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#f43f5e"
 ];
 
-type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "settings";
+type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design";
 
 export const Toolbar = () => {
     const {
@@ -40,10 +35,6 @@ export const Toolbar = () => {
         removeElement,
         setBackgroundColor,
         backgroundColor,
-        cardMode,
-        setCardMode,
-        currentFace,
-        setCurrentFace,
         isDrawing,
         setIsDrawing,
         brushColor,
@@ -54,7 +45,7 @@ export const Toolbar = () => {
         setCurrentFont
     } = useEditor();
 
-    const [activeTab, setActiveTab] = useState<Tab>("text");
+    const [activeTab, setActiveTab] = useState<Tab | null>("templates");
     const [textInput, setTextInput] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -82,205 +73,189 @@ export const Toolbar = () => {
         }
     };
 
+    const closePanel = () => setActiveTab(null);
+
     return (
-        <div className="flex h-full bg-white border-r w-80">
-            {/* Icons Sidebar */}
-            <div className="flex flex-col items-center w-20 py-4 bg-gray-50 border-r gap-4">
-                <SidebarTab icon={<LayoutTemplate size={24} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab("templates")} />
-                <SidebarTab icon={<Type size={24} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab("text")} />
-                <SidebarTab icon={<Smile size={24} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab("elements")} />
-                <SidebarTab icon={<Upload size={24} />} label="Uploads" active={activeTab === "uploads"} onClick={() => setActiveTab("uploads")} />
-                <SidebarTab icon={<Pencil size={24} />} label="Draw" active={activeTab === "draw"} onClick={() => setActiveTab("draw")} />
-                <SidebarTab icon={<Palette size={24} />} label="Design" active={activeTab === "settings"} onClick={() => setActiveTab("settings")} />
+        <div className="flex h-full z-40 relative">
+            {/* Dark Icon Rail */}
+            <div className="flex flex-col items-center w-[72px] py-4 bg-[#0e1318] text-white gap-2 z-50">
+                <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab(activeTab === "design" ? null : "design")} />
+                <SidebarTab icon={<LayoutTemplate size={20} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab(activeTab === "templates" ? null : "templates")} />
+                <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab(activeTab === "text" ? null : "text")} />
+                <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab(activeTab === "elements" ? null : "elements")} />
+                <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => setActiveTab(activeTab === "uploads" ? null : "uploads")} />
+                <SidebarTab icon={<Pencil size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => setActiveTab(activeTab === "draw" ? null : "draw")} />
             </div>
 
-            {/* Panel Content */}
-            <div className="flex-1 overflow-y-auto p-4">
-                {activeTab === "text" && (
-                    <div className="flex flex-col gap-6">
-                        <h3 className="font-semibold text-lg">Add Text</h3>
-                        <div className="flex gap-2">
-                            <Input
-                                value={textInput}
-                                onChange={(e) => setTextInput(e.target.value)}
-                                placeholder="Enter text..."
-                                onKeyDown={(e) => e.key === "Enter" && handleAddText()}
-                            />
-                            <Button onClick={handleAddText}>Add</Button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <Label>Font Family</Label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {fonts.map(font => (
-                                    <Button
-                                        key={font}
-                                        variant={currentFont === font ? "default" : "outline"}
-                                        className="h-10 justify-start px-2 overflow-hidden"
-                                        style={{ fontFamily: font }}
-                                        onClick={() => {
-                                            setCurrentFont(font);
-                                            if (selectedElement) {
-                                                updateElement(selectedElement.id, { fontFamily: font });
-                                            }
-                                        }}
-                                    >
-                                        <span className="truncate">{font}</span>
-                                    </Button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {selectedElement && selectedElement.type === "text" && (
-                            <div className="space-y-4 pt-4 border-t">
-                                <Label>Edit Selection</Label>
-                                <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Content</Label>
-                                    <Input
-                                        value={selectedElement.content}
-                                        onChange={(e) => updateElement(selectedElement.id, { content: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Size</Label>
-                                    <Slider
-                                        value={[selectedElement.fontSize || 24]}
-                                        min={12}
-                                        max={100}
-                                        step={1}
-                                        onValueChange={(vals) => updateElement(selectedElement.id, { fontSize: vals[0] })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs text-muted-foreground">Color</Label>
-                                    <ColorPicker
-                                        color={selectedElement.color || "#000000"}
-                                        onChange={(color) => updateElement(selectedElement.id, { color })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
+            {/* Sliding Panel */}
+            <div
+                className={cn(
+                    "absolute left-[72px] top-0 bottom-0 w-80 bg-white border-r shadow-xl transform transition-transform duration-300 ease-in-out z-40 overflow-hidden flex flex-col",
+                    activeTab ? "translate-x-0" : "-translate-x-full"
                 )}
-
-                {activeTab === "elements" && (
-                    <div className="flex flex-col gap-6">
-                        <h3 className="font-semibold text-lg">Elements</h3>
-                        <Button
-                            variant="outline"
-                            className="h-12 justify-start gap-2"
-                            onClick={() => setShowEmojiPicker(true)}
-                        >
-                            <Smile size={20} /> Add Emoji
-                        </Button>
-                        {showEmojiPicker && (
-                            <div className="absolute z-50 left-20 top-20 shadow-xl">
-                                <EmojiPicker onEmojiClick={handleAddEmoji} />
-                                <Button size="sm" variant="ghost" className="mt-2 w-full" onClick={() => setShowEmojiPicker(false)}>Close</Button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === "uploads" && (
-                    <div className="flex flex-col gap-6">
-                        <h3 className="font-semibold text-lg">Uploads</h3>
-                        <Label htmlFor="image-upload" className="cursor-pointer border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition">
-                            <Upload size={32} className="text-muted-foreground" />
-                            <span className="text-sm font-medium">Click to upload image</span>
-                            <Input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                        </Label>
-                    </div>
-                )}
-
-                {activeTab === "draw" && (
-                    <div className="flex flex-col gap-6">
-                        <h3 className="font-semibold text-lg">Drawing</h3>
-                        <div className="flex items-center gap-2">
-                            <Label>Enable Drawing</Label>
-                            <Button
-                                variant={isDrawing ? "default" : "outline"}
-                                onClick={() => setIsDrawing(!isDrawing)}
-                            >
-                                {isDrawing ? "On" : "Off"}
+            >
+                {activeTab && (
+                    <>
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h3 className="font-semibold text-sm capitalize">{activeTab}</h3>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
+                                <ChevronLeft size={16} />
                             </Button>
                         </div>
+                        <ScrollArea className="flex-1 p-4">
+                            {/* Panel Content Based on Tab */}
 
-                        <div className="space-y-4">
-                            <Label>Brush Color</Label>
-                            <ColorPicker color={brushColor} onChange={setBrushColor} />
-                        </div>
+                            {activeTab === "text" && (
+                                <div className="space-y-6">
+                                    <div className="bg-gray-100 p-2 rounded-md flex gap-2">
+                                        <Search size={16} className="text-gray-400 mt-1" />
+                                        <input className="bg-transparent text-sm w-full outline-none" placeholder="Search fonts" />
+                                    </div>
 
-                        <div className="space-y-4">
-                            <Label>Brush Size: {brushSize}px</Label>
-                            <Slider
-                                value={[brushSize]}
-                                min={1}
-                                max={20}
-                                step={1}
-                                onValueChange={(vals) => setBrushSize(vals[0])}
-                            />
-                        </div>
-                    </div>
-                )}
+                                    <div className="space-y-2">
+                                        <Button className="w-full justify-start h-12 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg" onClick={() => addElement("text", "Add a heading", { fontSize: 32, fontWeight: "bold" })}>
+                                            Add a heading
+                                        </Button>
+                                        <Button className="w-full justify-start h-10 bg-gray-100 hover:bg-gray-200 text-black font-semibold text-base" onClick={() => addElement("text", "Add a subheading", { fontSize: 24, fontWeight: "semibold" })}>
+                                            Add a subheading
+                                        </Button>
+                                        <Button className="w-full justify-start h-8 bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm" onClick={() => addElement("text", "Add a little bit of body text", { fontSize: 16 })}>
+                                            Add a little bit of body text
+                                        </Button>
+                                    </div>
 
-                {activeTab === "settings" && (
-                    <div className="flex flex-col gap-6">
-                        <h3 className="font-semibold text-lg">Card Settings</h3>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Font Combinations</Label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {fonts.map(font => (
+                                                <Button
+                                                    key={font}
+                                                    variant="outline"
+                                                    className="h-16 justify-center text-center px-1 overflow-hidden hover:bg-gray-50 bg-white border-gray-200"
+                                                    style={{ fontFamily: font }}
+                                                    onClick={() => addElement("text", font, { fontFamily: font })}
+                                                >
+                                                    <span className="truncate text-lg">{font}</span>
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                        <div className="space-y-2">
-                            <Label>Card Format</Label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <Button
-                                    variant={cardMode === "foldable" ? "default" : "outline"}
-                                    onClick={() => setCardMode("foldable")}
-                                    className="flex flex-col h-20 gap-2"
-                                >
-                                    <CreditCard size={24} />
-                                    <span>Foldable</span>
-                                </Button>
-                                <Button
-                                    variant={cardMode === "envelope" ? "default" : "outline"}
-                                    onClick={() => setCardMode("envelope")}
-                                    className="flex flex-col h-20 gap-2"
-                                >
-                                    <Mail size={24} />
-                                    <span>Envelope</span>
-                                </Button>
-                            </div>
-                        </div>
+                            {activeTab === "elements" && (
+                                <div className="space-y-6">
+                                    <div className="bg-gray-100 p-2 rounded-md flex gap-2">
+                                        <Search size={16} className="text-gray-400 mt-1" />
+                                        <input className="bg-transparent text-sm w-full outline-none" placeholder="Search elements" />
+                                    </div>
 
-                        <div className="space-y-2">
-                            <Label>Background Color</Label>
-                            <ColorPicker color={backgroundColor} onChange={setBackgroundColor} />
-                        </div>
-                    </div>
-                )}
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-start gap-2 h-10"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    >
+                                        <Smile size={18} /> {showEmojiPicker ? "Close Emoji Picker" : "Open Emoji Picker"}
+                                    </Button>
+                                    {showEmojiPicker && (
+                                        <div className="border rounded-lg shadow-sm">
+                                            <EmojiPicker onEmojiClick={handleAddEmoji} width="100%" height={350} />
+                                        </div>
+                                    )}
 
-                {activeTab === "templates" && (
-                    <div className="flex flex-col gap-4">
-                        <h3 className="font-semibold text-lg">Templates</h3>
-                        <p className="text-muted-foreground text-sm">Select a starting point...</p>
-                        {/* Placeholder for template thumbnails */}
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="aspect-[3/4] bg-yellow-100 rounded cursor-pointer hover:ring-2 ring-blue-500 flex items-center justify-center text-xs text-center font-bold text-yellow-600 p-2">Birthday</div>
-                            <div className="aspect-[3/4] bg-pink-100 rounded cursor-pointer hover:ring-2 ring-blue-500 flex items-center justify-center text-xs text-center font-bold text-pink-600 p-2">Wedding</div>
-                            <div className="aspect-[3/4] bg-red-100 rounded cursor-pointer hover:ring-2 ring-blue-500 flex items-center justify-center text-xs text-center font-bold text-red-600 p-2">Holiday</div>
-                        </div>
-                    </div>
-                )}
+                                    <div className="space-y-2">
+                                        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Shapes</Label>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            <div className="aspect-square bg-gray-200 rounded-sm cursor-pointer hover:bg-gray-300" onClick={() => addElement("text", "", { width: 100, height: 100, backgroundColor: "#000" })} />
+                                            <div className="aspect-square bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300" />
+                                            <div className="aspect-square bg-gray-200 rounded-md cursor-pointer hover:bg-gray-300" />
+                                            <div className="aspect-square border-2 border-gray-400 rounded-sm cursor-pointer hover:bg-gray-100" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                {/* Global Delete Button if selection exists */}
-                {selectedElement && (
-                    <Button
-                        variant="destructive"
-                        className="mt-8 w-full"
-                        onClick={() => removeElement(selectedElement.id)}
-                    >
-                        Delete Selected Element
-                    </Button>
+                            {activeTab === "uploads" && (
+                                <div className="space-y-6">
+                                    <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                                        <Label htmlFor="image-upload" className="cursor-pointer w-full h-full flex items-center justify-center gap-2 text-white">
+                                            <Upload size={18} />
+                                            Upload files
+                                            <Input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                                        </Label>
+                                    </Button>
+
+                                    <div className="text-center py-10 text-gray-400 text-sm">
+                                        <ImageIcon size={48} className="mx-auto mb-2 opacity-20" />
+                                        <p>No uploads yet</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "draw" && (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Drawing Mode</Label>
+                                        <Button
+                                            size="sm"
+                                            variant={isDrawing ? "default" : "secondary"}
+                                            onClick={() => setIsDrawing(!isDrawing)}
+                                            className={isDrawing ? "bg-purple-600 hover:bg-purple-700" : ""}
+                                        >
+                                            {isDrawing ? "Active" : "Disabled"}
+                                        </Button>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <Label>Brush Color</Label>
+                                        <ColorPicker color={brushColor} onChange={setBrushColor} />
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <Label>Brush Size: {brushSize}px</Label>
+                                        <Slider
+                                            value={[brushSize]}
+                                            min={1}
+                                            max={50}
+                                            step={1}
+                                            onValueChange={(vals) => setBrushSize(vals[0])}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "design" && (
+                                <div className="space-y-6">
+                                    <div className="space-y-3">
+                                        <Label>Background Color</Label>
+                                        <ColorPicker color={backgroundColor} onChange={setBackgroundColor} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === "templates" && (
+                                <div className="space-y-4">
+                                    <div className="bg-gray-100 p-2 rounded-md flex gap-2">
+                                        <Search size={16} className="text-gray-400 mt-1" />
+                                        <input className="bg-transparent text-sm w-full outline-none" placeholder="Search templates" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {["Birthday", "Wedding", "Party", "Thank You"].map((t, i) => (
+                                            <div key={i} className="aspect-[3/4] bg-gray-100 rounded-md hover:ring-2 ring-purple-500 cursor-pointer flex items-center justify-center text-xs text-gray-500 font-medium">
+                                                {t}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                        </ScrollArea>
+                    </>
                 )}
             </div>
+
+            {/* Selected Element Controls (Floating or Contextual) */}
+            {/* We can put this in the header later */}
         </div>
     );
 };
@@ -289,34 +264,38 @@ const SidebarTab = ({ icon, label, active, onClick }: { icon: React.ReactNode, l
     <button
         onClick={onClick}
         className={cn(
-            "flex flex-col items-center justify-center p-2 rounded-lg w-16 h-16 transition-colors",
-            active ? "bg-blue-50 text-blue-600" : "text-gray-500 hover:bg-gray-100"
+            "flex flex-col items-center justify-center w-full py-3 transition-colors relative group",
+            active ? "text-white bg-gray-800" : "text-gray-400 hover:text-white hover:bg-gray-800"
         )}
     >
-        {icon}
-        <span className="text-[10px] mt-1 font-medium">{label}</span>
+        <div className={cn("mb-1", active ? "text-purple-400" : "")}>{icon}</div>
+        <span className="text-[10px] font-medium">{label}</span>
+        {active && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-purple-500" />}
     </button>
 );
 
 const ColorPicker = ({ color, onChange }: { color: string, onChange: (c: string) => void }) => (
-    <div className="grid grid-cols-6 gap-2">
+    <div className="flex flex-wrap gap-2">
         {colors.map((c) => (
             <button
                 key={c}
                 className={cn(
-                    "w-8 h-8 rounded-full border transition-transform hover:scale-110",
-                    color === c && "ring-2 ring-black"
+                    "w-6 h-6 rounded-full border border-gray-200 transition-transform hover:scale-110",
+                    color === c && "ring-2 ring-offset-1 ring-purple-600"
                 )}
                 style={{ backgroundColor: c }}
                 onClick={() => onChange(c)}
                 title={c}
             />
         ))}
-        <input
-            type="color"
-            value={color}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-8 h-8 rounded-full overflow-hidden border-0 p-0"
-        />
+        <div className="relative w-6 h-6 rounded-full overflow-hidden border border-gray-200 bg-gradient-to-br from-red-500 via-green-500 to-blue-500">
+            <input
+                type="color"
+                value={color}
+                onChange={(e) => onChange(e.target.value)}
+                className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+            />
+        </div>
+
     </div>
 );

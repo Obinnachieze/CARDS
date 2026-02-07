@@ -3,104 +3,99 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useEditor } from "./editor-context";
 
-export const DrawingCanvas = ({ width, height }: { width: number; height: number }) => {
-    const { isDrawing, brushColor, brushSize, addElement, currentFace } = useEditor();
+interface DrawingCanvasProps {
+    width: number;
+    height: number;
+    zoom?: number; // Optional, but we use bounding rect for robustness
+}
+
+export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [isPainting, setIsPainting] = useState(false);
+    const { isDrawing, brushColor, brushSize, addElement, currentFace } = useEditor();
+    const [isDrawingState, setIsDrawingState] = useState(false);
+    const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
 
-    // Initial setup
-    useEffect(() => {
+    // Helper to get coordinates relative to canvas internal size
+    const getCoordinates = (e: React.MouseEvent | MouseEvent) => {
+        if (!canvasRef.current) return { x: 0, y: 0 };
         const canvas = canvasRef.current;
-        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
 
-        canvas.width = width;
-        canvas.height = height;
+        // Calculate scale factor between visual size and internal size
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
 
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-            ctx.lineJoin = "round";
-            ctx.lineCap = "round";
-            ctx.lineWidth = brushSize;
-            ctx.strokeStyle = brushColor;
-        }
-    }, [width, height]);
-
-    // Update brush style
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-            ctx.lineWidth = brushSize;
-            ctx.strokeStyle = brushColor;
-        }
-    }, [brushColor, brushSize]);
-
-    const startPaint = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!isDrawing) return;
-        const coordinates = getCoordinates(e);
-        if (!coordinates) return;
-
-        setIsPainting(true);
-        const ctx = canvasRef.current?.getContext("2d");
-        if (ctx) {
-            ctx.beginPath();
-            ctx.moveTo(coordinates.x, coordinates.y);
-        }
-    };
-
-    const paint = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!isDrawing || !isPainting) return;
-        const coordinates = getCoordinates(e);
-        if (!coordinates) return;
-
-        const ctx = canvasRef.current?.getContext("2d");
-        if (ctx) {
-            ctx.lineTo(coordinates.x, coordinates.y);
-            ctx.stroke();
-        }
-    };
-
-    const endPaint = () => {
-        if (!isPainting) return;
-        setIsPainting(false);
-        const ctx = canvasRef.current?.getContext("2d");
-        if (ctx) {
-            ctx.closePath();
-            // Here we could save the drawing as an image element
-            saveDrawing();
-        }
-    };
-
-    const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!canvasRef.current) return null;
-        const rect = canvasRef.current.getBoundingClientRect();
         return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
         };
+    };
+
+    const startDrawing = (e: React.MouseEvent) => {
+        if (!isDrawing) return;
+        const pos = getCoordinates(e);
+        setIsDrawingState(true);
+        setLastPos(pos);
+    };
+
+    const draw = (e: React.MouseEvent) => {
+        if (!isDrawingState || !canvasRef.current) return;
+        const ctx = canvasRef.current.getContext("2d");
+        if (!ctx) return;
+
+        const currentPos = getCoordinates(e);
+
+        ctx.beginPath();
+        ctx.moveTo(lastPos.x, lastPos.y);
+        ctx.lineTo(currentPos.x, currentPos.y);
+        ctx.strokeStyle = brushColor;
+        ctx.lineWidth = brushSize;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
+
+        setLastPos(currentPos);
+    };
+
+    const stopDrawing = () => {
+        if (!isDrawingState) return;
+        setIsDrawingState(false);
+        saveDrawing();
     };
 
     const saveDrawing = () => {
         if (!canvasRef.current) return;
+        // Check if canvas is empty? (optimization)
+
         const dataUrl = canvasRef.current.toDataURL("image/png");
         // Create an image element from the drawing
-        addElement("image", dataUrl, { x: 0, y: 0, width, height, face: currentFace });
+        // We add it to the center or top-left? Top-left since it's a layer overlay
+        addElement("draw", dataUrl, { x: 0, y: 0, width, height, face: currentFace });
+
         // Clear canvas for next drawing
         const ctx = canvasRef.current.getContext("2d");
         ctx?.clearRect(0, 0, width, height);
     };
 
-    if (!isDrawing) return null;
+    // Handle global mouse up to stop drawing if cursor leaves canvas
+    useEffect(() => {
+        const handleGlobalMouseUp = () => {
+            if (isDrawingState) stopDrawing();
+        };
+        window.addEventListener("mouseup", handleGlobalMouseUp);
+        return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
+    }, [isDrawingState]);
 
     return (
         <canvas
             ref={canvasRef}
-            className="absolute inset-0 z-50 pointer-events-auto cursor-crosshair"
-            onMouseDown={startPaint}
-            onMouseMove={paint}
-            onMouseUp={endPaint}
-            onMouseLeave={endPaint}
+            width={width}
+            height={height}
+            className="absolute inset-0 z-50 cursor-crosshair touch-none"
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
         />
     );
 };

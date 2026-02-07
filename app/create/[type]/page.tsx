@@ -1,14 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { EditorProvider } from "@/components/editor/editor-context";
 import { Canvas } from "@/components/editor/canvas";
-import { Toolbar } from "@/components/editor/toolbar"; // This is now the Sidebar
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
+import { Toolbar } from "@/components/editor/toolbar";
+import { Header } from "@/components/editor/header";
+import { PreviewModal } from "@/components/editor/preview-modal";
 import { EditorElement } from "@/components/editor/types";
 
 const getTemplate = (type: string) => {
@@ -73,6 +71,7 @@ const getTemplate = (type: string) => {
 export default function CreateCardPage() {
     const params = useParams();
     const type = params?.type as string;
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const { initialElements, initialBackgroundColor } = React.useMemo(() => getTemplate(type), [type]);
@@ -83,24 +82,12 @@ export default function CreateCardPage() {
             initialBackgroundColor={initialBackgroundColor}
         >
             <div className="flex flex-col h-screen bg-gray-100 text-black">
-                <header className="flex items-center justify-between px-6 py-4 bg-white border-b z-20 relative">
-                    <div className="flex items-center gap-4">
-                        <Link href="/">
-                            <Button variant="ghost" size="icon">
-                                <ArrowLeft size={20} />
-                            </Button>
-                        </Link>
-                        <h1 className="text-xl font-bold capitalize">{type} Card Editor</h1>
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline">Preview</Button>
-                        <Button>Save & Send</Button>
-                    </div>
-                </header>
+                <Header onPreview={() => setIsPreviewOpen(true)} />
                 <div className="flex flex-1 overflow-hidden relative">
                     <Toolbar />
                     <Canvas />
                 </div>
+                <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} />
             </div>
         </EditorProvider>
     );
