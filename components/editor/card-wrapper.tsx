@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEditor } from "./editor-context";
 import { cn } from "@/lib/utils";
 
@@ -32,19 +32,17 @@ export const CardWrapper = ({
 
     const handleFaceClick = (targetFace: "front" | "inside-left" | "inside-right" | "back") => {
         if (!interactive) return;
-        // Logic for interactive preview toggle
         if (targetFace === "front") {
-            setCurrentFace("inside-right"); // Open to inside
+            setCurrentFace("inside-right"); // Open
         } else if (targetFace === "inside-right" || targetFace === "inside-left") {
-            setCurrentFace("front"); // Close to front
+            setCurrentFace("front"); // Close
         }
     };
 
     if (!isFoldable) {
-        // ENVELOPE MODE (Simplified for now)
         return (
             <div className="relative flex items-center justify-center w-full h-full p-8">
-                <div className="relative w-[500px] h-[350px] bg-red-100 flex items-center justify-center shadow-2xl">
+                <div className="relative w-[500px] h-[350px] bg-red-100 flex items-center justify-center shadow-md">
                     <div className="absolute inset-0 bg-blue-100/50 flex items-center justify-center text-gray-400">
                         Envelope Preview (Coming Soon)
                     </div>
@@ -53,21 +51,44 @@ export const CardWrapper = ({
         )
     }
 
-    // FOLDABLE MODE
+    // FOLDABLE MODE - Centered Expansion
+    // Wrapper animates Width: 450 -> 900.
+    // Content is pinned to Right.
+    // Front Cover rotates -180deg (Left) to reveal Inside Left.
+
     return (
         <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
-            <div className="relative transform-style-3d transition-all duration-700 w-full h-full flex items-center justify-center">
+            <motion.div
+                className="relative transform-style-3d bg-transparent"
+                style={{ height }}
+                initial={{ width: 450 }}
+                animate={{
+                    width: isOpen ? 900 : 450
+                }}
+                transition={{ duration: 0.8, type: "spring", stiffness: 60 }}
+            >
+                {/* RIGHT SIDE (Inside Right) - Pinned to Right */}
+                <div
+                    className="absolute right-0 top-0 z-0 overflow-hidden border border-gray-200 rounded-r-md bg-white"
+                    style={{ width, height, backgroundColor }}
+                    onClick={() => handleFaceClick("inside-right")}
+                >
+                    {insideRightContent}
+                    {!interactive && isOpen && (
+                        <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Inside Right</div>
+                    )}
+                </div>
 
-                {/* LEFT SIDE (Front Cover + Inside Left) */}
+                {/* LEFT SIDE (Front Cover) - Pinned to Right, Rotates Left */}
                 <motion.div
-                    className="relative transform-style-3d origin-right z-10"
+                    className="absolute right-0 top-0 z-10 transform-style-3d origin-left"
                     style={{ width, height }}
                     animate={{
                         rotateY: isOpen ? -180 : 0,
                     }}
                     transition={{ duration: 0.8, type: "spring", stiffness: 60 }}
                 >
-                    {/* FRONT FACE */}
+                    {/* FRONT FACE (Visible when Closed/0deg) */}
                     <div
                         className="absolute inset-0 backface-hidden bg-white cursor-pointer rounded-r-md overflow-hidden border border-gray-200"
                         style={{ backgroundColor }}
@@ -79,9 +100,9 @@ export const CardWrapper = ({
                         )}
                     </div>
 
-                    {/* INSIDE LEFT FACE (Back of Front Cover) */}
+                    {/* INSIDE LEFT FACE (Visible when Open/-180deg) */}
                     <div
-                        className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-r border-gray-200 rounded-l-md overflow-hidden"
+                        className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-l border-gray-200 rounded-l-md overflow-hidden"
                         style={{ backgroundColor }}
                         onClick={() => handleFaceClick("inside-left")}
                     >
@@ -92,21 +113,7 @@ export const CardWrapper = ({
                     </div>
                 </motion.div>
 
-                {/* RIGHT SIDE (Inside Right + Back Cover) */}
-                {/* Ideally this would also be a motion div if we want to show the Back Cover by flipping the whole thing */}
-                {/* For now, let's assume standard greeting card where Right side is static base */}
-                <div
-                    className="relative bg-white z-0 rounded-r-md overflow-hidden border border-gray-200"
-                    style={{ width, height, backgroundColor }}
-                    onClick={() => handleFaceClick("inside-right")}
-                >
-                    {insideRightContent}
-                    {!interactive && isOpen && (
-                        <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Inside Right</div>
-                    )}
-                </div>
-
-            </div>
+            </motion.div>
         </div>
     );
 };
