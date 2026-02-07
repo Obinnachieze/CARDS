@@ -1,23 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useEditor } from "./editor-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Type, Image as ImageIcon, Smile,
     Palette, LayoutTemplate, Pencil, Upload,
-    MousePointer2, Move, ChevronLeft, Search
+    MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight
 } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { cn } from "@/lib/utils";
 
 const fonts = [
     "Inter", "Playfair Display", "Roboto", "Lato", "Montserrat", "Open Sans",
-    "Dancing Script", "Pacifico", "Great Vibes", "Caveat"
+    "Dancing Script", "Pacifico", "Great Vibes", "Caveat", "Mountains of Christmas"
 ];
 
 const colors = [
@@ -46,14 +47,26 @@ export const Toolbar = () => {
     } = useEditor();
 
     const [activeTab, setActiveTab] = useState<Tab | null>("templates");
-    const [textInput, setTextInput] = useState("");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-    const handleAddText = () => {
-        if (!textInput.trim()) return;
-        addElement("text", textInput, { x: 50, y: 50 });
-        setTextInput("");
-    };
+    // Auto-open Text tab if text is selected? Or just show properties?
+    // Let's show properties inside the active panel if relevant, OR switch to a "Properties" view if we had one.
+    // For now, if text is selected, we show the Edit Text UI at the top of the Text tab.
+
+    // BUT user might be in "Templates" tab.
+    // Let's make a decision: If an element is selected, we show its properties in a special "Edit" panel that overrides the current tab?
+    // Or we just add it to the top of the relevant tab.
+
+    // Simplest UX: If element selected, open a "Edit" tab automatically?
+    // Or just put it in the "Design" tab?
+
+    // Let's put text editing in "Text" tab at the top.
+
+    useEffect(() => {
+        if (selectedElement?.type === "text") {
+            setActiveTab("text");
+        }
+    }, [selectedElement?.id]); // Only switch when selection changes to a text element
 
     const handleAddEmoji = (emojiData: EmojiClickData) => {
         addElement("emoji", emojiData.emoji, { x: 50, y: 50 });
@@ -107,6 +120,59 @@ export const Toolbar = () => {
 
                             {activeTab === "text" && (
                                 <div className="space-y-6">
+                                    {/* Edit Selected Text */}
+                                    {selectedElement?.type === "text" && (
+                                        <div className="bg-purple-50 p-4 rounded-lg border border-purple-100 space-y-4 mb-6">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-purple-900 font-semibold">Edit Text</Label>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 text-red-500 hover:bg-red-100 placeholder:text-red-500"
+                                                    onClick={() => removeElement(selectedElement.id)}
+                                                    title="Delete Element"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </Button>
+                                            </div>
+
+                                            <Textarea
+                                                value={selectedElement.content}
+                                                onChange={(e) => updateElement(selectedElement.id, { content: e.target.value })}
+                                                className="bg-white"
+                                            />
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs text-muted-foreground">Font Size</Label>
+                                                <Slider
+                                                    value={[selectedElement.fontSize || 16]}
+                                                    min={8}
+                                                    max={120}
+                                                    step={1}
+                                                    onValueChange={(val) => updateElement(selectedElement.id, { fontSize: val[0] })}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs text-muted-foreground">Color</Label>
+                                                <ColorPicker color={selectedElement.color || "#000000"} onChange={(c) => updateElement(selectedElement.id, { color: c })} />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs text-muted-foreground">Font Family</Label>
+                                                <select
+                                                    className="w-full border rounded-md p-2 text-sm"
+                                                    value={selectedElement.fontFamily || "Inter"}
+                                                    onChange={(e) => updateElement(selectedElement.id, { fontFamily: e.target.value })}
+                                                >
+                                                    {fonts.map(f => (
+                                                        <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="bg-gray-100 p-2 rounded-md flex gap-2">
                                         <Search size={16} className="text-gray-400 mt-1" />
                                         <input className="bg-transparent text-sm w-full outline-none" placeholder="Search fonts" />
@@ -254,8 +320,6 @@ export const Toolbar = () => {
                 )}
             </div>
 
-            {/* Selected Element Controls (Floating or Contextual) */}
-            {/* We can put this in the header later */}
         </div>
     );
 };

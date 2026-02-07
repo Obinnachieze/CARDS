@@ -69,7 +69,7 @@ export const CardWrapper = ({
                 >
                     {/* FRONT FACE */}
                     <div
-                        className="absolute inset-0 backface-hidden bg-white shadow-xl cursor-pointer rounded-r-md overflow-hidden"
+                        className="absolute inset-0 backface-hidden bg-white cursor-pointer rounded-r-md overflow-hidden border border-gray-200"
                         style={{ backgroundColor }}
                         onClick={() => handleFaceClick("front")}
                     >
@@ -81,7 +81,7 @@ export const CardWrapper = ({
 
                     {/* INSIDE LEFT FACE (Back of Front Cover) */}
                     <div
-                        className="absolute inset-0 backface-hidden rotate-y-180 bg-white shadow-sm border-r border-gray-100 rounded-l-md overflow-hidden"
+                        className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-r border-gray-200 rounded-l-md overflow-hidden"
                         style={{ backgroundColor }}
                         onClick={() => handleFaceClick("inside-left")}
                     >
@@ -96,7 +96,7 @@ export const CardWrapper = ({
                 {/* Ideally this would also be a motion div if we want to show the Back Cover by flipping the whole thing */}
                 {/* For now, let's assume standard greeting card where Right side is static base */}
                 <div
-                    className="relative bg-white shadow-xl z-0 rounded-r-md overflow-hidden"
+                    className="relative bg-white z-0 rounded-r-md overflow-hidden border border-gray-200"
                     style={{ width, height, backgroundColor }}
                     onClick={() => handleFaceClick("inside-right")}
                 >

@@ -11,17 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CardWrapper } from "./card-wrapper";
 
 export const Canvas = () => {
-    const {
-        elements,
-        updateElement,
-        selectElement,
-        selectedElementId,
-        currentFace,
-        setCurrentFace,
-        isDrawing,
-        zoom,
-        setZoom
-    } = useEditor();
+    const { elements, updateElement, selectElement, selectedElementId, currentFace, setCurrentFace, isDrawing, zoom, setZoom } = useEditor();
 
     // Helper to render a list of elements
     const renderElements = (faceElements: EditorElement[]) => {
@@ -33,7 +23,6 @@ export const Canvas = () => {
                         drag={!isDrawing} // Disable drag when drawing
                         dragMomentum={false}
                         onDragEnd={(_, info) => {
-                            // Drag offset is in screen pixels. We need to adjust by zoom.
                             updateElement(el.id, {
                                 x: el.x + info.offset.x / zoom,
                                 y: el.y + info.offset.y / zoom
@@ -88,14 +77,12 @@ export const Canvas = () => {
             <div
                 className={cn("relative w-full h-full overflow-hidden", isActive ? "z-10" : "z-0")}
                 onClick={(e) => {
-                    // If we click the face background, select it (deselect element)
                     e.stopPropagation();
                     selectElement(null);
                     if (currentFace !== face) setCurrentFace(face);
                 }}
             >
                 {renderElements(faceElements)}
-                {/* Drawing Canvas overlay if active */}
                 {isActive && isDrawing && <DrawingCanvas width={450} height={600} zoom={zoom} />}
             </div>
         );
@@ -105,10 +92,10 @@ export const Canvas = () => {
 
     return (
         <div
-            className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center"
+            className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center p-20"
             onClick={() => selectElement(null)}
         >
-            {/* The Interactive Card */}
+            {/* The Interactive Card - Centered with Padding */}
             <div
                 className="transform transition-transform duration-200"
                 style={{ transform: `scale(${zoom})` }}
@@ -117,13 +104,12 @@ export const Canvas = () => {
                     frontContent={getFaceContent("front")}
                     insideLeftContent={getFaceContent("inside-left")}
                     insideRightContent={getFaceContent("inside-right")}
-                    interactive={false} // We control state manually mostly
+                    interactive={false}
                 />
             </div>
 
-            {/* Controls Overlay */}
-            <div className="absolute bottom-10 flex flex-col gap-4 items-center z-50 pointer-events-none">
-                {/* Open/Close Toggle */}
+            {/* Controls Overlay - Fixed at bottom */}
+            <div className="absolute bottom-6 flex flex-col gap-4 items-center z-50 pointer-events-none w-full">
                 <Button
                     variant="default"
                     size="lg"
@@ -136,7 +122,6 @@ export const Canvas = () => {
                     {isOpen ? <><X size={18} /> Close Card</> : <><BookOpen size={18} /> Open Card</>}
                 </Button>
 
-                {/* Zoom Controls */}
                 <div className="bg-white rounded-full shadow-lg flex items-center p-1.5 gap-2 pointer-events-auto border">
                     <Button variant="ghost" size="icon" onClick={() => setZoom(Math.max(0.4, zoom - 0.1))} className="rounded-full h-8 w-8 hover:bg-gray-100">
                         <ZoomOut size={16} />

@@ -67,7 +67,7 @@ export const EditorProvider = ({
     const [brushColor, setBrushColor] = useState("#000000");
     const [brushSize, setBrushSize] = useState(5);
     const [currentFont, setCurrentFont] = useState("Inter");
-    const [zoom, setZoom] = useState(1);
+    const [zoom, setZoom] = useState(0.75);
 
     const saveHistory = useCallback(() => {
         setPast(prev => [...prev, elements]);
