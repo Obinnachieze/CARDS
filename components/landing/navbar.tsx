@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PremiumToggle } from "@/components/ui/bouncy-toggle";
+
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { LogOut } from "lucide-react";
@@ -19,7 +19,8 @@ const navItems = [
 ];
 
 export function Navbar({ className }: { className?: string }) {
-    const { theme, setTheme } = useTheme();
+    // const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState<User | null>(null);
@@ -27,6 +28,7 @@ export function Navbar({ className }: { className?: string }) {
     const supabase = createClient();
 
     React.useEffect(() => {
+        setMounted(true);
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
@@ -98,7 +100,8 @@ export function Navbar({ className }: { className?: string }) {
                                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                                     className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"
                                 >
-                                    {user.user_metadata?.full_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                                    {/* Try full_name first, then username, then name (Google), then email */}
+                                    {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
                                 </button>
 
                                 <AnimatePresence>
@@ -111,7 +114,7 @@ export function Navbar({ className }: { className?: string }) {
                                         >
                                             <div className="px-4 py-2 border-b border-white/5">
                                                 <p className="text-sm font-medium text-white truncate">
-                                                    {user.user_metadata?.full_name || 'User'}
+                                                    {user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || 'User'}
                                                 </p>
                                                 <p className="text-xs text-zinc-400 truncate">
                                                     {user.email}
@@ -144,19 +147,13 @@ export function Navbar({ className }: { className?: string }) {
                                 </Link>
                             </>
                         )}
-                        <PremiumToggle
-                            defaultChecked={theme === 'dark'}
-                            onChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                        />
+
                     </div>
 
                     {/* Mobile Menu Button */}
                     <div className="md:hidden flex items-center">
                         <div className="mr-2">
-                            <PremiumToggle
-                                defaultChecked={theme === 'dark'}
-                                onChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                            />
+
                         </div>
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -193,11 +190,11 @@ export function Navbar({ className }: { className?: string }) {
                                     <>
                                         <div className="flex items-center gap-3 px-2 py-2 mb-2 border-b border-white/10">
                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs">
-                                                {user.user_metadata?.full_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
+                                                {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-white truncate">
-                                                    {user.user_metadata?.full_name || 'User'}
+                                                    {user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || 'User'}
                                                 </p>
                                                 <p className="text-xs text-zinc-400 truncate">
                                                     {user.email}

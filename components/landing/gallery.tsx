@@ -6,37 +6,37 @@ import Link from "next/link";
 const occasions = [
     {
         title: "Birthday",
-        description: "Celebrate another year of life.",
+        description: "Create vibrant, animated birthday cards with balloons, confetti, and personal messages to celebrate another year of life.",
         link: "/create/birthday",
         color: "bg-blue-500",
     },
     {
         title: "Wedding",
-        description: "Union of two souls.",
+        description: "Design elegant wedding invitations or congratulations with soft animations and romantic themes for the big day.",
         link: "/create/wedding",
         color: "bg-pink-500",
     },
     {
         title: "Thank You",
-        description: "Express your gratitude.",
+        description: "Send heartfelt thank you notes that express your gratitude with warmth and style.",
         link: "/create/thankyou",
         color: "bg-emerald-500",
     },
     {
         title: "Anniversary",
-        description: "Cherish the milestones.",
+        description: "Commemorate love and milestones with timeless designs that cherish the journey together.",
         link: "/create/anniversary",
         color: "bg-purple-500",
     },
     {
         title: "Just Because",
-        description: "No reason needed.",
+        description: "Brighten someone's day unexpectedly with a fun, spontaneous card—no special occasion needed.",
         link: "/create/justbecause",
         color: "bg-orange-500",
     },
     {
         title: "Holidays",
-        description: "Spread the seasonal cheer.",
+        description: "Spread seasonal cheer with festive cards for Christmas, New Year, and other holidays throughout the year.",
         link: "/create/holiday",
         color: "bg-red-500",
     },

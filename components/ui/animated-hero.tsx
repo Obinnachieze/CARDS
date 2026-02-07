@@ -22,9 +22,9 @@ function Hero() {
     }, [titleNumber, titles]);
 
     return (
-        <div className="w-full relative z-10 pt-32">
+        <div className="w-full relative z-10 pt-20">
             <div className="container mx-auto px-4">
-                <div className="flex gap-8 py-20 lg:py-20 items-center justify-center flex-col">
+                <div className="flex gap-8 pt-10 pb-20 items-center justify-center flex-col">
                     <div>
                         <Button variant="secondary" size="sm" className="gap-4 rounded-full bg-white/10 hover:bg-white/20 text-black dark:text-white border border-black/10 dark:border-white/10 backdrop-blur-sm">
                             ✨ The Future of Gifting <MoveRight className="w-4 h-4" />
@@ -69,7 +69,7 @@ function Hero() {
                             Start Creating <MoveRight className="w-4 h-4" />
                         </Button>
                         <Button size="lg" className="gap-2 rounded-full" variant="outline" onClick={() => document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' })}>
-                            View Occasions <PhoneCall className="w-4 h-4" />
+                            View Occasions
                         </Button>
                     </div>
                 </div>
