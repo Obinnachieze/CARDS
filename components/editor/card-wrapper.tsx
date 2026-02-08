@@ -58,7 +58,7 @@ export const CardWrapper = ({
                 <motion.div
                     className="relative transform-style-3d bg-transparent"
                     style={{ width: 600, height: 400 }} // Landscape for postcard
-                    animate={{ rotateY: currentFace === "back" ? 180 : 0 }}
+                    animate={{ rotateY: (currentFace === "back" || isOpen) ? 180 : 0 }}
                     transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
                 >
                     {/* Front Face */}
@@ -69,7 +69,7 @@ export const CardWrapper = ({
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
                         }}
-                        onClick={() => interactive && setCurrentFace("back")}
+                        onClick={() => interactive && setCurrentFace("back")} // Direct flip interaction
                     >
                         {frontContent}
                         {!interactive && (
@@ -103,43 +103,45 @@ export const CardWrapper = ({
     if (cardMode === "envelope") {
         return (
             <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
-                <div className="relative w-[550px] h-[350px] bg-transparent">
-                    {/* ENVELOPE BACK (Base) */}
+                <div className="relative w-[600px] h-[400px] bg-transparent group">
+                    {/* 1. Base (Back of Envelope) */}
                     <div
-                        className="absolute inset-0 shadow-xl rounded-sm"
+                        className="absolute inset-0 bg-white shadow-xl rounded-md"
                         style={{ backgroundColor: backgroundColor || "#f5f5f5" }}
                     />
 
-                    {/* INSERT (The Card) */}
+                    {/* 2. Card Insert (Slides Up) */}
                     <motion.div
-                        className="absolute inset-x-4 bottom-4 top-12 bg-white shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center text-center overflow-hidden"
+                        className="absolute left-6 right-6 bottom-4 h-[350px] bg-white shadow-sm border border-gray-100 flex items-center justify-center p-8 text-center overflow-hidden"
                         initial={{ y: 0 }}
                         animate={{
-                            y: isOpen ? -100 : 0, // Slide out
-                            zIndex: isOpen ? 20 : 5 // Pop over pocket when out? No, keep behind pocket but slide up.
+                            y: isOpen ? -150 : 0,
+                            zIndex: 5 // Logic: Render order handles visual depth. When sliding up, it stays behind z-10 pockets.
                         }}
-                        transition={{ delay: isOpen ? 0.2 : 0, duration: 0.5 }}
+                        transition={{
+                            delay: isOpen ? 0.2 : 0, // Wait for flap to start opening
+                            duration: 0.8,
+                            type: "spring", stiffness: 40, damping: 15
+                        }}
                         onClick={(e) => {
                             e.stopPropagation();
-                            // Select insert elements?
+                            // Optional: Click card to maybe open fully?
                         }}
                     >
-                        {/* We treat "front" content as the insert content for envelope mode for now */}
-                        {frontContent}
+                        {/* Scale down content slightly to fit insert */}
+                        <div className="w-full h-full origin-top transform scale-95">
+                            {frontContent}
+                        </div>
                     </motion.div>
 
-                    {/* POCKET (Bottom Flaps) */}
+                    {/* 3. Pocket (The "V" shape layers) */}
                     <div className="absolute inset-0 z-10 pointer-events-none">
-                        {/* Bottom Flap */}
-                        <div
-                            className="absolute bottom-0 inset-x-0 h-1/2 bg-gray-100/10 pointer-events-none" // Helper
-                        />
                         {/* Left Triangle */}
                         <div
                             className="absolute top-0 bottom-0 left-0 w-1/2"
                             style={{
                                 backgroundColor: backgroundColor || "#f5f5f5",
-                                filter: "brightness(0.95)",
+                                filter: "brightness(0.97)",
                                 clipPath: "polygon(0 0, 100% 50%, 0 100%)"
                             }}
                         />
@@ -148,22 +150,22 @@ export const CardWrapper = ({
                             className="absolute top-0 bottom-0 right-0 w-1/2"
                             style={{
                                 backgroundColor: backgroundColor || "#f5f5f5",
-                                filter: "brightness(0.95)",
+                                filter: "brightness(0.95)", // Slightly darker for depth
                                 clipPath: "polygon(100% 0, 100% 100%, 0 50%)"
                             }}
                         />
                         {/* Bottom Triangle */}
                         <div
-                            className="absolute bottom-0 inset-x-0 h-1/2"
+                            className="absolute bottom-0 inset-x-0 h-3/5" // Taller to cover card bottom
                             style={{
                                 backgroundColor: backgroundColor || "#f5f5f5",
-                                filter: "brightness(0.9)",
+                                filter: "brightness(0.92)",
                                 clipPath: "polygon(0 100%, 50% 0, 100% 100%)"
                             }}
                         />
                     </div>
 
-                    {/* TOP FLAP (Animates) */}
+                    {/* 4. Top Flap (The lid) */}
                     <motion.div
                         className="absolute top-0 inset-x-0 h-1/2 z-20 origin-top"
                         style={{
@@ -171,10 +173,14 @@ export const CardWrapper = ({
                             transformStyle: "preserve-3d"
                         }}
                         animate={{
-                            rotateX: isOpen ? 180 : 0
+                            rotateX: isOpen ? 180 : 0,
+                            zIndex: isOpen ? 1 : 20 // Drop z-index when open to go behind card
                         }}
-                        transition={{ duration: 0.6, type: "spring", stiffness: 60, damping: 12 }}
-                        onClick={() => interactive && handleFaceClick("front")} // Click flap to toggle
+                        transition={{
+                            rotateX: { duration: 0.6, type: "spring", stiffness: 60, damping: 14 },
+                            zIndex: { delay: isOpen ? 0.3 : 0 } // Wait for rotation to drop z-index
+                        }}
+                        onClick={() => interactive && handleFaceClick("front")}
                     >
                         {/* Outer Flap (Closed state visible) */}
                         <div
@@ -183,7 +189,7 @@ export const CardWrapper = ({
                                 backgroundColor: backgroundColor || "#f5f5f5",
                                 clipPath: "polygon(0 0, 50% 100%, 100% 0)",
                                 backfaceVisibility: "hidden",
-                                filter: "brightness(1.02)", // Slightly lighter
+                                filter: "brightness(1.02)",
                             }}
                         />
                         {/* Inner Flap (Open state visible) */}
@@ -194,7 +200,7 @@ export const CardWrapper = ({
                                 clipPath: "polygon(0 0, 50% 100%, 100% 0)",
                                 transform: "rotateX(180deg)",
                                 backfaceVisibility: "hidden",
-                                filter: "brightness(0.8)", // Darker inside
+                                filter: "brightness(0.85)", // Darker inside shadow
                                 pointerEvents: "none"
                             }}
                         />

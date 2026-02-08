@@ -22,6 +22,8 @@ export const Canvas = () => {
         setCardFace
     } = useEditor();
 
+    const { cardMode } = useEditor(); // Get cardMode separately or add to above
+
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
     // Helper to render a list of elements
@@ -229,7 +231,7 @@ export const Canvas = () => {
 
                             <div className={cn(
                                 "transition-all duration-200 rounded-xl",
-                                isCardActive ? "ring-2 ring-purple-600 ring-offset-4 ring-offset-[#f0f0f3]" : "opacity-90 hover:opacity-100"
+                                isCardActive ? "" : "opacity-90 hover:opacity-100"
                             )}>
                                 <CardWrapper
                                     frontContent={getFaceContent("front", card.elements)}
@@ -254,7 +256,11 @@ export const Canvas = () => {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         activateCard(card.id);
-                                        setCardFace(card.id, cardIsOpen ? "front" : "inside-right");
+                                        if (cardMode === "postcard") {
+                                            setCardFace(card.id, card.currentFace === "back" ? "front" : "back");
+                                        } else {
+                                            setCardFace(card.id, cardIsOpen ? "front" : "inside-right");
+                                        }
                                     }}
                                 >
                                     {cardIsOpen ? <><X size={16} /> Close</> : <><BookOpen size={16} /> Open</>}
