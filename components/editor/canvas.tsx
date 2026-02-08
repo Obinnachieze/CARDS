@@ -187,7 +187,7 @@ export const Canvas = () => {
         );
     };
 
-    const isOpen = (face: CardFace) => face === "inside-left" || face === "inside-right";
+    const isOpen = (face: CardFace) => face === "inside-left" || face === "inside-right" || face === "back";
 
     return (
         <div

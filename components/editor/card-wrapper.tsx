@@ -56,20 +56,28 @@ export const CardWrapper = ({
         return (
             <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
                 <motion.div
-                    className="relative transform-style-3d bg-transparent"
-                    style={{ width: 600, height: 400 }} // Landscape for postcard
+                    className="relative bg-transparent"
+                    style={{
+                        width: 600,
+                        height: 400,
+                        transformStyle: "preserve-3d"
+                    }}
                     animate={{ rotateY: (currentFace === "back" || isOpen) ? 180 : 0 }}
                     transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
                 >
                     {/* Front Face */}
                     <div
-                        className="absolute inset-0 bg-white shadow-lg overflow-hidden border border-gray-200"
+                        className={cn(
+                            "absolute inset-0 bg-white shadow-lg overflow-hidden border border-gray-200",
+                            currentFace === "front" ? "z-10 pointer-events-auto" : "z-0 pointer-events-none"
+                        )}
                         style={{
                             backgroundColor,
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
+                            transform: "translateZ(1px)" // Push forward slightly to avoid z-fighting
                         }}
-                        onClick={() => interactive && setCurrentFace("back")} // Direct flip interaction
+                        onClick={() => interactive && setCurrentFace("back")}
                     >
                         {frontContent}
                         {!interactive && (
@@ -79,10 +87,13 @@ export const CardWrapper = ({
 
                     {/* Back Face */}
                     <div
-                        className="absolute inset-0 bg-white shadow-lg overflow-hidden border border-gray-200"
+                        className={cn(
+                            "absolute inset-0 bg-white shadow-lg overflow-hidden border border-gray-200",
+                            currentFace === "back" ? "z-10 pointer-events-auto" : "z-0 pointer-events-none"
+                        )}
                         style={{
                             backgroundColor,
-                            transform: "rotateY(180deg)",
+                            transform: "rotateY(180deg) translateZ(1px)", // Push 'forward' relative to its own face direction
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
                         }}
@@ -167,7 +178,11 @@ export const CardWrapper = ({
 
                     {/* 4. Top Flap (The lid) */}
                     <motion.div
-                        className="absolute top-0 inset-x-0 h-1/2 z-20 origin-top"
+                        onClick={() => interactive && handleFaceClick("front")}
+                        className={cn(
+                            "absolute top-0 inset-x-0 h-1/2 z-20 origin-top",
+                            !interactive && "pointer-events-none" // Allow clicks to pass through to insert in Editor
+                        )}
                         style={{
                             borderRadius: "2px",
                             transformStyle: "preserve-3d"
@@ -180,7 +195,6 @@ export const CardWrapper = ({
                             rotateX: { duration: 0.6, type: "spring", stiffness: 60, damping: 14 },
                             zIndex: { delay: isOpen ? 0.3 : 0 } // Wait for rotation to drop z-index
                         }}
-                        onClick={() => interactive && handleFaceClick("front")}
                     >
                         {/* Outer Flap (Closed state visible) */}
                         <div
