@@ -63,7 +63,12 @@ export const CardWrapper = ({
                         transformStyle: "preserve-3d"
                     }}
                     animate={{ rotateY: (currentFace === "back" || isOpen) ? 180 : 0 }}
-                    transition={{ duration: 0.6, type: "spring", stiffness: 260, damping: 20 }}
+                    transition={{
+                        duration: 0.8, // Slower duration
+                        type: "spring",
+                        stiffness: 120, // Reduced stiffness (was 260) for softer feel
+                        damping: 20
+                    }}
                 >
                     {/* Front Face */}
                     <div

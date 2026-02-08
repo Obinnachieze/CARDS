@@ -49,3 +49,11 @@ export interface EditorState {
     brushType: DrawingTool;
     currentFont: string;
 }
+
+export interface Project {
+    id: string;
+    name: string;
+    updatedAt: number;
+    cards: CardPage[];
+    cardMode: CardMode;
+}

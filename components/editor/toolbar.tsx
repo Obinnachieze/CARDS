@@ -11,7 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
     Type, Image as ImageIcon, Smile,
     Palette, LayoutTemplate, Pencil, Upload, PenTool, Highlighter, Eraser,
-    MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight, Loader2
+    MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight, Loader2,
+    FolderOpen, Save, Download, FilePlus
 } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { cn } from "@/lib/utils";
@@ -57,10 +58,14 @@ export const Toolbar = () => {
         brushType,
         setBrushType,
         cardMode,
-        setCardMode
+        setCardMode,
+        projects,
+        saveProject,
+        loadProject,
+        deleteProject
     } = useEditor();
 
-    const [activeTab, setActiveTab] = useState<Tab | null>("templates");
+    const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates");
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     // Google Fonts State
@@ -146,6 +151,7 @@ export const Toolbar = () => {
         <div className="flex h-full z-40 relative">
             {/* Dark Icon Rail - Transparent */}
             <div className="flex flex-col items-center w-[72px] py-4 bg-transparent text-gray-600 gap-2 z-50">
+                <SidebarTab icon={<FolderOpen size={20} />} label="Projects" active={activeTab === "projects"} onClick={() => setActiveTab(activeTab === "projects" ? null : "projects")} onMouseEnter={() => setActiveTab("projects")} />
                 <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab(activeTab === "design" ? null : "design")} onMouseEnter={() => setActiveTab("design")} />
                 <SidebarTab icon={<LayoutTemplate size={20} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab(activeTab === "templates" ? null : "templates")} onMouseEnter={() => setActiveTab("templates")} />
                 <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab(activeTab === "text" ? null : "text")} onMouseEnter={() => setActiveTab("text")} />
@@ -158,20 +164,16 @@ export const Toolbar = () => {
             <div
                 className={cn(
                     "absolute top-0 bottom-0 bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col",
-                    activeTab === "draw"
-                        ? "absolute left-[84px] top-4 bottom-auto h-auto w-20 rounded-2xl shadow-xl ml-2 flex-col p-2 animate-in slide-in-from-left-2"
-                        : cn("absolute top-0 bottom-0 left-[72px] w-80 shadow-2xl", activeTab ? "translate-x-0" : "-translate-x-full")
+                    cn("absolute top-0 bottom-0 left-[72px] w-80 shadow-2xl", activeTab ? "translate-x-0" : "-translate-x-full")
                 )}
             >                        {activeTab && (
                 <>
-                    {activeTab !== "draw" && (
-                        <div className="flex items-center justify-between p-4 shadow-sm mb-1">
-                            <h3 className="font-semibold text-sm capitalize">{activeTab}</h3>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
-                                <ChevronLeft size={16} />
-                            </Button>
-                        </div>
-                    )}
+                    <div className="flex items-center justify-between p-4 shadow-sm mb-1">
+                        <h3 className="font-semibold text-sm capitalize">{activeTab}</h3>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
+                            <ChevronLeft size={16} />
+                        </Button>
+                    </div>
                     <ScrollArea className="flex-1 p-4">
                         {/* Panel Content Based on Tab */}
 
@@ -428,129 +430,181 @@ export const Toolbar = () => {
                             </div>
                         )}
 
+
+
+                        {activeTab === "projects" && (
+                            <div className="space-y-6">
+                                <div className="space-y-4">
+                                    <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Current Project</Label>
+                                    <div className="flex flex-col gap-2">
+                                        <Input
+                                            id="project-name"
+                                            placeholder="Project Name"
+                                            className="h-10"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    saveProject(e.currentTarget.value || "Untitled Project");
+                                                    e.currentTarget.value = "";
+                                                }
+                                            }}
+                                        />
+                                        <Button
+                                            className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2"
+                                            onClick={() => {
+                                                const input = document.getElementById("project-name") as HTMLInputElement;
+                                                saveProject(input?.value || "Untitled Project");
+                                                if (input) input.value = "";
+                                            }}
+                                        >
+                                            <Save size={16} />
+                                            Save Project
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 border-t pt-4">
+                                    <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Saved Projects</Label>
+                                    {projects.length === 0 ? (
+                                        <div className="text-center py-8 text-gray-400 text-xs">
+                                            No saved projects yet.
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {projects.map((project) => (
+                                                <div key={project.id} className="group flex items-center justify-between p-3 bg-gray-50 hover:bg-white border rounded-lg shadow-sm transition-all">
+                                                    <div className="flex flex-col cursor-pointer flex-1" onClick={() => loadProject(project.id)}>
+                                                        <span className="font-medium text-sm text-gray-700 group-hover:text-purple-700">{project.name}</span>
+                                                        <span className="text-[10px] text-gray-400">{new Date(project.updatedAt).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                deleteProject(project.id);
+                                                            }}
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === "draw" && (
                             <div className="space-y-6">
                                 <div className="flex flex-col gap-4">
-                                    {activeTab !== "draw" && (
-                                        <div className="flex items-center justify-between">
-                                            <Label className="font-semibold text-sm text-gray-500 uppercase tracking-wider">Drawing Tools</Label>
-                                        </div>
-                                    )}
+                                    <div className="flex items-center justify-between">
+                                        <Label className="font-semibold text-sm text-gray-500 uppercase tracking-wider">Drawing Tools</Label>
+                                    </div>
 
-                                    <div className={cn("flex gap-2", activeTab === "draw" ? "flex-col p-0" : "flex-col")}>
+                                    <div className="flex flex-col gap-2">
                                         <button
                                             className={cn(
-                                                "flex items-center justify-center p-3 rounded-xl transition-all group relative overflow-hidden",
-                                                !isDrawing ? "bg-purple-50 shadow-md" : "bg-white hover:bg-gray-50 hover:shadow-sm"
+                                                "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
+                                                !isDrawing ? "bg-purple-50 shadow-md ring-1 ring-purple-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
                                             )}
                                             onClick={() => setIsDrawing(false)}
                                         >
-                                            <div className={cn("p-2 rounded-lg bg-purple-100 text-purple-600", !isDrawing && "bg-purple-600 text-white")}>
+                                            <div className={cn("p-2 rounded-lg bg-purple-100 text-purple-600 shrink-0", !isDrawing && "bg-purple-600 text-white")}>
                                                 <MousePointer2 size={20} />
                                             </div>
-                                            {activeTab !== "draw" && (
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm">Select / Move</span>
-                                                    <span className="text-[10px] text-gray-500">Interact with elements</span>
-                                                </div>
-                                            )}
-                                            {!isDrawing && <div className={cn("absolute bg-purple-600", activeTab === "draw" ? "left-0 top-0 bottom-0 w-1 rounded-l-full" : "left-0 top-0 bottom-0 w-1")} />}
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm text-gray-800">Select / Move</span>
+                                                <span className="text-[10px] text-gray-500">Interact with elements</span>
+                                            </div>
+                                            {!isDrawing && <div className="absolute left-0 top-3 bottom-3 w-1 bg-purple-600 rounded-r-full" />}
                                         </button>
 
                                         <button
                                             className={cn(
-                                                "flex items-center justify-center p-3 rounded-xl transition-all group relative overflow-hidden",
-                                                isDrawing && brushType === "pencil" ? "bg-red-50 shadow-md" : "bg-white hover:bg-gray-50 hover:shadow-sm"
+                                                "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
+                                                isDrawing && brushType === "pencil" ? "bg-red-50 shadow-md ring-1 ring-red-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
                                             )}
                                             onClick={() => {
                                                 setBrushType("pencil");
                                                 setIsDrawing(true);
                                             }}
                                         >
-                                            <div className={cn("p-2 rounded-lg bg-red-100 text-red-600", isDrawing && brushType === "pencil" && "bg-red-500 text-white")}>
+                                            <div className={cn("p-2 rounded-lg bg-red-100 text-red-600 shrink-0", isDrawing && brushType === "pencil" && "bg-red-500 text-white")}>
                                                 <Pencil size={20} />
                                             </div>
-                                            {activeTab !== "draw" && (
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm">Pencil</span>
-                                                    <span className="text-[10px] text-gray-500">Fine detail lines</span>
-                                                </div>
-                                            )}
-                                            {isDrawing && brushType === "pencil" && <div className={cn("absolute bg-red-500", activeTab === "draw" ? "left-0 top-0 bottom-0 w-1 rounded-l-full" : "left-0 top-0 bottom-0 w-1")} />}
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm text-gray-800">Pencil</span>
+                                                <span className="text-[10px] text-gray-500">Fine detail lines</span>
+                                            </div>
+                                            {isDrawing && brushType === "pencil" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-red-500 rounded-r-full" />}
                                         </button>
 
                                         <button
                                             className={cn(
-                                                "flex items-center justify-center p-3 rounded-xl transition-all group relative overflow-hidden",
-                                                isDrawing && brushType === "marker" ? "bg-blue-50 shadow-md" : "bg-white hover:bg-gray-50 hover:shadow-sm"
+                                                "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
+                                                isDrawing && brushType === "marker" ? "bg-blue-50 shadow-md ring-1 ring-blue-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
                                             )}
                                             onClick={() => {
                                                 setBrushType("marker");
                                                 setIsDrawing(true);
                                             }}
                                         >
-                                            <div className={cn("p-2 rounded-lg bg-blue-100 text-blue-600", isDrawing && brushType === "marker" && "bg-blue-500 text-white")}>
+                                            <div className={cn("p-2 rounded-lg bg-blue-100 text-blue-600 shrink-0", isDrawing && brushType === "marker" && "bg-blue-500 text-white")}>
                                                 <PenTool size={20} />
                                             </div>
-                                            {activeTab !== "draw" && (
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm">Marker</span>
-                                                    <span className="text-[10px] text-gray-500">Bold, solid strokes</span>
-                                                </div>
-                                            )}
-                                            {isDrawing && brushType === "marker" && <div className={cn("absolute bg-blue-500", activeTab === "draw" ? "left-0 top-0 bottom-0 w-1 rounded-l-full" : "left-0 top-0 bottom-0 w-1")} />}
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm text-gray-800">Marker</span>
+                                                <span className="text-[10px] text-gray-500">Bold, solid strokes</span>
+                                            </div>
+                                            {isDrawing && brushType === "marker" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-full" />}
                                         </button>
 
                                         <button
                                             className={cn(
-                                                "flex items-center justify-center p-3 rounded-xl transition-all group relative overflow-hidden",
-                                                isDrawing && brushType === "highlighter" ? "bg-yellow-50 shadow-md" : "bg-white hover:bg-gray-50 hover:shadow-sm"
+                                                "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
+                                                isDrawing && brushType === "highlighter" ? "bg-yellow-50 shadow-md ring-1 ring-yellow-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
                                             )}
                                             onClick={() => {
                                                 setBrushType("highlighter");
                                                 setIsDrawing(true);
                                             }}
                                         >
-                                            <div className={cn("p-2 rounded-lg bg-yellow-100 text-yellow-600", isDrawing && brushType === "highlighter" && "bg-yellow-500 text-white")}>
+                                            <div className={cn("p-2 rounded-lg bg-yellow-100 text-yellow-600 shrink-0", isDrawing && brushType === "highlighter" && "bg-yellow-500 text-white")}>
                                                 <Highlighter size={20} />
                                             </div>
-                                            {activeTab !== "draw" && (
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm">Highlighter</span>
-                                                    <span className="text-[10px] text-gray-500">Transparent overlay</span>
-                                                </div>
-                                            )}
-                                            {isDrawing && brushType === "highlighter" && <div className={cn("absolute bg-yellow-500", activeTab === "draw" ? "left-0 top-0 bottom-0 w-1 rounded-l-full" : "left-0 top-0 bottom-0 w-1")} />}
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm text-gray-800">Highlighter</span>
+                                                <span className="text-[10px] text-gray-500">Transparent overlay</span>
+                                            </div>
+                                            {isDrawing && brushType === "highlighter" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-yellow-500 rounded-r-full" />}
                                         </button>
 
                                         <button
                                             className={cn(
-                                                "flex items-center justify-center p-3 rounded-xl transition-all group relative overflow-hidden",
-                                                isDrawing && brushType === "eraser" ? "bg-gray-100 shadow-md" : "bg-white hover:bg-gray-50 hover:shadow-sm"
+                                                "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
+                                                isDrawing && brushType === "eraser" ? "bg-gray-100 shadow-md ring-1 ring-gray-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
                                             )}
                                             onClick={() => {
                                                 setBrushType("eraser");
                                                 setIsDrawing(true);
                                             }}
                                         >
-                                            <div className={cn("p-2 rounded-lg bg-gray-100 text-gray-600", isDrawing && brushType === "eraser" && "bg-gray-600 text-white")}>
+                                            <div className={cn("p-2 rounded-lg bg-gray-100 text-gray-600 shrink-0", isDrawing && brushType === "eraser" && "bg-gray-600 text-white")}>
                                                 <Eraser size={20} />
                                             </div>
-                                            {activeTab !== "draw" && (
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm">Eraser</span>
-                                                    <span className="text-[10px] text-gray-500">Remove drawings</span>
-                                                </div>
-                                            )}
-                                            {isDrawing && brushType === "eraser" && <div className={cn("absolute bg-gray-600", activeTab === "draw" ? "left-0 top-0 bottom-0 w-1 rounded-l-full" : "left-0 top-0 bottom-0 w-1")} />}
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm text-gray-800">Eraser</span>
+                                                <span className="text-[10px] text-gray-500">Remove drawings</span>
+                                            </div>
+                                            {isDrawing && brushType === "eraser" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-gray-600 rounded-r-full" />}
                                         </button>
                                     </div>
                                 </div>
-
-
                             </div>
                         )}
-
                         {activeTab === "design" && (
                             <div className="space-y-6">
                                 <div className="space-y-3">

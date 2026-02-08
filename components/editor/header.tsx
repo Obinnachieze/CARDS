@@ -16,7 +16,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const { undo, redo, canUndo, canRedo } = useEditor();
 
     return (
-        <header className="h-14 bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-between px-4 text-white border-b border-white/10">
+        <header className="h-14 bg-gradient-to-r from-purple-950 via-black to-purple-950 flex items-center justify-between px-4 text-white border-b border-white/10">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white">
                     <Menu size={20} />

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage } from "./types";
+import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project } from "./types";
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -52,6 +52,12 @@ interface EditorContextType {
     redo: () => void;
     canUndo: boolean;
     canRedo: boolean;
+
+    // Projects (Local Storage)
+    projects: Project[];
+    saveProject: (name: string) => void;
+    loadProject: (id: string) => void;
+    deleteProject: (id: string) => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -99,10 +105,60 @@ export const EditorProvider = ({
     const [brushType, setBrushType] = useState<DrawingTool>("pencil");
     const [zoom, setZoom] = useState(0.75);
 
+    // Projects State
+    const [projects, setProjects] = useState<Project[]>([]);
+
+    // Load projects from local storage on mount
+    useEffect(() => {
+        const storedProjects = localStorage.getItem("card-projects");
+        if (storedProjects) {
+            try {
+                setProjects(JSON.parse(storedProjects));
+            } catch (e) {
+                console.error("Failed to parse projects", e);
+            }
+        }
+    }, []);
+
+    const saveProject = useCallback((name: string) => {
+        const newProject: Project = {
+            id: generateId(),
+            name,
+            updatedAt: Date.now(),
+            cards,
+            cardMode
+        };
+        const updatedProjects = [...projects, newProject];
+        setProjects(updatedProjects);
+        localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
+    }, [cards, cardMode, projects]);
+
     const saveHistory = useCallback(() => {
         setPast(prev => [...prev, cards]);
         setFuture([]);
     }, [cards]);
+
+    const loadProject = useCallback((id: string) => {
+        const project = projects.find(p => p.id === id);
+        if (project) {
+            setCards(project.cards);
+            setCardMode(project.cardMode);
+            setActiveCardId(project.cards[0]?.id || null);
+            saveHistory(); // Optional: Save "Load" as a history step? checking this might break undo/redo stack
+            // Better to clear history on new project load
+            setPast([]);
+            setFuture([]);
+        }
+    }, [projects, saveHistory]);
+
+    const deleteProject = useCallback((id: string) => {
+        const updatedProjects = projects.filter(p => p.id !== id);
+        setProjects(updatedProjects);
+        localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
+    }, [projects]);
+
+
+
 
     const undo = useCallback(() => {
         if (past.length === 0) return;
@@ -284,6 +340,11 @@ export const EditorProvider = ({
             redo,
             canUndo: past.length > 0,
             canRedo: future.length > 0,
+
+            projects,
+            saveProject,
+            loadProject,
+            deleteProject
         }}>
             {children}
         </EditorContext.Provider>
