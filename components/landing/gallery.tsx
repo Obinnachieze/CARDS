@@ -40,6 +40,18 @@ const occasions = [
         link: "/create/holiday",
         color: "bg-red-500",
     },
+    {
+        title: "Envelope",
+        description: "Customize a classic envelope with a liner and stamp to send your message in style.",
+        link: "/create/envelope",
+        color: "bg-amber-500",
+    },
+    {
+        title: "Postcard",
+        description: "Send a quick, beautiful postcard with a photo front and a message on the back.",
+        link: "/create/postcard",
+        color: "bg-teal-500",
+    },
 ];
 
 export const HoverEffect = ({

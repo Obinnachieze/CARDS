@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useEditor } from "./editor-context";
 import { useParams } from "next/navigation";
+import { UserAvatar } from "./user-avatar";
 
 export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const params = useParams();
@@ -15,7 +16,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const { undo, redo, canUndo, canRedo } = useEditor();
 
     return (
-        <header className="h-14 bg-[#0e1318] flex items-center justify-between px-4 text-white border-b border-gray-800">
+        <header className="h-14 bg-gradient-to-r from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-between px-4 text-white border-b border-white/10">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white">
                     <Menu size={20} />
@@ -60,6 +61,8 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 <Button className="bg-white text-black hover:bg-gray-100 font-semibold gap-2">
                     Share
                 </Button>
+                <div className="h-4 w-[1px] bg-gray-700 mx-2" />
+                <UserAvatar />
             </div>
         </header>
     );

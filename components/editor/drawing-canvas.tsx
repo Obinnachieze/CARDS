@@ -11,7 +11,7 @@ interface DrawingCanvasProps {
 
 export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { isDrawing, brushColor, brushSize, addElement, currentFace } = useEditor();
+    const { isDrawing, brushColor, brushSize, brushType, addElement, currentFace } = useEditor();
     const [isDrawingState, setIsDrawingState] = useState(false);
     const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
 
@@ -48,10 +48,33 @@ export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) =
         ctx.beginPath();
         ctx.moveTo(lastPos.x, lastPos.y);
         ctx.lineTo(currentPos.x, currentPos.y);
-        ctx.strokeStyle = brushColor;
-        ctx.lineWidth = brushSize;
+
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
+        ctx.strokeStyle = brushColor;
+
+        if (brushType === "pencil") {
+            ctx.lineWidth = brushSize;
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = "source-over";
+        } else if (brushType === "marker") {
+            ctx.lineWidth = brushSize * 1.5;
+            ctx.globalAlpha = 0.8;
+            // Markers are usually additive but here we just dampen opacity
+            ctx.globalCompositeOperation = "source-over";
+        } else if (brushType === "highlighter") {
+            ctx.lineWidth = brushSize * 4;
+            ctx.globalAlpha = 0.4;
+            // For drawing on the temp canvas, source-over allows building up color (darker on overlap)
+            ctx.globalCompositeOperation = "source-over";
+            // Note: real highlighter effect requires mix-blend-mode on the element, handled in saveDrawing
+            ctx.lineCap = "square"; // Highlighters often square? But round is smoother.
+        } else if (brushType === "eraser") {
+            ctx.lineWidth = brushSize * 2;
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = "destination-out";
+        }
+
         ctx.stroke();
 
         setLastPos(currentPos);
@@ -68,9 +91,12 @@ export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) =
         // Check if canvas is empty? (optimization)
 
         const dataUrl = canvasRef.current.toDataURL("image/png");
+
+        // Determine blend mode
+        const blendMode = brushType === "highlighter" ? "multiply" : "normal";
+
         // Create an image element from the drawing
-        // We add it to the center or top-left? Top-left since it's a layer overlay
-        addElement("draw", dataUrl, { x: 0, y: 0, width, height, face: currentFace });
+        addElement("draw", dataUrl, { x: 0, y: 0, width, height, face: currentFace, mixBlendMode: blendMode });
 
         // Clear canvas for next drawing
         const ctx = canvasRef.current.getContext("2d");

@@ -12,7 +12,8 @@ import { EditorElement } from "@/components/editor/types";
 const getTemplate = (type: string) => {
     const template = {
         initialBackgroundColor: "#ffffff",
-        initialElements: [] as EditorElement[]
+        initialElements: [] as EditorElement[],
+        initialCardMode: "foldable" as "foldable" | "envelope" | "postcard"
     };
 
     const id = () => Math.random().toString(36).substr(2, 9);
@@ -64,6 +65,23 @@ const getTemplate = (type: string) => {
                 { id: id(), type: "emoji", content: "❄️", x: 400, y: 100, fontSize: 60, rotation: 20, face: "front" },
             ];
             break;
+        case "envelope":
+            template.initialCardMode = "envelope";
+            template.initialBackgroundColor = "#f5f5f5"; // warm gray
+            template.initialElements = [
+                { id: id(), type: "text", content: "To: John Doe", x: 200, y: 300, fontSize: 24, rotation: 0, color: "#000000", face: "front", fontFamily: "Courier New" },
+                { id: id(), type: "text", content: "\n1234 Maple Ave\nSpringfield, IL 62704", x: 200, y: 340, fontSize: 18, rotation: 0, color: "#000000", face: "front", fontFamily: "Courier New" },
+                { id: id(), type: "emoji", content: "🛑", x: 400, y: 50, fontSize: 40, rotation: 0, face: "front" }, // Stamp placeholder
+            ];
+            break;
+        case "postcard":
+            template.initialCardMode = "postcard";
+            template.initialBackgroundColor = "#ffffff";
+            template.initialElements = [
+                { id: id(), type: "text", content: "Greetings from...", x: 50, y: 50, fontSize: 48, rotation: 0, color: "#000000", face: "front", fontFamily: "Impact" },
+                { id: id(), type: "text", content: "Wish you were here!", x: 250, y: 200, fontSize: 32, rotation: -5, color: "#ef4444", face: "back", fontFamily: "Caveat" },
+            ];
+            break;
     }
     return template;
 };
@@ -74,12 +92,13 @@ export default function CreateCardPage() {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const { initialElements, initialBackgroundColor } = React.useMemo(() => getTemplate(type), [type]);
+    const { initialElements, initialBackgroundColor, initialCardMode } = React.useMemo(() => getTemplate(type), [type]);
 
     return (
         <EditorProvider
             initialElements={initialElements}
             initialBackgroundColor={initialBackgroundColor}
+            initialCardMode={initialCardMode}
         >
             <div className="flex flex-col h-screen bg-gray-100 text-black">
                 <Header onPreview={() => setIsPreviewOpen(true)} />
