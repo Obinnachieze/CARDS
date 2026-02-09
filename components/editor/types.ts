@@ -36,6 +36,8 @@ export interface CardPage {
     elements: EditorElement[];
     backgroundColor: string;
     currentFace: CardFace;
+    celebration?: "none" | "confetti" | "fireworks" | "hearts";
+    audioSrc?: string; // URL or base64
 }
 
 export interface EditorState {

@@ -7,6 +7,7 @@ import { Canvas } from "@/components/editor/canvas";
 import { Toolbar } from "@/components/editor/toolbar";
 import { Header } from "@/components/editor/header";
 import { PreviewModal } from "@/components/editor/preview-modal";
+import { OnboardingTour } from "@/components/editor/onboarding-tour";
 import { EditorElement } from "@/components/editor/types";
 
 const getTemplate = (type: string) => {
@@ -107,6 +108,7 @@ export default function CreateCardPage() {
                     <Canvas />
                 </div>
                 <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} />
+                <OnboardingTour />
             </div>
         </EditorProvider>
     );

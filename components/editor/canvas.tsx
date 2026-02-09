@@ -13,6 +13,7 @@ import { CardWrapper } from "./card-wrapper";
 import { ContextualToolbar } from "./contextual-toolbar";
 import { CardToolbar } from "./card-toolbar";
 import { ChevronRight, ChevronLeft, Minus, Plus, Maximize, LayoutGrid, List } from "lucide-react";
+import confetti from "canvas-confetti";
 
 export const Canvas = () => {
     const {
@@ -23,6 +24,59 @@ export const Canvas = () => {
     } = useEditor();
 
     const { cardMode } = useEditor(); // Get cardMode separately or add to above
+
+    const activeCard = cards.find(c => c.id === activeCardId);
+
+    // Celebration Effect Trigger
+    const isOpen = (face: CardFace) => face === "inside-left" || face === "inside-right" || face === "back";
+    const cardIsOpen = activeCard ? isOpen(activeCard.currentFace) : false;
+
+    React.useEffect(() => {
+        if (cardIsOpen && activeCard?.celebration && activeCard.celebration !== "none") {
+            const duration = 3000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+            if (activeCard.celebration === "confetti") {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } else if (activeCard.celebration === "fireworks") {
+                const interval: any = setInterval(function () {
+                    const timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    const particleCount = 50 * (timeLeft / duration);
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                }, 250);
+            } else if (activeCard.celebration === "hearts") {
+                const interval: any = setInterval(function () {
+                    const timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    const particleCount = 20 * (timeLeft / duration);
+                    confetti({
+                        ...defaults,
+                        particleCount,
+                        scalar: 2,
+                        shapes: ['star'], // Replace with heart unicode/shape if available in library, or use star/circle
+                        colors: ['#FFC0CB', '#FF69B4', '#FF1493'],
+                    });
+                }, 250);
+            }
+        }
+    }, [cardIsOpen, activeCard?.celebration]);
 
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
@@ -186,8 +240,6 @@ export const Canvas = () => {
             </div>
         );
     };
-
-    const isOpen = (face: CardFace) => face === "inside-left" || face === "inside-right" || face === "back";
 
     return (
         <div

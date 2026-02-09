@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Trash2, Copy, Palette, Type } from "lucide-react";
 import { ColorPicker } from "./color-picker";
 import { cn } from "@/lib/utils";
+import { MagicWriterDialog } from "./magic-writer-dialog";
 
 export const ContextualToolbar = () => {
     const { selectedElement, updateElement, removeElement, addElement, zoom } = useEditor();
@@ -110,6 +111,10 @@ export const ContextualToolbar = () => {
                                 className="w-full"
                             />
                         </div>
+                        <MagicWriterDialog
+                            initialText={selectedElement.content}
+                            onInsert={(text) => updateElement(selectedElement.id, { content: text })}
+                        />
                     </div>
                 )}
 

@@ -8,6 +8,7 @@ const generateId = () => Math.random().toString(36).substr(2, 9);
 interface EditorContextType {
     // Multi-Card Support
     cards: CardPage[];
+    setCards: React.Dispatch<React.SetStateAction<CardPage[]>>;
     activeCardId: string | null;
     addCard: () => void;
     activateCard: (id: string) => void;
@@ -64,6 +65,8 @@ interface EditorContextType {
     exportProjectAsJSON: () => void;
     importProjectFromJSON: (file: File) => void;
     downloadAsImage: () => void;
+    setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "hearts") => void;
+    setAudio: (cardId: string, src: string | undefined) => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -400,9 +403,19 @@ export const EditorProvider = ({
 
     const selectedElement = elements.find(el => el.id === selectedElementId);
 
+    const setCelebration = useCallback((cardId: string, type: "none" | "confetti" | "fireworks" | "hearts") => {
+        setCards(prev => prev.map(card => {
+            if (card.id === cardId) {
+                return { ...card, celebration: type };
+            }
+            return card;
+        }));
+    }, []);
+
     return (
         <EditorContext.Provider value={{
             cards,
+            setCards,
             activeCardId,
             addCard,
             removeCard,
@@ -450,7 +463,17 @@ export const EditorProvider = ({
             deleteProject,
             exportProjectAsJSON,
             importProjectFromJSON,
-            downloadAsImage
+            downloadAsImage,
+            setCelebration,
+
+            setAudio: useCallback((cardId: string, src: string | undefined) => {
+                setCards(prev => prev.map(card => {
+                    if (card.id === cardId) {
+                        return { ...card, audioSrc: src };
+                    }
+                    return card;
+                }));
+            }, [])
         }}>
             {children}
         </EditorContext.Provider>

@@ -18,6 +18,8 @@ import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { cn } from "@/lib/utils";
 import { fetchGoogleFonts, loadFont, GoogleFont } from "@/lib/google-fonts";
 import { ColorPicker, colors } from "./color-picker";
+import { EffectsSidebar } from "./effects-sidebar";
+import { Sparkles } from "lucide-react";
 const ShapeButton = ({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) => (
     <button
         className="aspect-square bg-gray-50 hover:bg-gray-100 shadow-sm rounded-lg flex items-center justify-center p-2 transition-colors group"
@@ -37,40 +39,58 @@ const fallbackFonts = [
     "Dancing Script", "Pacifico", "Great Vibes", "Caveat"
 ];
 
-type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design";
+import { templates } from "./templates";
+
+
+const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void, onMouseEnter?: () => void }) => (
+    <button
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        className={cn(
+            "flex flex-col items-center justify-center w-full py-3 transition-colors relative group rounded-xl mx-2",
+            active ? "text-purple-600 bg-purple-50" : "text-gray-500 hover:text-purple-600 hover:bg-purple-50/50"
+        )}
+    >
+        <div className={cn("mb-1", active ? "text-purple-600" : "")}>{icon}</div>
+        <span className="text-[10px] font-medium">{label}</span>
+        {active && <div className="absolute left-0 top-3 bottom-3 w-1 bg-purple-600 rounded-r-full" />}
+    </button>
+);
+
+type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design" | "effects";
+
 
 export const Toolbar = () => {
     const {
-        activeCardId,
-        addCard,
-        activateCard,
-        removeCard,
-        duplicateCard,
-        elements,
         addElement,
-        removeElement,
+        activeCardId,
+        cards,
+        setCards,
+        addCard,
         selectedElement,
         updateElement,
+        removeElement,
+        undo,
+        redo,
+        saveProjectAs,
+        projects,
+        loadProject,
+        deleteProject,
         setBackgroundColor,
         backgroundColor,
+        currentFont,
+        setCurrentFont,
+        cardMode,
+        setCardMode,
         isDrawing,
         setIsDrawing,
         brushColor,
         setBrushColor,
         brushSize,
         setBrushSize,
-        currentFont,
-        setCurrentFont,
         brushType,
         setBrushType,
-        cardMode,
-        setCardMode,
-        saveProjectAs,
-        projects,
-        loadProject,
-        deleteProject,
-        undo,
-        redo
+        setCelebration
     } = useEditor();
 
     const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates");
@@ -81,6 +101,25 @@ export const Toolbar = () => {
     const [fontSearch, setFontSearch] = useState("");
     const [isLoadingFonts, setIsLoadingFonts] = useState(false);
     const [fontError, setFontError] = useState<string | null>(null);
+
+    const loadTemplate = (templateId: string) => {
+        const template = templates.find(t => t.id === templateId);
+        if (template && activeCardId) {
+            const templateCard = template.cards[0];
+
+            setCards(prev => prev.map(card => {
+                if (card.id === activeCardId) {
+                    return {
+                        ...card,
+                        elements: templateCard.elements.map(el => ({ ...el })),
+                        backgroundColor: templateCard.backgroundColor,
+                        celebration: templateCard.celebration
+                    };
+                }
+                return card;
+            }));
+        }
+    };
 
     // Fetch fonts on mount
     useEffect(() => {
@@ -438,8 +477,6 @@ export const Toolbar = () => {
                             </div>
                         )}
 
-
-
                         {activeTab === "projects" && (
                             <div className="space-y-6">
                                 <div className="space-y-4">
@@ -624,7 +661,30 @@ export const Toolbar = () => {
 
                         {activeTab === "templates" && (
                             <div className="space-y-6">
-                                <div className="space-y-3">
+                                <div className="space-y-4">
+                                    <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Templates</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {templates.map(template => (
+                                            <button
+                                                key={template.id}
+                                                className="group relative aspect-[3/4] bg-gray-100 rounded-xl overflow-hidden border hover:border-purple-400 hover:shadow-md transition-all text-left"
+                                                onClick={() => loadTemplate(template.id)}
+                                            >
+                                                <div
+                                                    className="absolute inset-0 w-full h-full"
+                                                    style={{ background: template.thumbnail.startsWith("#") ? template.thumbnail : template.thumbnail }}
+                                                />
+                                                <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
+                                                    <span className="text-white text-xs font-medium truncate w-full block">
+                                                        {template.name}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4 pt-4 border-t border-gray-100">
                                     <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Card Format</Label>
                                     <div className="grid grid-cols-2 gap-2">
                                         <button
@@ -667,21 +727,6 @@ export const Toolbar = () => {
                                         </button>
                                     </div>
                                 </div>
-
-                                <div className="space-y-3 border-t pt-4">
-                                    <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Themes</Label>
-                                    <div className="bg-gray-100 p-2 rounded-md flex gap-2">
-                                        <Search size={16} className="text-gray-400 mt-1" />
-                                        <input className="bg-transparent text-sm w-full outline-none" placeholder="Search templates" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {["Birthday", "Wedding", "Party", "Thank You"].map((t, i) => (
-                                            <div key={i} className="aspect-w-3 aspect-h-4 bg-gray-100 rounded-md hover:ring-2 ring-purple-500 cursor-pointer flex items-center justify-center text-xs text-gray-500 font-medium">
-                                                {t}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
                         )}
 
@@ -689,24 +734,8 @@ export const Toolbar = () => {
                 </>
             )}
             </div>
-
-        </div >
+        </div>
     );
 };
-
-const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void, onMouseEnter?: () => void }) => (
-    <button
-        onClick={onClick}
-        onMouseEnter={onMouseEnter}
-        className={cn(
-            "flex flex-col items-center justify-center w-full py-3 transition-colors relative group rounded-xl mx-2",
-            active ? "text-purple-600 bg-purple-50" : "text-gray-500 hover:text-purple-600 hover:bg-purple-50/50"
-        )}
-    >
-        <div className={cn("mb-1", active ? "text-purple-600" : "")}>{icon}</div>
-        <span className="text-[10px] font-medium">{label}</span>
-        {active && <div className="absolute left-0 top-3 bottom-3 w-1 bg-purple-600 rounded-r-full" />}
-    </button>
-);
 
 
