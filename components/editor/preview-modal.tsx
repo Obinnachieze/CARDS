@@ -65,6 +65,8 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
         </div>
     );
 
+    const cardIsOpen = currentFace === "inside-left" || currentFace === "inside-right" || currentFace === "back";
+
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-[80vw] max-h-[90vh] w-full h-full bg-transparent border-0 shadow-none flex items-center justify-center p-0">
@@ -73,6 +75,8 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                         frontContent={renderFace(frontElements)}
                         insideLeftContent={renderFace(insideLeftElements)}
                         insideRightContent={renderFace(insideRightElements)}
+                        isOpen={cardIsOpen}
+                        backgroundColor="#ffffff" // Default or get from context?
                     />
                 </div>
             </DialogContent>

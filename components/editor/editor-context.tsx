@@ -53,11 +53,17 @@ interface EditorContextType {
     canUndo: boolean;
     canRedo: boolean;
 
-    // Projects (Local Storage)
+    // Projects (Local Storage & File)
     projects: Project[];
-    saveProject: (name: string) => void;
+    currentProjectId: string | null;
+    createNewProject: () => void;
+    saveProjectAs: (name: string) => void;
+    saveCurrentProject: () => void;
     loadProject: (id: string) => void;
     deleteProject: (id: string) => void;
+    exportProjectAsJSON: () => void;
+    importProjectFromJSON: (file: File) => void;
+    downloadAsImage: () => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -106,6 +112,7 @@ export const EditorProvider = ({
     const [zoom, setZoom] = useState(0.75);
 
     // Projects State
+    const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
 
     // Load projects from local storage on mount
@@ -120,9 +127,19 @@ export const EditorProvider = ({
         }
     }, []);
 
-    const saveProject = useCallback((name: string) => {
+    const createNewProject = useCallback(() => {
+        setCards([{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }]);
+        setCardMode("postcard");
+        setCurrentProjectId(null);
+        setActiveCardId("card-1");
+        setPast([]);
+        setFuture([]);
+    }, []);
+
+    const saveProjectAs = useCallback((name: string) => {
+        const newId = generateId();
         const newProject: Project = {
-            id: generateId(),
+            id: newId,
             name,
             updatedAt: Date.now(),
             cards,
@@ -130,8 +147,90 @@ export const EditorProvider = ({
         };
         const updatedProjects = [...projects, newProject];
         setProjects(updatedProjects);
+        setCurrentProjectId(newId);
         localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
     }, [cards, cardMode, projects]);
+
+    const saveCurrentProject = useCallback(() => {
+        if (!currentProjectId) return;
+
+        const updatedProjects = projects.map(p =>
+            p.id === currentProjectId
+                ? { ...p, cards, cardMode, updatedAt: Date.now() }
+                : p
+        );
+        setProjects(updatedProjects);
+        localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
+    }, [cards, cardMode, projects, currentProjectId]);
+
+    const exportProjectAsJSON = useCallback(() => {
+        const projectData = {
+            version: "1.0",
+            timestamp: Date.now(),
+            cards,
+            cardMode
+        };
+        const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `card-project-${Date.now()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, [cards, cardMode]);
+
+    const importProjectFromJSON = useCallback((file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target?.result as string);
+                if (json.cards && json.cardMode) {
+                    setCards(json.cards);
+                    setCardMode(json.cardMode);
+                    setCurrentProjectId(null); // Imported projects are "new"/unsaved until saved
+                    setActiveCardId(json.cards[0]?.id || null);
+                    setPast([]);
+                    setFuture([]);
+                } else {
+                    alert("Invalid project file format");
+                }
+            } catch (error) {
+                console.error("Failed to parse project file", error);
+                alert("Failed to parse project file");
+            }
+        };
+        reader.readAsText(file);
+    }, []);
+
+    const downloadAsImage = useCallback(async () => {
+        // Dynamically import html2canvas to avoid SSR issues
+        const html2canvas = (await import("html2canvas")).default;
+
+        // Select the canvas/card element. 
+        // We need a reliable way to select the card. We can add an ID to the CardWrapper or a container.
+        // For now, let's assume there's an element with ID "card-canvas-container"
+        const element = document.getElementById("card-canvas-container");
+
+        if (!element) {
+            console.error("Card container not found");
+            return;
+        }
+
+        try {
+            const canvas = await html2canvas(element, { backgroundColor: null, scale: 2 });
+            const dataUrl = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `card-design-${Date.now()}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Failed to generate image", error);
+        }
+    }, []);
 
     const saveHistory = useCallback(() => {
         setPast(prev => [...prev, cards]);
@@ -143,6 +242,7 @@ export const EditorProvider = ({
         if (project) {
             setCards(project.cards);
             setCardMode(project.cardMode);
+            setCurrentProjectId(project.id);
             setActiveCardId(project.cards[0]?.id || null);
             saveHistory(); // Optional: Save "Load" as a history step? checking this might break undo/redo stack
             // Better to clear history on new project load
@@ -342,9 +442,15 @@ export const EditorProvider = ({
             canRedo: future.length > 0,
 
             projects,
-            saveProject,
+            currentProjectId,
+            createNewProject,
+            saveProjectAs,
+            saveCurrentProject,
             loadProject,
-            deleteProject
+            deleteProject,
+            exportProjectAsJSON,
+            importProjectFromJSON,
+            downloadAsImage
         }}>
             {children}
         </EditorContext.Provider>

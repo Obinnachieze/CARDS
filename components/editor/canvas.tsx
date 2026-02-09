@@ -194,10 +194,12 @@ export const Canvas = () => {
             className="flex-1 bg-[#f0f0f3] overflow-y-auto relative flex flex-col items-center"
             onClick={() => selectElement(null)}
         >
-            <div className={cn(
-                "p-20 w-full transition-all duration-300",
-                viewMode === "grid" ? "grid grid-cols-2 gap-12 justify-items-center" : "flex flex-col items-center gap-24" // Increased gap for buttons
-            )}>
+            <div
+                id="card-canvas-container"
+                className={cn(
+                    "p-20 w-full transition-all duration-300",
+                    viewMode === "grid" ? "grid grid-cols-2 gap-12 justify-items-center" : "flex flex-col items-center gap-24 items-center"
+                )}>
                 {cards.map(card => {
                     const isCardActive = activeCardId === card.id;
                     const cardIsOpen = isOpen(card.currentFace);

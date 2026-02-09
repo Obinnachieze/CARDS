@@ -41,10 +41,16 @@ type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design";
 
 export const Toolbar = () => {
     const {
+        activeCardId,
+        addCard,
+        activateCard,
+        removeCard,
+        duplicateCard,
+        elements,
         addElement,
+        removeElement,
         selectedElement,
         updateElement,
-        removeElement,
         setBackgroundColor,
         backgroundColor,
         isDrawing,
@@ -59,10 +65,12 @@ export const Toolbar = () => {
         setBrushType,
         cardMode,
         setCardMode,
+        saveProjectAs,
         projects,
-        saveProject,
         loadProject,
-        deleteProject
+        deleteProject,
+        undo,
+        redo
     } = useEditor();
 
     const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates");
@@ -443,7 +451,7 @@ export const Toolbar = () => {
                                             className="h-10"
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
-                                                    saveProject(e.currentTarget.value || "Untitled Project");
+                                                    saveProjectAs(e.currentTarget.value || "Untitled Project");
                                                     e.currentTarget.value = "";
                                                 }
                                             }}
@@ -452,7 +460,7 @@ export const Toolbar = () => {
                                             className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2"
                                             onClick={() => {
                                                 const input = document.getElementById("project-name") as HTMLInputElement;
-                                                saveProject(input?.value || "Untitled Project");
+                                                saveProjectAs(input?.value || "Untitled Project");
                                                 if (input) input.value = "";
                                             }}
                                         >

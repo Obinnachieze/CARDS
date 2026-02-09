@@ -17,6 +17,7 @@ export interface EditorElement {
     fontSize?: number;
     fontFamily?: string;
     rotation: number;
+    fontWeight?: string;
     face: CardFace;
     shapeType?: "rect" | "circle" | "triangle" | "star" | "pentagon" | "hexagon" | "octagon" | "diamond" | "star-4" | "star-8" | "heart" | "arrow-right" | "arrow-left" | "cloud" | "triangle-right"; // For shapes
     lineStyle?: "solid" | "dashed" | "dotted"; // For lines
