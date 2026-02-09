@@ -12,6 +12,7 @@ interface CardWrapperProps {
     backContent?: React.ReactNode;
     interactive?: boolean;
     isOpen?: boolean;
+    audioSrc?: string;
 }
 
 export const CardWrapper = ({
@@ -21,7 +22,8 @@ export const CardWrapper = ({
     backContent,
     interactive = true,
     isOpen: externalIsOpen,
-    backgroundColor
+    backgroundColor,
+    audioSrc
 }: CardWrapperProps & { backgroundColor: string }) => {
     const { cardMode, setCurrentFace, currentFace } = useEditor();
 
@@ -33,6 +35,41 @@ export const CardWrapper = ({
 
     // Use external state if provided, otherwise internal
     const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+
+    // Audio Playback Logic
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+    React.useEffect(() => {
+        if (!audioSrc) return;
+
+        // Create audio element if it doesn't exist
+        if (!audioRef.current) {
+            audioRef.current = new Audio(audioSrc);
+            audioRef.current.loop = true; // Loop background music
+        } else if (audioRef.current.src !== audioSrc) {
+            // Update src if changed
+            audioRef.current.src = audioSrc;
+        }
+
+        if (isOpen) {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Audio playback failed (autoplay policy?):", error);
+                });
+            }
+        } else {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0; // Reset to start
+        }
+
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, [isOpen, audioSrc]);
 
     // Dimensions
     const width = 450;

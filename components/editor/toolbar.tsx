@@ -20,6 +20,8 @@ import { fetchGoogleFonts, loadFont, GoogleFont } from "@/lib/google-fonts";
 import { ColorPicker, colors } from "./color-picker";
 import { EffectsSidebar } from "./effects-sidebar";
 import { Sparkles } from "lucide-react";
+import { MusicSidebar, MusicIcon } from "./music-sidebar";
+
 const ShapeButton = ({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) => (
     <button
         className="aspect-square bg-gray-50 hover:bg-gray-100 shadow-sm rounded-lg flex items-center justify-center p-2 transition-colors group"
@@ -57,7 +59,7 @@ const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: Reac
     </button>
 );
 
-type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design" | "effects";
+type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design" | "effects" | "music";
 
 
 export const Toolbar = () => {
@@ -197,14 +199,18 @@ export const Toolbar = () => {
     return (
         <div className="flex h-full z-40 relative">
             {/* Dark Icon Rail - Transparent */}
-            <div className="flex flex-col items-center w-[72px] py-4 bg-transparent text-gray-600 gap-2 z-50">
+            <div id="sidebar-tools" className="flex flex-col items-center w-[72px] py-4 bg-transparent text-gray-600 gap-2 z-50">
                 <SidebarTab icon={<FolderOpen size={20} />} label="Projects" active={activeTab === "projects"} onClick={() => setActiveTab(activeTab === "projects" ? null : "projects")} onMouseEnter={() => setActiveTab("projects")} />
+                <div id="sidebar-templates">
+                    <SidebarTab icon={<LayoutTemplate size={20} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab(activeTab === "templates" ? null : "templates")} onMouseEnter={() => setActiveTab("templates")} />
+                </div>
                 <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab(activeTab === "design" ? null : "design")} onMouseEnter={() => setActiveTab("design")} />
-                <SidebarTab icon={<LayoutTemplate size={20} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab(activeTab === "templates" ? null : "templates")} onMouseEnter={() => setActiveTab("templates")} />
                 <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab(activeTab === "text" ? null : "text")} onMouseEnter={() => setActiveTab("text")} />
                 <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab(activeTab === "elements" ? null : "elements")} onMouseEnter={() => setActiveTab("elements")} />
                 <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => setActiveTab(activeTab === "uploads" ? null : "uploads")} onMouseEnter={() => setActiveTab("uploads")} />
                 <SidebarTab icon={<Pencil size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => setActiveTab(activeTab === "draw" ? null : "draw")} onMouseEnter={() => setActiveTab("draw")} />
+                <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => setActiveTab(activeTab === "effects" ? null : "effects")} onMouseEnter={() => setActiveTab("effects")} />
+                <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={activeTab === "music"} onClick={() => setActiveTab(activeTab === "music" ? null : "music")} onMouseEnter={() => setActiveTab("music")} />
             </div>
 
             {/* Sliding Panel */}
@@ -213,7 +219,7 @@ export const Toolbar = () => {
                     "absolute top-0 bottom-0 bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col",
                     cn("absolute top-0 bottom-0 left-[72px] w-80 shadow-2xl", activeTab ? "translate-x-0" : "-translate-x-full")
                 )}
-            >                        {activeTab && (
+            >                        {activeTab && activeTab !== "music" && (
                 <>
                     <div className="flex items-center justify-between p-4 shadow-sm mb-1">
                         <h3 className="font-semibold text-sm capitalize">{activeTab}</h3>

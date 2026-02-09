@@ -412,6 +412,15 @@ export const EditorProvider = ({
         }));
     }, []);
 
+    const setAudio = useCallback((cardId: string, src: string | undefined) => {
+        setCards(prev => prev.map(card => {
+            if (card.id === cardId) {
+                return { ...card, audioSrc: src };
+            }
+            return card;
+        }));
+    }, []);
+
     return (
         <EditorContext.Provider value={{
             cards,
@@ -465,15 +474,7 @@ export const EditorProvider = ({
             importProjectFromJSON,
             downloadAsImage,
             setCelebration,
-
-            setAudio: useCallback((cardId: string, src: string | undefined) => {
-                setCards(prev => prev.map(card => {
-                    if (card.id === cardId) {
-                        return { ...card, audioSrc: src };
-                    }
-                    return card;
-                }));
-            }, [])
+            setAudio // Correctly referenced
         }}>
             {children}
         </EditorContext.Provider>

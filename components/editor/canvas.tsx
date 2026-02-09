@@ -295,6 +295,7 @@ export const Canvas = () => {
                                     interactive={false}
                                     isOpen={cardIsOpen}
                                     backgroundColor={card.backgroundColor}
+                                    audioSrc={card.audioSrc}
                                 />
                             </div>
 
