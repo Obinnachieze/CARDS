@@ -13,6 +13,7 @@ export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) =
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const { isDrawing, brushColor, brushSize, brushType, addElement, currentFace } = useEditor();
     const [isDrawingState, setIsDrawingState] = useState(false);
+    const isDrawingRef = useRef(false);
     const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
 
     // Helper to get coordinates relative to canvas internal size
@@ -35,6 +36,7 @@ export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) =
         if (!isDrawing) return;
         const pos = getCoordinates(e);
         setIsDrawingState(true);
+        isDrawingRef.current = true;
         setLastPos(pos);
     };
 
@@ -81,8 +83,9 @@ export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) =
     };
 
     const stopDrawing = () => {
-        if (!isDrawingState) return;
+        if (!isDrawingRef.current) return;
         setIsDrawingState(false);
+        isDrawingRef.current = false;
         saveDrawing();
     };
 
@@ -106,11 +109,22 @@ export const DrawingCanvas = ({ width, height, zoom = 1 }: DrawingCanvasProps) =
     // Handle global mouse up to stop drawing if cursor leaves canvas
     useEffect(() => {
         const handleGlobalMouseUp = () => {
-            if (isDrawingState) stopDrawing();
+            if (isDrawingRef.current) {
+                isDrawingRef.current = false;
+                setIsDrawingState(false);
+                // Save drawing inline to avoid stale closure on saveDrawing
+                if (canvasRef.current) {
+                    const dataUrl = canvasRef.current.toDataURL("image/png");
+                    const blendMode = brushType === "highlighter" ? "multiply" : "normal";
+                    addElement("draw", dataUrl, { x: 0, y: 0, width, height, face: currentFace, mixBlendMode: blendMode });
+                    const ctx = canvasRef.current.getContext("2d");
+                    ctx?.clearRect(0, 0, width, height);
+                }
+            }
         };
         window.addEventListener("mouseup", handleGlobalMouseUp);
         return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
-    }, [isDrawingState]);
+    }, [brushType, width, height, currentFace, addElement]);
 
     return (
         <canvas

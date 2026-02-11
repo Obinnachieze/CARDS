@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Mail, Lock, Eye, EyeClosed, ArrowRight, User } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 import { cn } from "@/lib/utils"
@@ -32,8 +32,6 @@ export function SignInCard({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [focusedInput, setFocusedInput] = useState<string | null>(null);
-    const [rememberMe, setRememberMe] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const router = useRouter();
     const supabase = createClient();
 
@@ -47,7 +45,6 @@ export function SignInCard({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) 
         const rect = e.currentTarget.getBoundingClientRect();
         mouseX.set(e.clientX - rect.left - rect.width / 2);
         mouseY.set(e.clientY - rect.top - rect.height / 2);
-        setMousePosition({ x: e.clientX, y: e.clientY });
     };
 
     const handleMouseLeave = () => {
@@ -55,7 +52,7 @@ export function SignInCard({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) 
         mouseY.set(0);
     };
 
-    const handleSubmit = async (event: React.MouseEvent) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setIsLoading(true);
         setError(null);
@@ -111,8 +108,9 @@ export function SignInCard({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) 
                 },
             });
             if (error) throw error;
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e) {
+            console.error("Google login error:", e);
+            setError("Unable to sign in with Google. Please try again.");
             setIsLoading(false);
         }
     };
@@ -540,7 +538,7 @@ export function SignInCard({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) 
                                                 {showPassword ? (
                                                     <Eye className="w-4 h-4 text-white/40 hover:text-white transition-colors duration-300" />
                                                 ) : (
-                                                    <EyeClosed className="w-4 h-4 text-white/40 hover:text-white transition-colors duration-300" />
+                                                    <EyeOff className="w-4 h-4 text-white/40 hover:text-white transition-colors duration-300" />
                                                 )}
                                             </div>
 
@@ -559,36 +557,8 @@ export function SignInCard({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) 
                                     </motion.div>
                                 </motion.div>
 
-                                {/* Remember me & Forgot password */}
-                                <div className="flex items-center justify-between pt-1">
-                                    <div className="flex items-center space-x-2">
-                                        <div className="relative">
-                                            <input
-                                                id="remember-me"
-                                                name="remember-me"
-                                                type="checkbox"
-                                                checked={rememberMe}
-                                                onChange={() => setRememberMe(!rememberMe)}
-                                                className="appearance-none h-4 w-4 rounded border border-white/20 bg-white/5 checked:bg-white checked:border-white focus:outline-none focus:ring-1 focus:ring-white/30 transition-all duration-200"
-                                            />
-                                            {rememberMe && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, scale: 0.5 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    className="absolute inset-0 flex items-center justify-center text-black pointer-events-none"
-                                                >
-                                                    {/* <!-- SVG_CHECKMARK --> */}
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                                    </svg>
-                                                </motion.div>
-                                            )}
-                                        </div>
-                                        <label htmlFor="remember-me" className="text-xs text-white/60 hover:text-white/80 transition-colors duration-200">
-                                            Remember me
-                                        </label>
-                                    </div>
-
+                                {/* Forgot password */}
+                                <div className="flex items-center justify-end pt-1">
                                     <div className="text-xs relative group/link">
                                         <Link href="/forgot-password" className="text-white/60 hover:text-white transition-colors duration-200">
                                             Forgot password?

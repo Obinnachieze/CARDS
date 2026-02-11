@@ -33,60 +33,17 @@ export const ContextualToolbar = () => {
 
     const handleDuplicate = () => {
         if (selectedElement) {
-            // Create a new ID for the duplicate
-            const newId = crypto.randomUUID();
-            const newElement = {
-                ...selectedElement,
-                id: newId,
-                x: selectedElement.x + 20,
-                y: selectedElement.y + 20
-            };
             addElement(selectedElement.type, selectedElement.content, {
                 ...selectedElement,
-                id: undefined, // Let addElement generate ID or if it uses the passed ID, we should be careful.
-                // Actually, if I pass 'id: undefined', it might override the generated ID if spread after.
-                // Let's see implementation.
-                // Safe bet: Pass only style properties if possible, or newElement with undefined ID.
-                // But wait, newElement defines x and y.
+                id: undefined,
                 x: selectedElement.x + 20,
                 y: selectedElement.y + 20
             });
         }
     };
 
-    // Calculate position - slightly above the element
-    // We need to account for rotation and zoom in a real app, but for now simple positioning
-    // improving this would require getting the bounding box of the selected element
-    // Since we don't have refs to the actual DOM nodes easily here without more state,
-    // we'll position it fixed relative to the screen or use the element's coordinates transformed.
-    // However, the Canvas component renders elements with `absolute` positioning within a scaled container.
-    // It's easiest to render this toolbar INSIDE the scaled container (so it scales with zoom) OR 
-    // render it in the overlay and do math. 
-    // Rendering inside the scaled container means the toolbar text shrinks/grows with zoom. 
-    // Usually we want the toolbar to stay constant size relative to screen.
-    // Let's try rendering it in the Canvas component's overlay layer, but we need screen coordinates.
-
-    // actually, let's just render it as a child of the element selection box if we had one.
-    // For now, let's render it absolute positioned based on selectedElement.x/y
-
-    // We'll style it to be centered above the element.
-
-    const toolbarStyle = {
-        left: selectedElement.x,
-        top: selectedElement.y - 60, // 60px above
-        transform: `translateX(-50%)`, // Center horizontally? No, x/y is top-left usually.
-        // If x/y is top-left, we want it above.
-        // Let's just adjust top.
-        // And maybe center it relative to width?
-    };
-
-    // Correcting positioning logic:
-    // element.x/y is top-left.
-    // toolbar should be centered horizontally relative to element width.
+    // Position toolbar centered above the element, counter-scaled to stay constant size
     const leftPos = selectedElement.x + (selectedElement.width || 0) / 2;
-
-    // If we render this inside the zoom container, `scale(${1/zoom})` can keep it constant size?
-    // Let's try that.
 
     return (
         <div

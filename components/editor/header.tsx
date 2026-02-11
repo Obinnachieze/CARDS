@@ -25,11 +25,23 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const type = params?.type || "Untitled Design";
     const {
         undo, redo, canUndo, canRedo,
-        createNewProject, saveCurrentProject,
+        createNewProject, saveCurrentProject, saveProjectAs,
         exportProjectAsJSON, importProjectFromJSON,
         downloadAsImage,
         currentProjectId
     } = useEditor();
+
+    const handleSave = () => {
+        if (currentProjectId) {
+            saveCurrentProject();
+        } else {
+            // Auto-save new projects with a name derived from the card type
+            const projectName = typeof type === "string"
+                ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
+                : "Untitled Card";
+            saveProjectAs(projectName);
+        }
+    };
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,12 +74,11 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
                         <DropdownMenuItem
-                            onClick={saveCurrentProject}
-                            disabled={!currentProjectId}
-                            className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3 disabled:opacity-50"
+                            onClick={handleSave}
+                            className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3"
                         >
                             <Save size={18} className="text-emerald-400" />
-                            <span className="text-sm font-medium">Save</span>
+                            <span className="text-sm font-medium">{currentProjectId ? "Save" : "Save As"}</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={exportProjectAsJSON} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
                             <FileJson size={18} className="text-amber-400" />
