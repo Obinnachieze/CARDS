@@ -770,6 +770,10 @@ export const Toolbar = () => {
                                 </div>
                             )}
 
+                            {activeTab === "effects" && (
+                                <EffectsSidebar />
+                            )}
+
                         </ScrollArea>
                     </div>
                 </>
