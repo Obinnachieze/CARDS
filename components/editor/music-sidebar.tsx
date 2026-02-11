@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Music, Upload, Play, Pause, X } from "lucide-react";
+import { Music, Upload, Play, Pause, X, Mic } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const presetAudios = [
@@ -20,20 +20,19 @@ export const MusicIcon = Music;
 
 // Note: In a real app, these would need to be actual files in public/music or hosted URLs.
 // For now, we'll allow users to input a URL or simulate selection.
-
 export function MusicSidebar() {
     const { cards, activeCardId, setAudio } = useEditor();
     const activeCard = cards.find((c) => c.id === activeCardId);
     const currentAudio = activeCard?.audioSrc;
 
-    const [customUrl, setCustomUrl] = useState("");
-    const [previewSrc, setPreviewSrc] = useState<string | null>(null);
-
-    const handleSelectAudio = (src: string) => {
-        if (activeCardId) {
-            setAudio(activeCardId, src);
-        }
-    };
+    // Recording State
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+    const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+    const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+    const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+    const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
     const handleRemoveAudio = () => {
         if (activeCardId) {
@@ -41,12 +40,84 @@ export function MusicSidebar() {
         }
     };
 
-    const handleCustomUrlSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (customUrl && activeCardId) {
-            setAudio(activeCardId, customUrl);
-            setCustomUrl("");
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && activeCardId) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64data = reader.result as string;
+                setAudio(activeCardId, base64data);
+            };
+            reader.readAsDataURL(file);
         }
+    };
+
+    // Recording Logic
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream);
+            const chunks: Blob[] = [];
+
+            recorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: "audio/webm" });
+                setRecordedChunks([]);
+                setRecordedBlob(blob);
+                const url = URL.createObjectURL(blob);
+                setRecordedUrl(url);
+
+                // Stop all tracks
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            recorder.start();
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+            setRecordedBlob(null);
+            setRecordedUrl(null);
+
+            // Timer
+            setRecordingTime(0);
+            const interval = setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
+            setTimerInterval(interval);
+
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+            alert("Could not access microphone. Please ensure specific permissions are granted.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+            setIsRecording(false);
+            if (timerInterval) clearInterval(timerInterval);
+        }
+    };
+
+    const saveRecording = () => {
+        if (!recordedBlob || !activeCardId) return;
+
+        // Convert Blob to Base64 for storage/persistence
+        const reader = new FileReader();
+        reader.readAsDataURL(recordedBlob);
+        reader.onloadend = () => {
+            const base64data = reader.result as string;
+            setAudio(activeCardId, base64data);
+            // Clear recording state after saving? Or keep it? Let's keep it for now.
+        };
+    };
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
     return (
@@ -57,7 +128,7 @@ export function MusicSidebar() {
                     Music & Audio
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">
-                    Add background music to your card.
+                    Add background music or record a message.
                 </p>
             </div>
 
@@ -71,7 +142,7 @@ export function MusicSidebar() {
                             <div className="flex items-center gap-2 overflow-hidden">
                                 <Music className="w-4 h-4 text-purple-400 shrink-0" />
                                 <span className="text-sm truncate text-purple-700">
-                                    {presetAudios.find(a => a.src === currentAudio)?.title || "Custom Audio"}
+                                    Audio Track
                                 </span>
                             </div>
                             <Button
@@ -88,51 +159,92 @@ export function MusicSidebar() {
                     </div>
                 )}
 
-                <div className="space-y-6">
+                <div className="space-y-8">
+                    {/* Recording Section */}
                     <div>
-                        <Label className="text-sm font-medium mb-3 block">From Library</Label>
-                        <div className="grid gap-2">
-                            {presetAudios.map((audio) => (
-                                <button
-                                    key={audio.src}
-                                    onClick={() => handleSelectAudio(audio.src)}
-                                    className={cn(
-                                        "flex items-center justify-between p-3 rounded-lg border text-left transition-all",
-                                        currentAudio === audio.src
-                                            ? "border-purple-600 bg-purple-50"
-                                            : "border-gray-200 hover:border-purple-300 hover:bg-gray-50"
-                                    )}
-                                >
-                                    <div>
-                                        <div className="font-medium text-sm">{audio.title}</div>
-                                        <div className="text-xs text-gray-500">{audio.category}</div>
+                        <Label className="text-sm font-medium mb-3 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                            Record Voice
+                        </Label>
+
+                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center gap-4 text-center">
+                            {!isRecording && !recordedUrl ? (
+                                <div className="space-y-2 flex flex-col items-center">
+                                    <p className="text-xs text-gray-500">Click the mic to record.</p>
+                                    <Button
+                                        onClick={startRecording}
+                                        className="bg-red-500 hover:bg-red-600 text-white rounded-full w-14 h-14 p-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center border-4 border-red-100"
+                                    >
+                                        <Mic className="w-6 h-6" />
+                                    </Button>
+                                </div>
+                            ) : isRecording ? (
+                                <div className="space-y-3 w-full">
+                                    <div className="text-2xl font-mono font-bold text-red-500">
+                                        {formatTime(recordingTime)}
                                     </div>
-                                    {currentAudio === audio.src && (
-                                        <div className="text-xs text-purple-600 font-bold px-2 py-1 bg-white rounded-md">
-                                            Selected
-                                        </div>
-                                    )}
-                                </button>
-                            ))}
+                                    <div className="flex items-center justify-center gap-1 h-8">
+                                        {[...Array(5)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-1 bg-red-400 rounded-full animate-pulse"
+                                                style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}
+                                            />
+                                        ))}
+                                    </div>
+                                    <Button
+                                        onClick={stopRecording}
+                                        variant="outline"
+                                        className="h-12 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2"
+                                    >
+                                        <div className="w-3 h-3 bg-red-600 rounded-sm" />
+                                        Stop Recording
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-3 w-full">
+                                    <div className="flex items-center justify-center gap-2 mb-2">
+                                        <audio controls src={recordedUrl!} className="h-8 w-full" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => setRecordedUrl(null)}
+                                            className="text-xs h-8"
+                                        >
+                                            Discard
+                                        </Button>
+                                        <Button
+                                            onClick={saveRecording}
+                                            className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-8 font-semibold"
+                                        >
+                                            Attach to Card
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
+                    {/* Upload Section */}
                     <div>
-                        <Label className="text-sm font-medium mb-3 block">Custom URL</Label>
-                        <form onSubmit={handleCustomUrlSubmit} className="flex gap-2">
-                            <Input
-                                placeholder="https://example.com/song.mp3"
-                                value={customUrl}
-                                onChange={(e) => setCustomUrl(e.target.value)}
-                                className="text-xs"
-                            />
-                            <Button type="submit" size="icon" variant="outline">
-                                <Upload size={14} />
-                            </Button>
-                        </form>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                            Supported formats: MP3, WAV, OGG. Ensure you have rights to use the audio.
-                        </p>
+                        <Label className="text-sm font-medium mb-3 block">Upload Audio</Label>
+                        <div className="flex items-center justify-center w-full">
+                            <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-8 h-8 mb-3 text-gray-400" />
+                                    <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span></p>
+                                    <p className="text-xs text-gray-500">MP3, WAV, M4A, MP4 (Audio)</p>
+                                </div>
+                                <input
+                                    id="audio-upload"
+                                    type="file"
+                                    className="hidden"
+                                    accept="audio/*,video/mp4"
+                                    onChange={handleFileUpload}
+                                />
+                            </label>
+                        </div>
                     </div>
                 </div>
             </ScrollArea>

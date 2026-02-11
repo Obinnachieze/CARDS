@@ -63,7 +63,7 @@ const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: Reac
     </button>
 );
 
-type Tab = "templates" | "text" | "elements" | "uploads" | "draw" | "design" | "effects" | "music" | "stickers";
+
 
 
 export const Toolbar = () => {
@@ -785,6 +785,20 @@ export const Toolbar = () => {
                         </div>
                         <div className="flex-1 overflow-hidden h-full">
                             <StickerSidebar />
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === "music" && (
+                    <div className="flex h-full flex-col w-full">
+                        <div className="flex items-center justify-between p-4 shadow-sm mb-1 bg-white">
+                            <h3 className="font-semibold text-sm capitalize">Music & Audio</h3>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
+                                <ChevronLeft size={16} />
+                            </Button>
+                        </div>
+                        <div className="flex-1 overflow-hidden h-full">
+                            <MusicSidebar />
                         </div>
                     </div>
                 )}
