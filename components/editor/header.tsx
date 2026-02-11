@@ -41,45 +41,45 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     };
 
     return (
-        <header className="h-14 bg-gradient-to-r from-purple-950 via-black to-purple-950 flex items-center justify-between px-4 text-white border-b border-white/10">
-            <div className="flex items-center gap-4">
+        <header className="h-14 bg-gradient-to-r from-slate-900 to-slate-900 border-b border-white/10 flex items-center justify-between px-3 md:px-4 text-white z-50 relative">
+            <div className="flex items-center gap-2 md:gap-4">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white">
+                        <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white w-9 h-9">
                             <Menu size={20} />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-56 bg-gray-900 border-gray-800 text-white">
-                        <DropdownMenuLabel>File</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-gray-800" />
-                        <DropdownMenuItem onClick={createNewProject} className="hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">
-                            <FilePlus size={16} className="mr-2" />
-                            <span>New Design</span>
+                    <DropdownMenuContent align="start" className="w-64 bg-[#1e1e2e] border-gray-700 text-white p-2 rounded-xl shadow-2xl backdrop-blur-xl">
+                        <DropdownMenuLabel className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 py-1.5">File Options</DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
+                        <DropdownMenuItem onClick={createNewProject} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
+                            <FilePlus size={18} className="text-purple-400" />
+                            <span className="text-sm font-medium">New Design</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">
-                            <FolderOpen size={16} className="mr-2" />
-                            <span>Open...</span>
+                        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
+                            <FolderOpen size={18} className="text-blue-400" />
+                            <span className="text-sm font-medium">Open Project</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-800" />
+                        <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
                         <DropdownMenuItem
                             onClick={saveCurrentProject}
                             disabled={!currentProjectId}
-                            className="hover:bg-gray-800 focus:bg-gray-800 cursor-pointer disabled:opacity-50"
+                            className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3 disabled:opacity-50"
                         >
-                            <Save size={16} className="mr-2" />
-                            <span>Save</span>
+                            <Save size={18} className="text-emerald-400" />
+                            <span className="text-sm font-medium">Save</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={exportProjectAsJSON} className="hover:bg-gray-800 focus:bg-gray-800 cursor-pointer">
-                            <FileJson size={16} className="mr-2" />
-                            <span>Save to File (JSON)</span>
+                        <DropdownMenuItem onClick={exportProjectAsJSON} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
+                            <FileJson size={18} className="text-amber-400" />
+                            <span className="text-sm font-medium">Export JSON</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-800" />
+                        <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
                         <DropdownMenuItem
                             onClick={downloadAsImage}
-                            className="hover:bg-gray-800 focus:bg-gray-800 cursor-pointer"
+                            className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3"
                         >
-                            <Download size={16} className="mr-2" />
-                            <span>Download Image</span>
+                            <Download size={18} className="text-pink-400" />
+                            <span className="text-sm font-medium">Download Image</span>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -93,45 +93,57 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     onChange={handleFileChange}
                 />
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/5">
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={undo}
                         disabled={!canUndo}
-                        className="hover:bg-white/10 text-white disabled:opacity-30"
+                        className="h-8 w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
                     >
-                        <Undo2 size={18} />
+                        <Undo2 size={16} />
                     </Button>
+                    <div className="w-px h-4 bg-white/10" />
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={redo}
                         disabled={!canRedo}
-                        className="hover:bg-white/10 text-white disabled:opacity-30"
+                        className="h-8 w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
                     >
-                        <Redo2 size={18} />
+                        <Redo2 size={16} />
                     </Button>
                 </div>
-                <div className="h-4 w-px bg-gray-600 mx-2" />
-                <div className="text-sm font-medium text-white/90 capitalize">
-                    {type} - Card Design
+
+                {/* Title - Hidden on very small screens, truncate on mobile */}
+                <div className="hidden xs:flex items-center gap-2 ml-1">
+                    <div className="h-8 w-px bg-white/10 hidden sm:block" />
+                    <div className="text-sm font-medium text-white/90 truncate max-w-[120px] sm:max-w-xs">
+                        {type}
+                    </div>
+                    <Cloud size={14} className="text-blue-400/80 hidden sm:block" />
                 </div>
-                <Cloud size={16} className="text-white/50 ml-2" />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
+                {/* Mobile: Icon only. Desktop: Text. */}
                 <Button
                     variant="secondary"
                     size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white border-0"
+                    className="bg-purple-600 hover:bg-purple-700 text-white border-0 h-9 px-3 md:px-4 rounded-full shadow-lg shadow-purple-900/20"
                     onClick={onPreview}
                 >
-                    <FileText size={16} className="mr-2" /> Preview
+                    <FileText size={16} className="md:mr-2" />
+                    <span className="hidden md:inline">Preview</span>
                 </Button>
 
                 <ShareDialog />
-                <div className="h-4 w-px bg-gray-700 mx-2" />
+
+                {/* Mobile Share Icon (if ShareDialog is complex, maybe just a simplified trigger?) 
+                    For now assuming ShareDialog button fits or is icon-only capable. 
+                    Let's just show avatar.
+                */}
+                <div className="h-4 w-px bg-white/10 hidden sm:block" />
                 <UserAvatar />
             </div>
         </header>

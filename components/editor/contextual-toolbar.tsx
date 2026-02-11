@@ -6,10 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Copy, Palette, Type } from "lucide-react";
 import { ColorPicker } from "./color-picker";
 import { cn } from "@/lib/utils";
 import { MagicWriterDialog } from "./magic-writer-dialog";
+
+const FILTER_PRESETS = [
+    { name: "None", value: "none" },
+    { name: "Grayscale", value: "grayscale(100%)" },
+    { name: "Sepia", value: "sepia(100%)" },
+    { name: "Blur", value: "blur(5px)" },
+    { name: "Vintage", value: "sepia(50%) contrast(150%)" },
+    { name: "Bright", value: "brightness(120%)" },
+    { name: "Invert", value: "invert(100%)" },
+];
 
 export const ContextualToolbar = () => {
     const { selectedElement, updateElement, removeElement, addElement, zoom } = useEditor();
@@ -92,7 +103,7 @@ export const ContextualToolbar = () => {
                 <div className="flex items-center gap-1 border-r pr-2 mr-2">
                     <ColorPicker
                         color={selectedElement.color || "#000000"}
-                        onChange={(c) => updateElement(selectedElement.id, { color: c })}
+                        onChange={(c: string) => updateElement(selectedElement.id, { color: c })}
                         className="w-8 h-8 rounded-xl shadow-sm ring-1 ring-gray-100"
                     />
                 </div>
@@ -167,6 +178,28 @@ export const ContextualToolbar = () => {
                                 onValueChange={(val) => updateElement(selectedElement.id, { width: val[0], height: selectedElement.type === "shape" ? val[0] : (selectedElement.height! * (val[0] / (selectedElement.width || 1))) })}
                                 className="w-full"
                             />
+                        </div>
+                    </div>
+                )}
+
+                {/* Image Specific - Filters */}
+                {selectedElement.type === "image" && (
+                    <div className="flex items-center gap-2 border-r pr-2 mr-2">
+                        <div className="flex flex-col w-24">
+                            <Label className="text-[8px] text-gray-500 uppercase font-bold">Filter</Label>
+                            <Select
+                                value={selectedElement.filter || "none"}
+                                onValueChange={(val) => updateElement(selectedElement.id, { filter: val })}
+                            >
+                                <SelectTrigger className="h-7 text-xs w-full">
+                                    <SelectValue placeholder="None" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {FILTER_PRESETS.map(f => (
+                                        <SelectItem key={f.value} value={f.value}>{f.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                 )}

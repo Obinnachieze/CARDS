@@ -21,6 +21,7 @@ export interface EditorElement {
     face: CardFace;
     shapeType?: "rect" | "circle" | "triangle" | "star" | "pentagon" | "hexagon" | "octagon" | "diamond" | "star-4" | "star-8" | "heart" | "arrow-right" | "arrow-left" | "cloud" | "triangle-right"; // For shapes
     lineStyle?: "solid" | "dashed" | "dotted"; // For lines
+    filter?: string; // CSS filter (grayscale, sepia, etc.)
 }
 
 export interface CardTemplate {
@@ -60,3 +61,5 @@ export interface Project {
     cards: CardPage[];
     cardMode: CardMode;
 }
+
+export type EditorTab = "templates" | "text" | "elements" | "uploads" | "draw" | "design" | "effects" | "music" | "stickers" | "projects";

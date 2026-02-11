@@ -45,7 +45,7 @@ export function FAQ() {
                     {faqs.map((faq, idx) => (
                         <div
                             key={idx}
-                            className="border border-white/10 rounded-2xl bg-white/5 backdrop-blur-sm overflow-hidden"
+                            className="border border-white/10 rounded-2xl bg-black/40 overflow-hidden"
                         >
                             <button
                                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}

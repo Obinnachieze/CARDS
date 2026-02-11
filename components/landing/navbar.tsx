@@ -50,8 +50,9 @@ export function Navbar({ className }: { className?: string }) {
     return (
         <nav
             className={cn(
-                "fixed top-4 inset-x-0 mx-auto max-w-4xl z-50 rounded-full",
-                "bg-zinc-900/90 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300",
+                "fixed top-4 inset-x-0 mx-auto max-w-4xl z-50",
+                isMobileMenuOpen ? "rounded-3xl" : "rounded-full",
+                "bg-black/10 backdrop-blur-2xl border border-white/15 shadow-lg transition-all duration-300 supports-[backdrop-filter]:bg-black/5",
                 className
             )}
         >
@@ -172,7 +173,7 @@ export function Navbar({ className }: { className?: string }) {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-black/90 backdrop-blur-xl border-b border-white/10 overflow-hidden"
+                        className="md:hidden border-t border-white/15 overflow-hidden"
                     >
                         <div className="px-4 py-4 space-y-2">
                             {navItems.map((item) => (

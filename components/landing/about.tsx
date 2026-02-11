@@ -59,7 +59,7 @@ const features = [
 
 export function AboutContact() {
     return (
-        <section id="about" className="py-24 bg-black relative overflow-hidden">
+        <section id="about" className="py-24 bg-transparent relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-neutral-900 to-transparent opacity-50 pointer-events-none" />
 

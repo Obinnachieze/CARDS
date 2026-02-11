@@ -20,7 +20,7 @@ export const Canvas = () => {
         cards, activeCardId, activateCard,
         updateElement, selectElement, selectedElementId, selectedElement,
         currentFace, setCurrentFace, isDrawing, zoom, setZoom,
-        setCardFace
+        setCardFace, activeTool
     } = useEditor();
 
     const { cardMode } = useEditor(); // Get cardMode separately or add to above
@@ -127,7 +127,7 @@ export const Canvas = () => {
                                 src={el.content}
                                 alt="element"
                                 className="w-full h-full object-contain pointer-events-none select-none"
-                                style={{ width: el.width, height: el.height, mixBlendMode: el.mixBlendMode as any }}
+                                style={{ width: el.width, height: el.height, mixBlendMode: el.mixBlendMode as any, filter: el.filter }}
                             />
                         )}
                         {el.type === "line" && (
@@ -249,8 +249,9 @@ export const Canvas = () => {
             <div
                 id="card-canvas-container"
                 className={cn(
-                    "p-20 w-full transition-all duration-300",
-                    viewMode === "grid" ? "grid grid-cols-2 gap-12 justify-items-center" : "flex flex-col items-center gap-24 items-center"
+                    "p-4 md:p-20 w-full transition-all duration-300 pb-32 md:pb-20",
+                    activeTool ? "md:pb-20 origin-top scale-[0.6] -translate-y-[10vh] md:scale-100 md:translate-y-0" : "",
+                    viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-12 justify-items-center" : "flex flex-col items-center gap-12 md:gap-24 items-center"
                 )}>
                 {cards.map(card => {
                     const isCardActive = activeCardId === card.id;
@@ -327,7 +328,7 @@ export const Canvas = () => {
             </div>
 
             {/* Bottom Control Bar - Canva Style */}
-            <div className="fixed bottom-6 right-6 flex items-center gap-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border border-gray-200/50 z-50 pointer-events-auto">
+            <div className="fixed bottom-6 right-6 flex items-center gap-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border border-gray-200/50 z-50 pointer-events-auto transition-all duration-300">
                 <div className="flex items-center gap-2 border-r border-gray-200 pr-4 mr-0">
                     <span className="text-xs font-semibold text-gray-700 select-none">
                         Page {cards.findIndex(c => c.id === activeCardId) + 1} of {cards.length}
@@ -344,7 +345,7 @@ export const Canvas = () => {
                     {viewMode === "grid" ? <List size={18} /> : <LayoutGrid size={18} />}
                 </Button>
 
-                <div className="flex items-center gap-2 ml-2">
+                <div className="hidden md:flex items-center gap-2 ml-2">
                     <div className="w-24">
                         <Slider
                             value={[zoom]}

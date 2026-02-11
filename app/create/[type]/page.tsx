@@ -103,7 +103,7 @@ export default function CreateCardPage() {
         >
             <div className="flex flex-col h-screen bg-gray-100 text-black">
                 <Header onPreview={() => setIsPreviewOpen(true)} />
-                <div className="flex flex-1 overflow-hidden relative">
+                <div className="flex flex-1 overflow-hidden relative flex-col-reverse md:flex-row">
                     <Toolbar />
                     <Canvas />
                 </div>

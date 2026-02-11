@@ -67,6 +67,9 @@ interface EditorContextType {
     downloadAsImage: () => void;
     setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "hearts") => void;
     setAudio: (cardId: string, src: string | undefined) => void;
+
+    activeTool: import("./types").EditorTab | null;
+    setActiveTool: (tool: import("./types").EditorTab | null) => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -117,6 +120,9 @@ export const EditorProvider = ({
     // Projects State
     const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
+
+    // UI State
+    const [activeTool, setActiveTool] = useState<import("./types").EditorTab | null>(null);
 
     // Load projects from local storage on mount
     useEffect(() => {
@@ -474,7 +480,9 @@ export const EditorProvider = ({
             importProjectFromJSON,
             downloadAsImage,
             setCelebration,
-            setAudio // Correctly referenced
+            setAudio,
+            activeTool,
+            setActiveTool
         }}>
             {children}
         </EditorContext.Provider>
