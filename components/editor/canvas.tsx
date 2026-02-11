@@ -14,6 +14,7 @@ import { ContextualToolbar } from "./contextual-toolbar";
 import { CardToolbar } from "./card-toolbar";
 import { ChevronRight, ChevronLeft, Minus, Plus, Maximize, LayoutGrid, List } from "lucide-react";
 import confetti from "canvas-confetti";
+import { FloatingParticles } from "./floating-particles";
 
 export const Canvas = () => {
     const {
@@ -30,6 +31,9 @@ export const Canvas = () => {
     // Celebration Effect Trigger
     const isOpen = (face: CardFace) => face === "inside-left" || face === "inside-right" || face === "back";
     const cardIsOpen = activeCard ? isOpen(activeCard.currentFace) : false;
+
+    // Track whether to show floating particles
+    const [showFloating, setShowFloating] = React.useState(false);
 
     React.useEffect(() => {
         if (cardIsOpen && activeCard?.celebration && activeCard.celebration !== "none") {
@@ -48,33 +52,17 @@ export const Canvas = () => {
             } else if (activeCard.celebration === "fireworks") {
                 const interval: any = setInterval(function () {
                     const timeLeft = animationEnd - Date.now();
-
-                    if (timeLeft <= 0) {
-                        return clearInterval(interval);
-                    }
-
+                    if (timeLeft <= 0) return clearInterval(interval);
                     const particleCount = 50 * (timeLeft / duration);
                     confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
                     confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
                 }, 250);
-            } else if (activeCard.celebration === "hearts") {
-                const interval: any = setInterval(function () {
-                    const timeLeft = animationEnd - Date.now();
-
-                    if (timeLeft <= 0) {
-                        return clearInterval(interval);
-                    }
-
-                    const particleCount = 20 * (timeLeft / duration);
-                    confetti({
-                        ...defaults,
-                        particleCount,
-                        scalar: 2,
-                        shapes: ['star'], // Replace with heart unicode/shape if available in library, or use star/circle
-                        colors: ['#FFC0CB', '#FF69B4', '#FF1493'],
-                    });
-                }, 250);
+            } else if (activeCard.celebration === "floating-emoji") {
+                setShowFloating(true);
+                setTimeout(() => setShowFloating(false), 5000);
             }
+        } else {
+            setShowFloating(false);
         }
     }, [cardIsOpen, activeCard?.celebration]);
 
@@ -298,6 +286,10 @@ export const Canvas = () => {
                                     backgroundColor={card.backgroundColor}
                                     audioSrc={card.audioSrc}
                                 />
+                                {/* Floating Emoji Overlay */}
+                                {showFloating && card.id === activeCardId && card.celebration === "floating-emoji" && (
+                                    <FloatingParticles emoji={card.celebrationEmoji || "🎈"} />
+                                )}
                             </div>
 
                             {/* Sticky Open/Close Button */}

@@ -37,7 +37,8 @@ export interface CardPage {
     elements: EditorElement[];
     backgroundColor: string;
     currentFace: CardFace;
-    celebration?: "none" | "confetti" | "fireworks" | "hearts";
+    celebration?: "none" | "confetti" | "fireworks" | "floating-emoji";
+    celebrationEmoji?: string;
     audioSrc?: string; // URL or base64
 }
 

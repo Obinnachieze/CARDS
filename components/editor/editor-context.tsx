@@ -65,7 +65,7 @@ interface EditorContextType {
     exportProjectAsJSON: () => void;
     importProjectFromJSON: (file: File) => void;
     downloadAsImage: () => void;
-    setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "hearts") => void;
+    setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "floating-emoji", emoji?: string) => void;
     setAudio: (cardId: string, src: string | undefined) => void;
 
     activeTool: import("./types").EditorTab | null;
@@ -409,10 +409,10 @@ export const EditorProvider = ({
 
     const selectedElement = elements.find(el => el.id === selectedElementId);
 
-    const setCelebration = useCallback((cardId: string, type: "none" | "confetti" | "fireworks" | "hearts") => {
+    const setCelebration = useCallback((cardId: string, type: "none" | "confetti" | "fireworks" | "floating-emoji", emoji?: string) => {
         setCards(prev => prev.map(card => {
             if (card.id === cardId) {
-                return { ...card, celebration: type };
+                return { ...card, celebration: type, ...(emoji !== undefined ? { celebrationEmoji: emoji } : {}) };
             }
             return card;
         }));
