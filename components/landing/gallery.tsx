@@ -1,12 +1,11 @@
 "use client";
 import React from "react";
-import { CarouselCard } from "@/components/ui/carousel-card";
-import { CardStackItem } from "@/components/ui/card-stack";
+import { CarouselCard, CarouselItem } from "@/components/ui/carousel-card";
 
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const occasions: CardStackItem[] = [
+const occasions: CarouselItem[] = [
     {
         id: 1,
         title: "Birthday",

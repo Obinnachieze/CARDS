@@ -91,7 +91,7 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
         scene.add(points);
 
         let count = 0;
-        let animationId: number;
+        let animationId: number = 0;
         let mouseX = 0;
         let mouseY = 0;
         let targetX = 0;

@@ -10,7 +10,7 @@ export interface Template {
         elements: EditorElement[];
         backgroundColor: string;
         currentFace: CardFace;
-        celebration?: "none" | "confetti" | "fireworks" | "hearts";
+        celebration?: "none" | "confetti" | "fireworks" | "floating-emoji";
     }>;
 }
 
@@ -38,18 +38,21 @@ export const templates: Template[] = [
                         width: 300,
                         height: 60,
                         face: "front",
-                        textAlign: "center"
+                        textAlign: "center",
+                        rotation: 0
                     },
                     {
                         id: uuidv4(),
                         type: "shape",
+                        content: "",
                         x: 150,
                         y: 300,
                         width: 100,
                         height: 100,
                         shapeType: "star",
                         color: "#FFD700",
-                        face: "front"
+                        face: "front",
+                        rotation: 0
                     }
                 ]
             }
@@ -64,7 +67,7 @@ export const templates: Template[] = [
                 id: uuidv4(),
                 backgroundColor: "#e0c3fc", // Fallback or base
                 currentFace: "front",
-                celebration: "hearts",
+                celebration: "confetti",
                 elements: [
                     {
                         id: uuidv4(),
@@ -78,7 +81,8 @@ export const templates: Template[] = [
                         width: 340,
                         height: 80,
                         face: "front",
-                        textAlign: "center"
+                        textAlign: "center",
+                        rotation: 0
                     }
                 ]
             }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project } from "./types";
+import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project, EditorTab } from "./types";
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -68,8 +68,8 @@ interface EditorContextType {
     setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "floating-emoji", emoji?: string) => void;
     setAudio: (cardId: string, src: string | undefined) => void;
 
-    activeTool: import("./types").EditorTab | null;
-    setActiveTool: (tool: import("./types").EditorTab | null) => void;
+    activeTool: EditorTab | null;
+    setActiveTool: (tool: EditorTab | null) => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);

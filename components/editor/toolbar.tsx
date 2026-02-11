@@ -270,7 +270,7 @@ export const Toolbar = () => {
                             <SidebarTab icon={<Palette size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab("design")} />
                             <SidebarTab icon={<Pencil size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => setActiveTab("draw")} />
                             <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => setActiveTab("effects")} />
-                            <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={activeTab === "music"} onClick={() => setActiveTab("music")} />
+                            <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={(activeTab as string) === "music"} onClick={() => setActiveTab("music")} />
                             <SidebarTab icon={<Star size={20} />} label="Stickers" active={activeTab === "stickers"} onClick={() => setActiveTab("stickers")} />
                             <div className="h-10" /> {/* Spacer */}
                         </div>
