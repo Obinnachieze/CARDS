@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CardWrapper } from "./card-wrapper";
 import { useEditor } from "./editor-context";
 import { EditorElement } from "./types";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import confetti from "canvas-confetti";
+import { FloatingParticles } from "./floating-particles";
 
 interface PreviewModalProps {
     isOpen: boolean;
@@ -18,6 +19,58 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
 
     // Get the active card data
     const activeCard = cards.find(c => c.id === activeCardId) || cards[0];
+
+    // Track card open state for celebrations
+    const [previewIsOpen, setPreviewIsOpen] = useState(false);
+    const [showFloating, setShowFloating] = useState(false);
+
+    // Fire celebrations when the card is opened in preview
+    useEffect(() => {
+        if (!previewIsOpen || !activeCard?.celebration || activeCard.celebration === "none") {
+            setShowFloating(false);
+            return;
+        }
+
+        let interval: any = null;
+        let timeout: any = null;
+
+        if (activeCard.celebration === "confetti") {
+            confetti({
+                particleCount: 60,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        } else if (activeCard.celebration === "fireworks") {
+            const duration = 3000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+            interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { clearInterval(interval); return; }
+                const particleCount = 30 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 350);
+        } else if (activeCard.celebration === "floating-emoji") {
+            setShowFloating(true);
+            timeout = setTimeout(() => setShowFloating(false), 5000);
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+            if (timeout) clearTimeout(timeout);
+        };
+    }, [previewIsOpen, activeCard?.celebration]);
+
+    // Reset open state when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setPreviewIsOpen(false);
+            setShowFloating(false);
+        }
+    }, [isOpen]);
 
     if (!activeCard) return null;
 
@@ -66,7 +119,6 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                             <div className="w-full h-full pointer-events-none select-none" style={{ color: el.color }}>
                                 {el.shapeType === "rect" && <div className="w-full h-full bg-current" />}
                                 {el.shapeType === "circle" && <div className="w-full h-full bg-current rounded-full" />}
-                                {/* Add other shapes if needed for preview, simplistic for now */}
                                 {el.shapeType === "heart" && (
                                     <svg viewBox="0 0 24 24" className="w-full h-full fill-current"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
                                 )}
@@ -102,27 +154,30 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                     </svg>
                 </button>
 
-                {/* 
-                    Scaling Wrapper:
-                    - Mobile: Scale down significantly (0.42) to fit 900px wide card
-                    - Tablet: Scale 0.7 
-                    - Desktop: Scale 1.0 (or fit)
-                */}
+                {/* Floating Emoji Overlay (above the card) */}
+                {showFloating && activeCard.celebrationEmoji && (
+                    <div className="absolute inset-0 z-40 pointer-events-none">
+                        <FloatingParticles emoji={activeCard.celebrationEmoji} count={15} />
+                    </div>
+                )}
+
                 <div
                     className="relative flex items-center justify-center transition-transform duration-300 ease-in-out"
                     style={{
                         transform: "scale(var(--preview-scale))",
-                        "--preview-scale": "0.42", // Mobile default
+                        "--preview-scale": "0.42",
                     } as React.CSSProperties}
                 >
-                    {/* Responsive overrides via style injection or just use standard css classes if we can map them */}
                     <style jsx global>{`
                         @media (min-width: 640px) { :root { --preview-scale: 0.6; } }
                         @media (min-width: 1024px) { :root { --preview-scale: 0.85; } }
                         @media (min-width: 1280px) { :root { --preview-scale: 1; } }
                     `}</style>
 
-                    <div className="w-full h-full flex items-center justify-center pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+                    <div
+                        className="w-full h-full flex items-center justify-center pointer-events-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <CardWrapper
                             frontContent={renderFace(getElements("front"))}
                             insideLeftContent={renderFace(getElements("inside-left"))}
@@ -132,6 +187,7 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                             isOpen={cardIsOpen}
                             backgroundColor={activeCard.backgroundColor}
                             audioSrc={activeCard.audioSrc}
+                            onOpenChange={(open) => setPreviewIsOpen(open)}
                         />
                     </div>
                 </div>

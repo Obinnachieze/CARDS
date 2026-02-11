@@ -13,6 +13,7 @@ interface CardWrapperProps {
     interactive?: boolean;
     isOpen?: boolean;
     audioSrc?: string;
+    onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const CardWrapper = ({
@@ -23,7 +24,8 @@ export const CardWrapper = ({
     interactive = true,
     isOpen: externalIsOpen,
     backgroundColor,
-    audioSrc
+    audioSrc,
+    onOpenChange
 }: CardWrapperProps & { backgroundColor: string }) => {
     const { cardMode, setCurrentFace, currentFace } = useEditor();
 
@@ -79,13 +81,14 @@ export const CardWrapper = ({
         if (!interactive) return;
         if (targetFace === "front") {
             if (isEnvelope) {
-                // For envelope, "front" click opens the flap
-                setCurrentFace("inside-right"); // Reusing "inside-right" as "open" state for simplified logic
+                setCurrentFace("inside-right");
             } else {
                 setCurrentFace("inside-right");
             }
+            onOpenChange?.(true);
         } else if (targetFace === "inside-right" || targetFace === "inside-left") {
-            setCurrentFace("front"); // Close
+            setCurrentFace("front");
+            onOpenChange?.(false);
         }
     };
 
@@ -119,7 +122,7 @@ export const CardWrapper = ({
                             WebkitBackfaceVisibility: "hidden",
                             transform: "translateZ(1px)" // Push forward slightly to avoid z-fighting
                         }}
-                        onClick={() => interactive && setCurrentFace("back")}
+                        onClick={() => { if (interactive) { setCurrentFace("back"); onOpenChange?.(true); } }}
                     >
                         {frontContent}
                         {!interactive && (
@@ -139,7 +142,7 @@ export const CardWrapper = ({
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
                         }}
-                        onClick={() => interactive && setCurrentFace("front")}
+                        onClick={() => { if (interactive) { setCurrentFace("front"); onOpenChange?.(false); } }}
                     >
                         {/* Optional Postcard Dividers/Stamp Area */}
                         <div className="absolute inset-0 pointer-events-none opacity-20">

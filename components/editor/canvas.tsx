@@ -36,6 +36,9 @@ export const Canvas = () => {
     const [showFloating, setShowFloating] = React.useState(false);
 
     React.useEffect(() => {
+        let interval: any = null;
+        let timeout: any = null;
+
         if (cardIsOpen && activeCard?.celebration && activeCard.celebration !== "none") {
             const duration = 3000;
             const animationEnd = Date.now() + duration;
@@ -45,25 +48,30 @@ export const Canvas = () => {
 
             if (activeCard.celebration === "confetti") {
                 confetti({
-                    particleCount: 100,
+                    particleCount: 60,
                     spread: 70,
                     origin: { y: 0.6 }
                 });
             } else if (activeCard.celebration === "fireworks") {
-                const interval: any = setInterval(function () {
+                interval = setInterval(function () {
                     const timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) return clearInterval(interval);
-                    const particleCount = 50 * (timeLeft / duration);
+                    if (timeLeft <= 0) { clearInterval(interval); return; }
+                    const particleCount = 30 * (timeLeft / duration);
                     confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
                     confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-                }, 250);
+                }, 350);
             } else if (activeCard.celebration === "floating-emoji") {
                 setShowFloating(true);
-                setTimeout(() => setShowFloating(false), 5000);
+                timeout = setTimeout(() => setShowFloating(false), 5000);
             }
         } else {
             setShowFloating(false);
         }
+
+        return () => {
+            if (interval) clearInterval(interval);
+            if (timeout) clearTimeout(timeout);
+        };
     }, [cardIsOpen, activeCard?.celebration]);
 
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -288,7 +296,7 @@ export const Canvas = () => {
                                 />
                                 {/* Floating Emoji Overlay */}
                                 {showFloating && card.id === activeCardId && card.celebration === "floating-emoji" && (
-                                    <FloatingParticles emoji={card.celebrationEmoji || "🎈"} />
+                                    <FloatingParticles emoji={card.celebrationEmoji || "🎈"} count={15} />
                                 )}
                             </div>
 
