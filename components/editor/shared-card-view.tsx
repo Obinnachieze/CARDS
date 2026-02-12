@@ -18,7 +18,7 @@ interface SharedCardViewProps {
 }
 
 export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
-    const { cards, activeCardId } = useEditor();
+    const { cards, activeCardId, cardMode } = useEditor();
 
     // Get the active card data (default to first card)
     const activeCard = cards.find(c => c.id === activeCardId) || cards[0];
@@ -33,9 +33,9 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
             const width = window.innerWidth;
 
             if (width < 640) { // Mobile
-                if (activeCard.cardMode === "foldable" && cardIsOpen) {
+                if (cardMode === "foldable" && cardIsOpen) {
                     setScale(0.35); // Fit 900px wide open card
-                } else if (activeCard.cardMode === "foldable") {
+                } else if (cardMode === "foldable") {
                     setScale(0.65); // Fit 450px wide closed card
                 } else {
                     setScale(0.55); // Fit 600px wide standard card
@@ -51,7 +51,7 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
         calculateScale();
         window.addEventListener("resize", calculateScale);
         return () => window.removeEventListener("resize", calculateScale);
-    }, [cardIsOpen, activeCard.cardMode]);
+    }, [cardIsOpen, cardMode]);
 
     // Celebration logic (simplified from PreviewModal)
     useEffect(() => {
