@@ -177,9 +177,9 @@ export const EditorProvider = ({
                 updated_at: new Date().toISOString(),
                 is_public: true // Default to public for sharing
             });
-        } catch (error) {
-            console.error("Failed to save to Supabase:", error);
-            // Non-blocking, we still have local storage
+        } catch (error: any) {
+            console.error("Failed to save to Supabase:", error.message || error);
+            throw error;
         }
     }, [cards, cardMode, projects]);
 
@@ -205,8 +205,9 @@ export const EditorProvider = ({
                 // name is not updated here, assuming name change is separate or implementation detail
             });
             if (error) throw error;
-        } catch (error) {
-            console.error("Failed to save to Supabase:", error);
+        } catch (error: any) {
+            console.error("Failed to save to Supabase (Upsert):", error.message || JSON.stringify(error));
+            throw error;
         }
     }, [cards, cardMode, projects, currentProjectId]);
 
