@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project, EditorTab } from "./types";
+import { createClient } from "@/lib/supabase/client";
+
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -76,24 +78,29 @@ const EditorContext = createContext<EditorContextType | null>(null);
 
 export const EditorProvider = ({
     children,
+
     initialElements = [],
     initialBackgroundColor = "#ffffff",
-    initialCardMode = "foldable"
+    initialCardMode = "foldable",
+    initialProjectId = null,
+    initialCards = null
 }: {
     children: React.ReactNode;
     initialElements?: EditorElement[];
     initialBackgroundColor?: string;
     initialCardMode?: CardMode;
+    initialProjectId?: string | null;
+    initialCards?: CardPage[] | null;
 }) => {
     // Initial State setup
     const initialCardId = generateId();
-    const [cards, setCards] = useState<CardPage[]>([{
+    const [cards, setCards] = useState<CardPage[]>(initialCards || [{
         id: initialCardId,
         elements: initialElements,
         backgroundColor: initialBackgroundColor,
         currentFace: "front"
     }]);
-    const [activeCardId, setActiveCardId] = useState<string | null>(initialCardId);
+    const [activeCardId, setActiveCardId] = useState<string | null>(initialCards ? initialCards[0].id : initialCardId);
 
     // Derived State
     const activeCard = cards.find(c => c.id === activeCardId) || cards[0];
@@ -118,7 +125,7 @@ export const EditorProvider = ({
     const [zoom, setZoom] = useState(0.75);
 
     // Projects State
-    const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+    const [currentProjectId, setCurrentProjectId] = useState<string | null>(initialProjectId);
     const [projects, setProjects] = useState<Project[]>([]);
 
     // UI State
@@ -145,7 +152,7 @@ export const EditorProvider = ({
         setFuture([]);
     }, []);
 
-    const saveProjectAs = useCallback((name: string) => {
+    const saveProjectAs = useCallback(async (name: string) => {
         const newId = generateId();
         const newProject: Project = {
             id: newId,
@@ -158,9 +165,25 @@ export const EditorProvider = ({
         setProjects(updatedProjects);
         setCurrentProjectId(newId);
         localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
+
+        // Save to Supabase
+        const supabase = createClient();
+        try {
+            await supabase.from('projects').insert({
+                id: newId,
+                name: name,
+                cards: cards,
+                card_mode: cardMode,
+                updated_at: new Date().toISOString(),
+                is_public: true // Default to public for sharing
+            });
+        } catch (error) {
+            console.error("Failed to save to Supabase:", error);
+            // Non-blocking, we still have local storage
+        }
     }, [cards, cardMode, projects]);
 
-    const saveCurrentProject = useCallback(() => {
+    const saveCurrentProject = useCallback(async () => {
         if (!currentProjectId) return;
 
         const updatedProjects = projects.map(p =>
@@ -170,6 +193,21 @@ export const EditorProvider = ({
         );
         setProjects(updatedProjects);
         localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
+
+        // Save to Supabase
+        const supabase = createClient();
+        try {
+            const { error } = await supabase.from('projects').upsert({
+                id: currentProjectId,
+                cards: cards,
+                card_mode: cardMode,
+                updated_at: new Date().toISOString()
+                // name is not updated here, assuming name change is separate or implementation detail
+            });
+            if (error) throw error;
+        } catch (error) {
+            console.error("Failed to save to Supabase:", error);
+        }
     }, [cards, cardMode, projects, currentProjectId]);
 
     const exportProjectAsJSON = useCallback(() => {
