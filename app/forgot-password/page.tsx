@@ -7,6 +7,8 @@ import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     return (
         <input
