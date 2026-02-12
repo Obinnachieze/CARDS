@@ -23,9 +23,35 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
     // Get the active card data (default to first card)
     const activeCard = cards.find(c => c.id === activeCardId) || cards[0];
 
-    // Interact state
     const [cardIsOpen, setCardIsOpen] = useState(false);
     const [showFloating, setShowFloating] = useState(false);
+    const [scale, setScale] = useState(0.42); // Default mobile scale
+
+    // Dynamic Scaling Logic
+    useEffect(() => {
+        const calculateScale = () => {
+            const width = window.innerWidth;
+
+            if (width < 640) { // Mobile
+                if (activeCard.cardMode === "foldable" && cardIsOpen) {
+                    setScale(0.35); // Fit 900px wide open card
+                } else if (activeCard.cardMode === "foldable") {
+                    setScale(0.65); // Fit 450px wide closed card
+                } else {
+                    setScale(0.55); // Fit 600px wide standard card
+                }
+            } else if (width < 1024) { // Tablet
+                setScale(0.65);
+            } else { // Desktop
+                setScale(0.9);
+            }
+        };
+
+        // Calculate initially and on resize
+        calculateScale();
+        window.addEventListener("resize", calculateScale);
+        return () => window.removeEventListener("resize", calculateScale);
+    }, [cardIsOpen, activeCard.cardMode]);
 
     // Celebration logic (simplified from PreviewModal)
     useEffect(() => {
@@ -121,7 +147,7 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
     return (
         <div className="relative w-full h-screen bg-neutral-950 flex flex-col items-center justify-center overflow-hidden">
             {/* Background Decoration */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-neutral-950 to-neutral-950 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-purple-900/20 via-neutral-950 to-neutral-950 pointer-events-none" />
 
             {/* Header / Brand */}
             <div className="absolute top-6 left-6 z-20">
@@ -145,7 +171,12 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
                     perspective: "2000px" // Ensure 3D perspective is active
                 }}
             >
-                <div className="scale-75 sm:scale-90 md:scale-100 transition-transform duration-500">
+                <div
+                    className="transition-transform duration-500 ease-in-out"
+                    style={{
+                        transform: `scale(${scale})`,
+                    }}
+                >
                     <CardWrapper
                         frontContent={renderFace(getElements("front"))}
                         insideLeftContent={renderFace(getElements("inside-left"))}
