@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Share2, Globe, AlertCircle, Save } from "lucide-react";
+import { Copy, Share2, Globe, AlertCircle, Save, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,8 @@ import { useParams } from "next/navigation";
 
 export function ShareDialog() {
     const [copied, setCopied] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { currentProjectId, saveCurrentProject, saveProjectAs } = useEditor();
     const params = useParams();
     const type = params?.type || "Untitled Design";
@@ -29,20 +31,39 @@ export function ShareDialog() {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const handleShare = () => {
-        if (currentProjectId) {
-            saveCurrentProject();
+    const handleShare = async () => {
+        setError(null);
+        setIsSaving(true);
+        try {
+            if (currentProjectId) {
+                await saveCurrentProject();
+            }
+            handleCopy();
+        } catch (e) {
+            console.error("Share failed:", e);
+            setError("Failed to save project. Please check your connection.");
+        } finally {
+            setIsSaving(false);
         }
-        handleCopy();
     };
 
-    const handleSaveAndShare = () => {
-        const projectName = typeof type === "string"
-            ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
-            : "Untitled Card";
-        saveProjectAs(projectName);
-        // After saving, the component will re-render with currentProjectId set,
-        // and the URL will be available for copying
+    const handleSaveAndShare = async () => {
+        setError(null);
+        setIsSaving(true);
+        try {
+            const projectName = typeof type === "string"
+                ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
+                : "Untitled Card";
+            await saveProjectAs(projectName);
+            // After saving, the component will re-render with currentProjectId set,
+            // and the user can then copy the link. We could auto-copy here if we wanted,
+            // but waiting for the UI to update is safer.
+        } catch (e) {
+            console.error("Save failed:", e);
+            setError("Failed to create project. Please check if Supabase is configured.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -63,6 +84,12 @@ export function ShareDialog() {
                     </DialogDescription>
                 </DialogHeader>
 
+                {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
+                        {error}
+                    </div>
+                )}
+
                 {!isSaved ? (
                     <div className="space-y-3">
                         <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
@@ -74,9 +101,10 @@ export function ShareDialog() {
                         <Button
                             className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2"
                             onClick={handleSaveAndShare}
+                            disabled={isSaving}
                         >
-                            <Save size={16} />
-                            Save & Generate Link
+                            {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                            {isSaving ? "Saving..." : "Save & Generate Link"}
                         </Button>
                     </div>
                 ) : (
@@ -93,9 +121,21 @@ export function ShareDialog() {
                                     className="bg-gray-50 border-gray-300 text-gray-900"
                                 />
                             </div>
-                            <Button type="button" size="sm" className="px-3 bg-purple-600 hover:bg-purple-700 text-white" onClick={handleShare}>
-                                <span className="sr-only">Copy</span>
-                                {copied ? "Copied!" : <Copy className="h-4 w-4" />}
+                            <Button
+                                type="button"
+                                size="sm"
+                                className="px-3 bg-purple-600 hover:bg-purple-700 text-white min-w-[80px]"
+                                onClick={handleShare}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                ) : (
+                                    <>
+                                        <span className="sr-only">Copy</span>
+                                        {copied ? "Copied!" : <Copy className="h-4 w-4" />}
+                                    </>
+                                )}
                             </Button>
                         </div>
                         <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
@@ -110,4 +150,3 @@ export function ShareDialog() {
         </Dialog>
     );
 }
-

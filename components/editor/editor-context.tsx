@@ -60,8 +60,8 @@ interface EditorContextType {
     projects: Project[];
     currentProjectId: string | null;
     createNewProject: () => void;
-    saveProjectAs: (name: string) => void;
-    saveCurrentProject: () => void;
+    saveProjectAs: (name: string) => Promise<void>;
+    saveCurrentProject: () => Promise<void>;
     loadProject: (id: string) => void;
     deleteProject: (id: string) => void;
     exportProjectAsJSON: () => void;
