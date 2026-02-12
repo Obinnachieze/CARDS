@@ -197,12 +197,15 @@ export const EditorProvider = ({
         // Save to Supabase
         const supabase = createClient();
         try {
+            const project = projects.find(p => p.id === currentProjectId);
+            const currentName = project?.name || "Untitled Project";
+
             const { error } = await supabase.from('projects').upsert({
                 id: currentProjectId,
+                name: currentName,
                 cards: cards,
                 card_mode: cardMode,
                 updated_at: new Date().toISOString()
-                // name is not updated here, assuming name change is separate or implementation detail
             });
             if (error) throw error;
         } catch (error: any) {
