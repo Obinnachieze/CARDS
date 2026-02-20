@@ -184,6 +184,13 @@ export const Toolbar = () => {
 
     const closePanel = () => setActiveTab(null);
 
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const handleUploadClick = () => {
+        setActiveTab(null);
+        setIsSettingsOpen(false);
+        fileInputRef.current?.click();
+    };
+
     return (
         <div className="flex flex-col md:flex-col z-40 relative shrink-0">
             {/* Universal Bottom Dock */}
@@ -191,7 +198,8 @@ export const Toolbar = () => {
                 <SidebarTab icon={<LayoutTemplate size={20} />} label="Color" active={activeTab === "design"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "design" ? null : "design"); }} />
                 <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "text" ? null : "text"); }} />
                 <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "elements" ? null : "elements"); }} />
-                <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "uploads" ? null : "uploads"); }} />
+                <SidebarTab icon={<Upload size={20} />} label="Uploads" active={false} onClick={handleUploadClick} />
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 <SidebarTab icon={<Highlighter size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "draw" ? null : "draw"); }} />
                 <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "effects" ? null : "effects"); }} />
                 <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={activeTab === "music"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "music" ? null : "music"); }} />
