@@ -188,7 +188,7 @@ export const Toolbar = () => {
         <div className="flex flex-col md:flex-col z-40 relative shrink-0">
             {/* Universal Bottom Dock */}
             <div className="fixed bottom-2 left-1/2 -translate-x-1/2 h-14 bg-white/95 backdrop-blur-md border border-gray-200/60 flex items-center justify-around px-2 z-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl w-[calc(100%-16px)] max-w-lg md:max-w-4xl md:h-16 md:px-4">
-                <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "design" ? null : "design"); }} />
+                <SidebarTab icon={<LayoutTemplate size={20} />} label="Color" active={activeTab === "design"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "design" ? null : "design"); }} />
                 <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "text" ? null : "text"); }} />
                 <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "elements" ? null : "elements"); }} />
                 <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "uploads" ? null : "uploads"); }} />
@@ -202,7 +202,7 @@ export const Toolbar = () => {
                 className={cn(
                     "fixed bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col rounded-2xl",
                     // Floating panel above the dock
-                    "bottom-[76px] left-2 right-2 md:left-auto md:right-4 md:w-96 h-[50vh] md:h-[70vh] md:bottom-[76px]",
+                    "bottom-[76px] left-2 right-2 md:left-auto md:right-4 md:w-96 max-h-[50vh] md:max-h-[70vh] md:bottom-[76px]",
                     activeTab ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
                 )}
             >                        {activeTab && activeTab !== "music" && (
@@ -578,8 +578,8 @@ export const Toolbar = () => {
                                 </div>
                             )}
                             {activeTab === "design" && (
-                                <div className="space-y-6">
-                                    <div className="space-y-3">
+                                <div className="space-y-3">
+                                    <div className="space-y-2">
                                         <Label>Background Color</Label>
                                         <ColorPicker color={backgroundColor} onChange={setBackgroundColor} />
                                     </div>
