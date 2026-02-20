@@ -98,49 +98,55 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                 <section className="space-y-4">
                                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Save & Export</h3>
                                     <div className="bg-purple-50 p-4 rounded-2xl space-y-3">
-                                        {currentProjectId ? (
-                                            <div className="space-y-3">
+                                        <div className="space-y-3">
+                                            {currentProjectId && (
                                                 <div className="space-y-1 overflow-x-auto min-w-0">
-                                                    <Label className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Active Project</Label>
+                                                    <Label className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Active Workspace</Label>
                                                     <p className="text-sm font-semibold text-purple-900 whitespace-nowrap min-w-max">
-                                                        {projectName || "Untitled Project"}
+                                                        {projectName || "Untitled Card"}
+                                                        <span className="ml-1.5 opacity-60 font-normal">
+                                                            [{cards.length === 1 ? "Page 1" : `Page ${cards.length}`}]
+                                                        </span>
                                                     </p>
                                                 </div>
-                                                <Button
-                                                    disabled
-                                                    className="w-full bg-green-500 text-white gap-2 h-11 rounded-xl shadow-lg shadow-green-100 opacity-100 cursor-default"
-                                                >
-                                                    <Check size={18} />
-                                                    Saved
-                                                </Button>
+                                            )}
+
+                                            <div className="space-y-2 pt-1">
+                                                <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Card Name</Label>
+                                                <Input
+                                                    id="sidebar-project-name"
+                                                    placeholder="Enter card name..."
+                                                    value={projectName}
+                                                    onChange={(e) => setProjectName(e.target.value)}
+                                                    className="bg-white border-purple-200 focus:ring-purple-500 h-11 text-purple-900 font-medium"
+                                                />
                                             </div>
-                                        ) : (
-                                            <>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Project Name</Label>
-                                                    <Input
-                                                        id="sidebar-project-name"
-                                                        placeholder="Enter project name..."
-                                                        value={projectName}
-                                                        onChange={(e) => setProjectName(e.target.value)}
-                                                        className="bg-white border-purple-200 focus:ring-purple-500 h-11 text-purple-900 font-medium"
-                                                    />
-                                                </div>
-                                                <Button
-                                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2 h-11 rounded-xl shadow-lg shadow-purple-200"
-                                                    onClick={() => saveProjectAs(projectName || "Untitled Project")}
-                                                >
-                                                    <Save size={18} />
-                                                    Save Project
-                                                </Button>
-                                            </>
-                                        )}
+
+                                            <Button
+                                                className={cn(
+                                                    "w-full gap-2 h-11 rounded-xl shadow-lg transition-all",
+                                                    currentProjectId
+                                                        ? "bg-green-500 hover:bg-green-600 text-white shadow-green-100"
+                                                        : "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-200"
+                                                )}
+                                                onClick={() => {
+                                                    if (currentProjectId) {
+                                                        saveCurrentProject();
+                                                    } else {
+                                                        saveProjectAs(projectName || "Untitled Card");
+                                                    }
+                                                }}
+                                            >
+                                                {currentProjectId ? <Check size={18} /> : <Save size={18} />}
+                                                {currentProjectId ? "Update Information" : "Save Card"}
+                                            </Button>
+                                        </div>
                                         {currentProjectId && (
                                             <Button
                                                 variant="outline"
                                                 className="w-full border-purple-200 text-purple-600 hover:bg-purple-50 gap-2 h-11 rounded-xl"
                                                 onClick={() => {
-                                                    addCard();
+                                                    createNewProject();
                                                     onClose();
                                                 }}
                                             >
@@ -189,7 +195,12 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                     }}
                                                 >
                                                     <div className="flex flex-col flex-1 min-w-0 pr-4">
-                                                        <span className="font-semibold text-sm text-gray-800 whitespace-nowrap min-w-max block">{project.name}</span>
+                                                        <span className="font-semibold text-sm text-gray-800 whitespace-nowrap min-w-max block">
+                                                            {project.name}
+                                                            <span className="ml-1.5 opacity-40 font-normal">
+                                                                [{project.cards.length === 1 ? "Page 1" : `Page ${project.cards.length}`}]
+                                                            </span>
+                                                        </span>
                                                         <span className="text-[10px] text-gray-400">{new Date(project.updatedAt).toLocaleDateString()}</span>
                                                     </div>
                                                     <Button

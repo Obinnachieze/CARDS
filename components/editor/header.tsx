@@ -21,8 +21,9 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const {
         undo, redo, canUndo, canRedo,
         saveCurrentProject, saveProjectAs,
-        currentProjectId,
-        cards, activeCardId, addCard, activateCard
+        currentProjectId, projectName, createNewProject,
+        cards, activeCardId, addCard, activateCard,
+        workspaceProjects, activeWorkspaceIndex, switchToWorkspaceProject
     } = useEditor();
 
     const [showSaveModal, setShowSaveModal] = useState(false);
@@ -88,21 +89,21 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     </Button>
                 </div>
 
-                {/* Page indicator + Add page */}
+                {/* Project Tabs (Rooms) */}
                 <div className="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5 border border-white/5 max-w-[180px] md:max-w-none overflow-x-auto scrollbar-hide">
-                    {cards.map((card, index) => (
+                    {workspaceProjects.map((project, index) => (
                         <Button
-                            key={card.id}
+                            key={project.id}
                             variant="ghost"
                             size="icon"
-                            onClick={() => activateCard(card.id)}
+                            onClick={() => switchToWorkspaceProject(index)}
                             className={cn(
                                 "h-7 w-7 md:h-8 md:w-8 rounded-md text-xs font-semibold transition-all shrink-0",
-                                activeCardId === card.id
+                                activeWorkspaceIndex === index
                                     ? "bg-purple-600 text-white hover:bg-purple-700"
                                     : "text-white/60 hover:bg-white/10 hover:text-white"
                             )}
-                            title={`Page ${index + 1}`}
+                            title={project.name || `Card ${index + 1}`}
                         >
                             {index + 1}
                         </Button>
@@ -111,9 +112,9 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={addCard}
+                        onClick={createNewProject}
                         className="h-7 w-7 md:h-8 md:w-8 hover:bg-white/10 text-white/60 hover:text-white rounded-md shrink-0"
-                        title="Add new page"
+                        title="Create New Card"
                     >
                         <Plus size={14} />
                     </Button>
@@ -123,7 +124,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 <div className="hidden md:flex items-center gap-2 ml-1">
                     <div className="h-8 w-px bg-white/10" />
                     <div className="text-sm font-medium text-white/90 truncate max-w-xs">
-                        {type}
+                        {projectName ? projectName : defaultTitle}
                     </div>
                     <Cloud size={14} className="text-blue-400/80" />
                 </div>

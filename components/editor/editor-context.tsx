@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project, EditorTab } from "./types";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -59,6 +60,8 @@ interface EditorContextType {
 
     // Projects (Local Storage & File)
     projects: Project[];
+    workspaceProjects: Project[];
+    activeWorkspaceIndex: number;
     currentProjectId: string | null;
     createNewProject: () => void;
     saveProjectAs: (name: string) => Promise<void>;
@@ -69,6 +72,11 @@ interface EditorContextType {
     exportProjectAsJSON: () => void;
     importProjectFromJSON: (file: File) => void;
     downloadAsImage: () => void;
+
+    // Workspace Management
+    switchToWorkspaceProject: (index: number) => void;
+    removeWorkspaceProject: (index: number) => void;
+
     setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "floating-emoji", emoji?: string) => void;
     setAudio: (cardId: string, src: string | undefined) => void;
 
@@ -136,6 +144,8 @@ export const EditorProvider = ({
     // Projects State
     const [currentProjectId, setCurrentProjectId] = useState<string | null>(initialProjectId);
     const [projects, setProjects] = useState<Project[]>([]);
+    const [workspaceProjects, setWorkspaceProjects] = useState<Project[]>([]);
+    const [activeWorkspaceIndex, setActiveWorkspaceIndex] = useState(0);
 
     // UI State
     const [activeTool, setActiveTool] = useState<import("./types").EditorTab | null>(null);
@@ -144,18 +154,51 @@ export const EditorProvider = ({
     // Auth State
     const [user, setUser] = useState<User | null>(null);
     const supabase = createClient();
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     // Ref for debouncing auto-save
     const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Initial Auth Load
+    // Ref to prevent infinite loops during state swapping
+    const isSwappingRef = useRef(false);
+
+    // Update workspace record whenever active project state changes
     useEffect(() => {
-        const getUser = async () => {
+        if (isSwappingRef.current) return;
+
+        setWorkspaceProjects(prev => {
+            const updated = [...prev];
+            if (updated[activeWorkspaceIndex]) {
+                updated[activeWorkspaceIndex] = {
+                    ...updated[activeWorkspaceIndex],
+                    name: projectName,
+                    cardMode: cardMode,
+                    cards: cards,
+                    updatedAt: Date.now()
+                };
+            }
+            return updated;
+        });
+    }, [projectName, cardMode, cards, activeWorkspaceIndex]);
+
+    // Initial Auth Load and Workspace Setup
+    useEffect(() => {
+        const setup = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
+
+            // Initialize workspace if empty
+            setWorkspaceProjects([{
+                id: generateId(),
+                name: "",
+                updatedAt: Date.now(),
+                cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
+                cardMode: "postcard"
+            }]);
         };
 
-        getUser();
+        setup();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
@@ -164,27 +207,85 @@ export const EditorProvider = ({
         return () => subscription.unsubscribe();
     }, [supabase]);
 
-    // Load projects from local storage on mount
     useEffect(() => {
         const storedProjects = localStorage.getItem("card-projects");
         if (storedProjects) {
             try {
-                setProjects(JSON.parse(storedProjects));
+                const parsed = JSON.parse(storedProjects);
+                setProjects(parsed);
+
+                // If we have a project ID in the URL, load it now
+                const projectIdFromUrl = searchParams.get("project");
+                if (projectIdFromUrl) {
+                    const project = parsed.find((p: any) => p.id === projectIdFromUrl);
+                    if (project) {
+                        setCards(project.cards);
+                        setCardMode(project.cardMode);
+                        setCurrentProjectId(project.id);
+                        setProjectName(project.name);
+                        setActiveCardId(project.cards[0]?.id || null);
+                    }
+                }
             } catch (e) {
                 console.error("Failed to parse projects", e);
             }
         }
-    }, []);
+    }, [searchParams]);
 
     const createNewProject = useCallback(() => {
-        setCards([{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }]);
-        setCardMode("postcard");
+        const newProject: Project = {
+            id: generateId(),
+            name: "",
+            updatedAt: Date.now(),
+            cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
+            cardMode: "postcard"
+        };
+
+        setWorkspaceProjects(prev => [...prev, newProject]);
+        setActiveWorkspaceIndex(prev => prev + 1);
+
+        // Load the new project state
+        setCards(newProject.cards);
+        setCardMode(newProject.cardMode);
         setCurrentProjectId(null);
-        setProjectName(""); // Reset name
+        setProjectName("");
         setActiveCardId("card-1");
         setPast([]);
         setFuture([]);
     }, []);
+
+    const switchToWorkspaceProject = useCallback((index: number) => {
+        const project = workspaceProjects[index];
+        if (!project) return;
+
+        isSwappingRef.current = true;
+        setActiveWorkspaceIndex(index);
+        setCards(project.cards);
+        setCardMode(project.cardMode);
+        setCurrentProjectId(project.id.startsWith("local-") ? null : project.id);
+        setProjectName(project.name);
+        setActiveCardId(project.cards[0]?.id || null);
+        setPast([]);
+        setFuture([]);
+
+        // Brief timeout to let effects finish before re-enabling sync
+        setTimeout(() => {
+            isSwappingRef.current = false;
+        }, 100);
+    }, [workspaceProjects]);
+
+    const removeWorkspaceProject = useCallback((index: number) => {
+        setWorkspaceProjects(prev => {
+            if (prev.length <= 1) return prev;
+            const updated = prev.filter((_, i) => i !== index);
+            if (activeWorkspaceIndex >= updated.length) {
+                switchToWorkspaceProject(updated.length - 1);
+            } else if (activeWorkspaceIndex === index) {
+                switchToWorkspaceProject(Math.max(0, index - 1));
+            }
+            return updated;
+        });
+    }, [activeWorkspaceIndex, switchToWorkspaceProject]);
 
     const saveProjectAs = useCallback(async (name: string) => {
         const newId = generateId();
@@ -217,7 +318,10 @@ export const EditorProvider = ({
             console.error("Failed to save to Supabase:", error.message || error);
             throw error;
         }
-    }, [cards, cardMode, projects, user]);
+
+        // Redirect to project URL
+        router.push(`/create/${cardMode}?project=${newId}`);
+    }, [cards, cardMode, projects, user, router]);
 
     const saveCurrentProject = useCallback(async () => {
         if (!currentProjectId) return;
@@ -347,14 +451,12 @@ export const EditorProvider = ({
         if (project) {
             setCards(project.cards);
             setCardMode(project.cardMode);
-            setCurrentProjectId(project.id);
-            setProjectName(project.name); // Keep names in sync
-            setActiveCardId(project.cards[0]?.id || null);
-            saveHistory();
-            setPast([]);
             setFuture([]);
+
+            // Update URL to match current project
+            router.push(`/create/${project.cardMode}?project=${project.id}`);
         }
-    }, [projects, saveHistory]);
+    }, [projects, saveHistory, router]);
 
     const deleteProject = useCallback((id: string) => {
         const updatedProjects = projects.filter(p => p.id !== id);
@@ -590,6 +692,8 @@ export const EditorProvider = ({
             canRedo: future.length > 0,
 
             projects,
+            workspaceProjects,
+            activeWorkspaceIndex,
             currentProjectId,
             createNewProject,
             saveProjectAs,
@@ -600,6 +704,10 @@ export const EditorProvider = ({
             exportProjectAsJSON,
             importProjectFromJSON,
             downloadAsImage,
+
+            switchToWorkspaceProject,
+            removeWorkspaceProject,
+
             setCelebration,
             setAudio,
             activeTool,
