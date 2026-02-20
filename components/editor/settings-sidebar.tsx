@@ -118,12 +118,12 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                             <>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Project Name</Label>
-                                                    <Textarea
+                                                    <Input
                                                         id="sidebar-project-name"
                                                         placeholder="Enter project name..."
                                                         value={projectName}
                                                         onChange={(e) => setProjectName(e.target.value)}
-                                                        className="bg-white border-purple-200 focus:ring-purple-500 min-h-[80px] py-3 resize-none text-purple-900 font-medium"
+                                                        className="bg-white border-purple-200 focus:ring-purple-500 h-11 text-purple-900 font-medium"
                                                     />
                                                 </div>
                                                 <Button
