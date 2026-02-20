@@ -187,7 +187,7 @@ export const Toolbar = () => {
     return (
         <div className="flex flex-col md:flex-col z-40 relative shrink-0">
             {/* Universal Bottom Dock */}
-            <div className="fixed bottom-2 left-1/2 -translate-x-1/2 h-14 bg-white/95 backdrop-blur-md border border-gray-200/60 flex items-center justify-around px-2 z-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl w-[calc(100%-16px)] max-w-lg md:max-w-4xl md:h-16 md:px-4">
+            <div className="fixed bottom-2 left-1/2 -translate-x-1/2 h-14 bg-white/95 backdrop-blur-md border border-gray-200/60 flex items-center justify-around px-2 z-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl w-[calc(100%-16px)] max-w-lg md:max-w-4xl md:h-12 md:px-4">
                 <SidebarTab icon={<LayoutTemplate size={20} />} label="Color" active={activeTab === "design"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "design" ? null : "design"); }} />
                 <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "text" ? null : "text"); }} />
                 <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "elements" ? null : "elements"); }} />
@@ -284,18 +284,12 @@ export const Toolbar = () => {
                                         </div>
                                     )}
 
-                                    <div className="space-y-2">
-                                        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">Add Text</Label>
-                                        <Button className="w-full justify-start h-12 bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg" onClick={() => addElement("text", "Add a heading", { fontSize: 32, fontWeight: "bold" })}>
-                                            Add a heading
-                                        </Button>
-                                        <Button className="w-full justify-start h-10 bg-gray-100 hover:bg-gray-200 text-black font-semibold text-base" onClick={() => addElement("text", "Add a subheading", { fontSize: 24, fontWeight: "semibold" })}>
-                                            Add a subheading
-                                        </Button>
-                                        <Button className="w-full justify-start h-8 bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm" onClick={() => addElement("text", "Add a little bit of body text", { fontSize: 16 })}>
-                                            Add a little bit of body text
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl gap-2"
+                                        onClick={() => addElement("text", "Your text here", { fontSize: 24 })}
+                                    >
+                                        <Type size={16} /> Add Text
+                                    </Button>
 
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
