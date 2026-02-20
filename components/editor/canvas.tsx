@@ -6,13 +6,9 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { EditorElement, CardFace } from "./types";
 
-import { ZoomIn, ZoomOut, BookOpen, X } from "lucide-react";
+import { BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { CardWrapper } from "./card-wrapper";
-import { ContextualToolbar } from "./contextual-toolbar";
-import { CardToolbar } from "./card-toolbar";
-import { ChevronRight, ChevronLeft, Minus, Plus, Maximize, LayoutGrid, List } from "lucide-react";
 import confetti from "canvas-confetti";
 import { FloatingParticles } from "./floating-particles";
 import { FabricCanvas } from "./fabric-canvas";
@@ -135,19 +131,7 @@ export const Canvas = () => {
                                 activateCard(card.id);
                             }}
                         >
-                            {/* Toolbars - Attached to Card */}
-                            <div className={cn(
-                                "absolute inset-0 pointer-events-none z-50 transition-opacity duration-200",
-                                isCardActive ? "opacity-100" : "opacity-0"
-                            )}>
-                                <div className="w-full h-full relative">
-                                    {isCardActive && selectedElement ? (
-                                        <div className="pointer-events-auto"><ContextualToolbar /></div>
-                                    ) : isCardActive ? (
-                                        <div className="pointer-events-auto"><CardToolbar /></div>
-                                    ) : null}
-                                </div>
-                            </div>
+
 
                             <div className={cn(
                                 "transition-all duration-200 rounded-xl",
@@ -196,57 +180,7 @@ export const Canvas = () => {
                 })}
             </div>
 
-            {/* Bottom Control Bar - Canva Style */}
-            <div className="fixed bottom-6 right-6 flex items-center gap-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg border border-gray-200/50 z-50 pointer-events-auto transition-all duration-300">
-                <div className="flex items-center gap-2 border-r border-gray-200 pr-4 mr-0">
-                    <span className="text-xs font-semibold text-gray-700 select-none">
-                        Page {cards.findIndex(c => c.id === activeCardId) + 1} of {cards.length}
-                    </span>
-                </div>
 
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg hover:bg-gray-100 text-gray-500"
-                    onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-                    title={viewMode === "grid" ? "List View" : "Grid View"}
-                >
-                    {viewMode === "grid" ? <List size={18} /> : <LayoutGrid size={18} />}
-                </Button>
-
-                <div className="hidden md:flex items-center gap-2 ml-2">
-                    <div className="w-24">
-                        <Slider
-                            value={[zoom]}
-                            min={0.4}
-                            max={1.0}
-                            step={0.1}
-                            onValueChange={([value]) => setZoom(value)}
-                            className="cursor-pointer"
-                        />
-                    </div>
-                    <span className="text-xs font-medium w-9 text-right text-gray-500 select-none tabular-nums">{Math.round(zoom * 100)}%</span>
-                </div>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg hover:bg-gray-100 text-gray-500 ml-2"
-                    onClick={() => {
-                        const elem = document.documentElement;
-                        if (!document.fullscreenElement) {
-                            elem.requestFullscreen().catch(err => {
-                                console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                            });
-                        } else {
-                            document.exitFullscreen();
-                        }
-                    }}
-                    title="Full Screen"
-                >
-                    <Maximize size={18} />
-                </Button>
-            </div>
         </div>
     );
 };
