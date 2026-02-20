@@ -209,8 +209,9 @@ export const Toolbar = () => {
             <div
                 className={cn(
                     "fixed bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col rounded-2xl",
-                    // Floating panel above the dock
-                    "bottom-[76px] left-2 right-2 md:left-auto md:right-4 max-h-[50vh] md:max-h-[70vh] md:bottom-[76px]",
+                    // Floating panel centered above the dock
+                    "bottom-[76px] left-2 right-2 max-h-[50vh] md:max-h-[70vh] md:bottom-[76px]",
+                    "md:left-1/2 md:-translate-x-1/2 md:right-auto",
                     activeTab && ["draw", "effects", "music"].includes(activeTab) ? "md:w-fit" : "md:w-96",
                     activeTab ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
                 )}
