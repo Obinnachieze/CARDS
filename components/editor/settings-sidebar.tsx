@@ -111,16 +111,18 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                 </div>
                                             )}
 
-                                            <div className="space-y-2 pt-1">
-                                                <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Card Name</Label>
-                                                <Input
-                                                    id="sidebar-project-name"
-                                                    placeholder="Enter card name..."
-                                                    value={projectName}
-                                                    onChange={(e) => setProjectName(e.target.value)}
-                                                    className="bg-white border-purple-200 focus:ring-purple-500 h-11 text-purple-900 font-medium"
-                                                />
-                                            </div>
+                                            {!currentProjectId && (
+                                                <div className="space-y-2 pt-1">
+                                                    <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Card Name</Label>
+                                                    <Input
+                                                        id="sidebar-project-name"
+                                                        placeholder="Enter card name..."
+                                                        value={projectName}
+                                                        onChange={(e) => setProjectName(e.target.value)}
+                                                        className="bg-white border-purple-200 focus:ring-purple-500 h-11 text-purple-900 font-medium"
+                                                    />
+                                                </div>
+                                            )}
 
                                             <Button
                                                 className={cn(
@@ -138,22 +140,23 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                 }}
                                             >
                                                 {currentProjectId ? <Check size={18} /> : <Save size={18} />}
-                                                {currentProjectId ? "Update Information" : "Save Card"}
+                                                {currentProjectId ? "Saved" : "Save Card"}
                                             </Button>
+
+                                            {currentProjectId && (
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full border-purple-200 text-purple-600 hover:bg-purple-50 gap-2 h-11 rounded-xl"
+                                                    onClick={() => {
+                                                        createNewProject();
+                                                        onClose();
+                                                    }}
+                                                >
+                                                    <Plus size={18} />
+                                                    Create New Design
+                                                </Button>
+                                            )}
                                         </div>
-                                        {currentProjectId && (
-                                            <Button
-                                                variant="outline"
-                                                className="w-full border-purple-200 text-purple-600 hover:bg-purple-50 gap-2 h-11 rounded-xl"
-                                                onClick={() => {
-                                                    createNewProject();
-                                                    onClose();
-                                                }}
-                                            >
-                                                <Plus size={18} />
-                                                Create New Design
-                                            </Button>
-                                        )}
                                     </div>
                                 </section>
 
