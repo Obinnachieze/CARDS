@@ -50,16 +50,13 @@ const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: Reac
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         className={cn(
-            "flex flex-col items-center justify-center w-auto md:w-full min-w-[60px] md:min-w-0 py-1 md:py-3 transition-colors relative group rounded-xl mx-0 md:mx-2 px-1 md:px-0",
+            "flex flex-col items-center justify-center min-w-[44px] py-1.5 px-1 transition-colors relative group rounded-xl",
             active ? "text-purple-600 bg-purple-50" : "text-gray-500 hover:text-purple-600 hover:bg-purple-50/50"
         )}
     >
-        <div className={cn("mb-1", active ? "text-purple-600" : "")}>{icon}</div>
-        <span className="text-[10px] font-medium hidden md:block">{label}</span>
-        {/* Mobile active indicator (top border) */}
-        {active && <div className="absolute top-0 left-2 right-2 h-1 bg-purple-600 rounded-b-full md:hidden" />}
-        {/* Desktop active indicator (left border) */}
-        {active && <div className="absolute left-0 top-3 bottom-3 w-1 bg-purple-600 rounded-r-full hidden md:block" />}
+        <div className={cn("mb-0.5", active ? "text-purple-600" : "")}>{icon}</div>
+        <span className="text-[9px] font-medium leading-tight">{label}</span>
+        {active && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-purple-600 rounded-t-full" />}
     </button>
 );
 
@@ -98,7 +95,9 @@ export const Toolbar = () => {
         setBrushType,
         setCelebration,
         activeTool: activeTab,
-        setActiveTool: setActiveTab
+        setActiveTool: setActiveTab,
+        isSettingsOpen,
+        setIsSettingsOpen
     } = useEditor();
 
     // const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates"); // Removed local state
@@ -186,39 +185,25 @@ export const Toolbar = () => {
     const closePanel = () => setActiveTab(null);
 
     return (
-        <div className="flex md:h-full z-40 relative shrink-0 md:shrink-0">
-            {/* Mobile FAB */}
-            <button
-                className={cn(
-                    "md:hidden fixed bottom-6 left-6 w-14 h-14 bg-purple-600 rounded-full shadow-lg z-50 flex items-center justify-center text-white hover:bg-purple-700 transition-all duration-300 active:scale-95",
-                    activeTab ? "scale-0 opacity-0 pointer-events-none" : "scale-100 opacity-100"
-                )}
-                onClick={() => setActiveTab("text")}
-            >
-                <div className="text-3xl font-light">+</div>
-            </button>
-
-            {/* Dark Icon Rail - Desktop Only */}
-            <div id="sidebar-tools" className="hidden md:flex flex-col items-center w-[72px] py-4 bg-transparent text-gray-600 gap-2 z-50">
-                <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab(activeTab === "design" ? null : "design")} onMouseEnter={() => setActiveTab("design")} />
-                <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab(activeTab === "text" ? null : "text")} onMouseEnter={() => setActiveTab("text")} />
-                <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab(activeTab === "elements" ? null : "elements")} onMouseEnter={() => setActiveTab("elements")} />
-                <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => setActiveTab(activeTab === "uploads" ? null : "uploads")} onMouseEnter={() => setActiveTab("uploads")} />
-                <SidebarTab icon={<Pencil size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => setActiveTab(activeTab === "draw" ? null : "draw")} onMouseEnter={() => setActiveTab("draw")} />
-                <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => setActiveTab(activeTab === "effects" ? null : "effects")} onMouseEnter={() => setActiveTab("effects")} />
-                <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={activeTab === "music"} onClick={() => setActiveTab(activeTab === "music" ? null : "music")} onMouseEnter={() => setActiveTab("music")} />
+        <div className="flex flex-col md:flex-col z-40 relative shrink-0">
+            {/* Universal Bottom Dock */}
+            <div className="fixed bottom-2 left-1/2 -translate-x-1/2 h-14 bg-white/95 backdrop-blur-md border border-gray-200/60 flex items-center justify-around px-2 z-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl w-[calc(100%-16px)] max-w-lg md:max-w-2xl md:h-16 md:px-4">
+                <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "design" ? null : "design"); }} />
+                <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "text" ? null : "text"); }} />
+                <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "elements" ? null : "elements"); }} />
+                <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "uploads" ? null : "uploads"); }} />
+                <SidebarTab icon={<Highlighter size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "draw" ? null : "draw"); }} />
+                <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "effects" ? null : "effects"); }} />
+                <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={activeTab === "music"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "music" ? null : "music"); }} />
             </div>
 
             {/* Sliding Panel */}
             <div
                 className={cn(
-                    "fixed md:absolute bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col",
-                    // Mobile: Bottom Sheet, fixed above bottom bar
-                    "bottom-0 left-0 right-0 h-[50vh] rounded-t-2xl md:rounded-none",
-                    activeTab ? "translate-y-0" : "translate-y-full md:translate-y-0",
-                    // Desktop: Side Panel, full height
-                    "md:top-0 md:bottom-0 md:left-[72px] md:w-80 md:h-full md:shadow-2xl md:translate-y-0",
-                    activeTab ? "md:translate-x-0" : "md:-translate-x-full"
+                    "fixed bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col rounded-2xl",
+                    // Floating panel above the dock
+                    "bottom-[76px] left-2 right-2 md:left-auto md:right-4 md:w-96 h-[50vh] md:h-[70vh] md:bottom-[76px]",
+                    activeTab ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
                 )}
             >                        {activeTab && activeTab !== "music" && (
                 <>
@@ -237,20 +222,8 @@ export const Toolbar = () => {
                         </Button>
                     </div>
 
-                    {/* Sidebar + Content Layout */}
+                    {/* Content Layout */}
                     <div className="flex h-full overflow-hidden">
-                        {/* Mobile Sidebar (Vertical List) */}
-                        <div className="w-[72px] bg-gray-50 border-r border-gray-100 flex flex-col items-center py-4 gap-2 overflow-y-auto no-scrollbar shrink-0 md:hidden">
-                            <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab("text")} />
-                            <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab("elements")} />
-                            <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => setActiveTab("uploads")} />
-                            <SidebarTab icon={<Palette size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab("design")} />
-                            <SidebarTab icon={<Pencil size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => setActiveTab("draw")} />
-                            <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => setActiveTab("effects")} />
-                            <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={(activeTab as string) === "music"} onClick={() => setActiveTab("music")} />
-                            <SidebarTab icon={<Star size={20} />} label="Stickers" active={activeTab === "stickers"} onClick={() => setActiveTab("stickers")} />
-                            <div className="h-10" /> {/* Spacer */}
-                        </div>
 
                         <ScrollArea className="flex-1 p-4 bg-white">
                             {/* Panel Content Based on Tab */}

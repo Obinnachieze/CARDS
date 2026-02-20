@@ -82,8 +82,8 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                         initial={{ x: "100%" }}
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed top-0 right-0 h-full w-[280px] sm:w-[350px] max-w-full bg-white z-70 shadow-2xl flex flex-col overflow-x-hidden"
+                        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                        className="fixed top-0 right-0 h-full w-full sm:w-[350px] max-w-full bg-white z-70 shadow-2xl flex flex-col overflow-x-hidden"
                     >
                         {/* Header */}
                         <div className="flex shrink-0 items-center justify-between p-4 sm:p-6 border-b border-gray-100 min-w-0">

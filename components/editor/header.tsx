@@ -23,12 +23,12 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
         saveCurrentProject, saveProjectAs,
         currentProjectId, projectName, createNewProject,
         cards, activeCardId, addCard, activateCard,
-        workspaceProjects, activeWorkspaceIndex, switchToWorkspaceProject
+        workspaceProjects, activeWorkspaceIndex, switchToWorkspaceProject,
+        isSettingsOpen, setIsSettingsOpen
     } = useEditor();
 
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const defaultTitle = typeof type === "string"
         ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
@@ -62,7 +62,6 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     size="icon"
                     className="hover:bg-white/10 text-white w-8 h-8 md:w-9 md:h-9 shrink-0"
                     onClick={() => router.push("/")}
-                    title="Go to Homepage"
                 >
                     <Home size={18} />
                 </Button>

@@ -89,6 +89,10 @@ interface EditorContextType {
 
     // Auth
     user: User | null;
+
+    // Settings Sidebar
+    isSettingsOpen: boolean;
+    setIsSettingsOpen: (open: boolean) => void;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -150,6 +154,7 @@ export const EditorProvider = ({
     // UI State
     const [activeTool, setActiveTool] = useState<import("./types").EditorTab | null>(null);
     const [projectName, setProjectName] = useState("");
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Auth State
     const [user, setUser] = useState<User | null>(null);
@@ -465,10 +470,36 @@ export const EditorProvider = ({
     }, [projects]);
 
     const clearAllProjects = useCallback(async () => {
+        // Clear local storage and state
         setProjects([]);
         localStorage.removeItem("card-projects");
-        createNewProject();
 
+        // Reset Workspace (Rooms) to initial state
+        const initialRoomId = generateId();
+        const initialRoom: Project = {
+            id: initialRoomId,
+            name: "",
+            updatedAt: Date.now(),
+            cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
+            cardMode: "postcard"
+        };
+
+        setWorkspaceProjects([initialRoom]);
+        setActiveWorkspaceIndex(0);
+
+        // Reset Active State
+        setCards(initialRoom.cards);
+        setCardMode(initialRoom.cardMode);
+        setCurrentProjectId(null);
+        setProjectName("");
+        setActiveCardId("card-1");
+        setPast([]);
+        setFuture([]);
+
+        // Clear URL project parameter
+        router.push(`/create/postcard`);
+
+        // Delete all projects from Supabase if user is logged in
         if (user) {
             const supabaseClient = createClient();
             try {
@@ -477,12 +508,12 @@ export const EditorProvider = ({
                     .delete()
                     .eq('user_id', user.id);
                 if (error) throw error;
-                console.log("Cleared cloud projects");
+                console.log("Cleared cloud projects entirely");
             } catch (error: any) {
                 console.error("Failed to clear cloud projects:", error.message);
             }
         }
-    }, [user]);
+    }, [user, router]);
 
 
 
@@ -714,7 +745,8 @@ export const EditorProvider = ({
             setActiveTool,
             projectName,
             setProjectName,
-            user
+            user,
+            isSettingsOpen, setIsSettingsOpen
         }}>
             {children}
         </EditorContext.Provider>
