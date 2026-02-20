@@ -1,108 +1,66 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-    Menu, Undo2, Redo2, Cloud, FileText,
-    Share2, Crown, FilePlus, FolderOpen, Save, FileJson, Image as ImageIcon, Download
+    Undo2, Redo2, Cloud, FileText,
+    Home, Save
 } from "lucide-react";
 import { useEditor } from "./editor-context";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { UserAvatar } from "./user-avatar";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useRef } from "react";
 import { ShareDialog } from "./share-dialog";
+import { SaveModal } from "./save-modal";
 
 export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const params = useParams();
+    const router = useRouter();
     const type = params?.type || "Untitled Design";
     const {
         undo, redo, canUndo, canRedo,
-        createNewProject, saveCurrentProject, saveProjectAs,
-        exportProjectAsJSON, importProjectFromJSON,
-        downloadAsImage,
+        saveCurrentProject, saveProjectAs,
         currentProjectId
     } = useEditor();
+
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const defaultTitle = typeof type === "string"
+        ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
+        : "Untitled Card";
 
     const handleSave = () => {
         if (currentProjectId) {
             saveCurrentProject();
         } else {
-            // Auto-save new projects with a name derived from the card type
-            const projectName = typeof type === "string"
-                ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
-                : "Untitled Card";
-            saveProjectAs(projectName);
+            setShowSaveModal(true);
         }
     };
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            importProjectFromJSON(file);
+    const handleModalSave = async (title: string, creatorName: string) => {
+        setIsSaving(true);
+        try {
+            await saveProjectAs(title);
+            setShowSaveModal(false);
+        } catch (e) {
+            console.error("Save failed:", e);
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
         <header className="h-14 bg-gradient-to-r from-slate-900 to-slate-900 border-b border-white/10 flex items-center justify-between px-3 md:px-4 text-white z-50 relative">
             <div className="flex items-center gap-2 md:gap-4">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="hover:bg-white/10 text-white w-9 h-9">
-                            <Menu size={20} />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-64 bg-[#1e1e2e] border-gray-700 text-white p-2 rounded-xl shadow-2xl backdrop-blur-xl">
-                        <DropdownMenuLabel className="text-xs font-bold text-gray-400 uppercase tracking-wider px-2 py-1.5">File Options</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
-                        <DropdownMenuItem onClick={createNewProject} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
-                            <FilePlus size={18} className="text-purple-400" />
-                            <span className="text-sm font-medium">New Design</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
-                            <FolderOpen size={18} className="text-blue-400" />
-                            <span className="text-sm font-medium">Open Project</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
-                        <DropdownMenuItem
-                            onClick={handleSave}
-                            className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3"
-                        >
-                            <Save size={18} className="text-emerald-400" />
-                            <span className="text-sm font-medium">{currentProjectId ? "Save" : "Save As"}</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={exportProjectAsJSON} className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3">
-                            <FileJson size={18} className="text-amber-400" />
-                            <span className="text-sm font-medium">Export JSON</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-gray-700 mx-2 my-1" />
-                        <DropdownMenuItem
-                            onClick={downloadAsImage}
-                            className="hover:bg-white/10 focus:bg-white/10 cursor-pointer rounded-lg px-3 py-2.5 transition-colors gap-3"
-                        >
-                            <Download size={18} className="text-pink-400" />
-                            <span className="text-sm font-medium">Download Image</span>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Hidden Input for Import */}
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept=".json"
-                    onChange={handleFileChange}
-                />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-white/10 text-white w-9 h-9"
+                    onClick={() => router.push("/")}
+                    title="Go to Homepage"
+                >
+                    <Home size={20} />
+                </Button>
 
                 <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/5">
                     <Button
@@ -137,7 +95,17 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
             </div>
 
             <div className="flex items-center gap-2 md:gap-3">
-                {/* Mobile: Icon only. Desktop: Text. */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-white/10 text-white h-9 px-3 md:px-4 rounded-full"
+                    onClick={handleSave}
+                    title="Save"
+                >
+                    <Save size={16} className="md:mr-2" />
+                    <span className="hidden md:inline">Save</span>
+                </Button>
+
                 <Button
                     variant="secondary"
                     size="sm"
@@ -157,6 +125,14 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 <div className="h-4 w-px bg-white/10 hidden sm:block" />
                 <UserAvatar />
             </div>
+
+            <SaveModal
+                open={showSaveModal}
+                onClose={() => setShowSaveModal(false)}
+                onSave={handleModalSave}
+                defaultTitle={defaultTitle}
+                isSaving={isSaving}
+            />
         </header>
     );
 };
