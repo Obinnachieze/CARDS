@@ -43,71 +43,49 @@ export const EffectsSidebar = () => {
     };
 
     return (
-        <div className="h-full flex flex-col gap-6 p-4">
-            <div>
-                <h3 className="text-sm font-semibold mb-1 text-gray-900">Celebration Effects</h3>
-                <p className="text-xs text-gray-500 mb-4">
-                    Choose an effect to play when the recipient opens the card.
-                </p>
-
-                <div className="grid grid-cols-2 gap-3">
-                    {effects.map((effect) => {
-                        if (effect.id === "floating-emoji") {
-                            return (
-                                <Popover key={effect.id}>
-                                    <PopoverTrigger asChild>
-                                        <button
-                                            onClick={() => handleEffectSelect(effect.id)}
-                                            className={cn(
-                                                "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all",
-                                                currentEffect === effect.id
-                                                    ? "border-purple-600 bg-purple-50 text-purple-700"
-                                                    : "border-gray-100 bg-white hover:border-purple-200 text-gray-600 hover:text-purple-600"
-                                            )}
-                                        >
-                                            <div className={cn(
-                                                "p-2 rounded-full",
-                                                currentEffect === effect.id ? "bg-purple-100" : "bg-gray-100"
-                                            )}>
-                                                {effect.icon}
-                                            </div>
-                                            <span className="text-xs font-medium">{effect.label}</span>
-                                        </button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-full p-0 border-none">
-                                        <EmojiPicker onEmojiClick={handleEmojiSelect} width="100%" height={300} />
-                                    </PopoverContent>
-                                </Popover>
-                            )
-                        }
-
+        <div className="flex flex-col p-3">
+            <div className="flex items-center gap-2">
+                {effects.map((effect) => {
+                    if (effect.id === "floating-emoji") {
                         return (
-                            <button
-                                key={effect.id}
-                                onClick={() => handleEffectSelect(effect.id)}
-                                className={cn(
-                                    "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all",
-                                    currentEffect === effect.id
-                                        ? "border-purple-600 bg-purple-50 text-purple-700"
-                                        : "border-gray-100 bg-white hover:border-purple-200 text-gray-600 hover:text-purple-600"
-                                )}
-                            >
-                                <div className={cn(
-                                    "p-2 rounded-full",
-                                    currentEffect === effect.id ? "bg-purple-100" : "bg-gray-100"
-                                )}>
-                                    {effect.icon}
-                                </div>
-                                <span className="text-xs font-medium">{effect.label}</span>
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
+                            <Popover key={effect.id}>
+                                <PopoverTrigger asChild>
+                                    <button
+                                        onClick={() => handleEffectSelect(effect.id)}
+                                        title={effect.label}
+                                        className={cn(
+                                            "p-3 rounded-xl transition-all",
+                                            currentEffect === effect.id
+                                                ? "bg-purple-600 text-white shadow-md"
+                                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                        )}
+                                    >
+                                        {effect.icon}
+                                    </button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-full p-0 border-none">
+                                    <EmojiPicker onEmojiClick={handleEmojiSelect} width="100%" height={300} />
+                                </PopoverContent>
+                            </Popover>
+                        )
+                    }
 
-            <div className="p-4 bg-yellow-50 text-yellow-800 rounded-lg text-xs italic border border-yellow-200">
-                <Sparkles size={12} className="inline mr-1" />
-                Pro Tip: Effects play automatically when the card is opened!
+                    return (
+                        <button
+                            key={effect.id}
+                            onClick={() => handleEffectSelect(effect.id)}
+                            title={effect.label}
+                            className={cn(
+                                "p-3 rounded-xl transition-all",
+                                currentEffect === effect.id
+                                    ? "bg-purple-600 text-white shadow-md"
+                                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            )}
+                        >
+                            {effect.icon}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

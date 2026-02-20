@@ -210,30 +210,24 @@ export const Toolbar = () => {
                 className={cn(
                     "fixed bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col rounded-2xl",
                     // Floating panel above the dock
-                    "bottom-[76px] left-2 right-2 md:left-auto md:right-4 md:w-96 max-h-[50vh] md:max-h-[70vh] md:bottom-[76px]",
+                    "bottom-[76px] left-2 right-2 md:left-auto md:right-4 max-h-[50vh] md:max-h-[70vh] md:bottom-[76px]",
+                    activeTab && ["draw", "effects", "music"].includes(activeTab) ? "md:w-fit" : "md:w-96",
                     activeTab ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
                 )}
             >                        {activeTab && activeTab !== "music" && (
                 <>
-                    <div className="flex items-center justify-between p-3 border-b border-gray-100 md:hidden">
+                    <div className="flex items-center justify-between p-2 md:hidden">
                         <div className="w-8" />
-                        <div className="w-12 h-1 bg-gray-200 rounded-full" />
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
-                            <ChevronLeft size={16} className="-rotate-90" />
-                        </Button>
-                    </div>
-
-                    <div className="hidden md:flex items-center justify-between p-4 shadow-sm mb-1">
-                        <h3 className="font-semibold text-sm capitalize">{activeTab}</h3>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
-                            <ChevronLeft size={16} />
+                        <div className="w-10 h-1 bg-gray-200 rounded-full" />
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={closePanel}>
+                            <ChevronLeft size={14} className="-rotate-90" />
                         </Button>
                     </div>
 
                     {/* Content Layout */}
-                    <div className="flex h-full overflow-hidden">
+                    <div className="flex overflow-hidden">
 
-                        <ScrollArea className="flex-1 p-4 bg-white">
+                        <ScrollArea className="p-4 bg-white max-h-[inherit] w-full">
                             {/* Panel Content Based on Tab */}
 
                             {activeTab === "text" && (
@@ -472,111 +466,42 @@ export const Toolbar = () => {
                             {/* Projects and Templates moved to SettingsSidebar */}
 
                             {activeTab === "draw" && (
-                                <div className="space-y-6">
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="font-semibold text-sm text-gray-500 uppercase tracking-wider">Drawing Tools</Label>
-                                        </div>
-
-                                        <div className="flex flex-col gap-2">
-                                            <button
-                                                className={cn(
-                                                    "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
-                                                    !isDrawing ? "bg-purple-50 shadow-md ring-1 ring-purple-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
-                                                )}
-                                                onClick={() => setIsDrawing(false)}
-                                            >
-                                                <div className={cn("p-2 rounded-lg bg-purple-100 text-purple-600 shrink-0", !isDrawing && "bg-purple-600 text-white")}>
-                                                    <MousePointer2 size={20} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm text-gray-800">Select / Move</span>
-                                                    <span className="text-[10px] text-gray-500">Interact with elements</span>
-                                                </div>
-                                                {!isDrawing && <div className="absolute left-0 top-3 bottom-3 w-1 bg-purple-600 rounded-r-full" />}
-                                            </button>
-
-                                            <button
-                                                className={cn(
-                                                    "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
-                                                    isDrawing && brushType === "pencil" ? "bg-red-50 shadow-md ring-1 ring-red-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
-                                                )}
-                                                onClick={() => {
-                                                    setBrushType("pencil");
-                                                    setIsDrawing(true);
-                                                }}
-                                            >
-                                                <div className={cn("p-2 rounded-lg bg-red-100 text-red-600 shrink-0", isDrawing && brushType === "pencil" && "bg-red-500 text-white")}>
-                                                    <Pencil size={20} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm text-gray-800">Pencil</span>
-                                                    <span className="text-[10px] text-gray-500">Fine detail lines</span>
-                                                </div>
-                                                {isDrawing && brushType === "pencil" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-red-500 rounded-r-full" />}
-                                            </button>
-
-                                            <button
-                                                className={cn(
-                                                    "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
-                                                    isDrawing && brushType === "marker" ? "bg-blue-50 shadow-md ring-1 ring-blue-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
-                                                )}
-                                                onClick={() => {
-                                                    setBrushType("marker");
-                                                    setIsDrawing(true);
-                                                }}
-                                            >
-                                                <div className={cn("p-2 rounded-lg bg-blue-100 text-blue-600 shrink-0", isDrawing && brushType === "marker" && "bg-blue-500 text-white")}>
-                                                    <PenTool size={20} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm text-gray-800">Marker</span>
-                                                    <span className="text-[10px] text-gray-500">Bold, solid strokes</span>
-                                                </div>
-                                                {isDrawing && brushType === "marker" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-blue-500 rounded-r-full" />}
-                                            </button>
-
-                                            <button
-                                                className={cn(
-                                                    "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
-                                                    isDrawing && brushType === "highlighter" ? "bg-yellow-50 shadow-md ring-1 ring-yellow-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
-                                                )}
-                                                onClick={() => {
-                                                    setBrushType("highlighter");
-                                                    setIsDrawing(true);
-                                                }}
-                                            >
-                                                <div className={cn("p-2 rounded-lg bg-yellow-100 text-yellow-600 shrink-0", isDrawing && brushType === "highlighter" && "bg-yellow-500 text-white")}>
-                                                    <Highlighter size={20} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm text-gray-800">Highlighter</span>
-                                                    <span className="text-[10px] text-gray-500">Transparent overlay</span>
-                                                </div>
-                                                {isDrawing && brushType === "highlighter" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-yellow-500 rounded-r-full" />}
-                                            </button>
-
-                                            <button
-                                                className={cn(
-                                                    "flex items-center p-3 rounded-xl transition-all group relative overflow-hidden gap-3 text-left w-full",
-                                                    isDrawing && brushType === "eraser" ? "bg-gray-100 shadow-md ring-1 ring-gray-200" : "bg-white hover:bg-gray-50 hover:shadow-sm border border-gray-100"
-                                                )}
-                                                onClick={() => {
-                                                    setBrushType("eraser");
-                                                    setIsDrawing(true);
-                                                }}
-                                            >
-                                                <div className={cn("p-2 rounded-lg bg-gray-100 text-gray-600 shrink-0", isDrawing && brushType === "eraser" && "bg-gray-600 text-white")}>
-                                                    <Eraser size={20} />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold text-sm text-gray-800">Eraser</span>
-                                                    <span className="text-[10px] text-gray-500">Remove drawings</span>
-                                                </div>
-                                                {isDrawing && brushType === "eraser" && <div className="absolute left-0 top-3 bottom-3 w-1 bg-gray-600 rounded-r-full" />}
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div className="flex items-center gap-2 flex-wrap p-2">
+                                    <button
+                                        className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                        onClick={() => setIsDrawing(false)}
+                                        title="Select / Move"
+                                    >
+                                        <MousePointer2 size={20} />
+                                    </button>
+                                    <button
+                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                        onClick={() => { setBrushType("pencil"); setIsDrawing(true); }}
+                                        title="Pencil"
+                                    >
+                                        <Pencil size={20} />
+                                    </button>
+                                    <button
+                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                        onClick={() => { setBrushType("marker"); setIsDrawing(true); }}
+                                        title="Marker"
+                                    >
+                                        <PenTool size={20} />
+                                    </button>
+                                    <button
+                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                        onClick={() => { setBrushType("highlighter"); setIsDrawing(true); }}
+                                        title="Highlighter"
+                                    >
+                                        <Highlighter size={20} />
+                                    </button>
+                                    <button
+                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-gray-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                        onClick={() => { setBrushType("eraser"); setIsDrawing(true); }}
+                                        title="Eraser"
+                                    >
+                                        <Eraser size={20} />
+                                    </button>
                                 </div>
                             )}
                             {activeTab === "design" && (
@@ -600,28 +525,16 @@ export const Toolbar = () => {
             )}
 
                 {activeTab === "stickers" && (
-                    <div className="flex h-full flex-col w-full">
-                        <div className="flex items-center justify-between p-4 shadow-sm mb-1 bg-white">
-                            <h3 className="font-semibold text-sm capitalize">Stickers</h3>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
-                                <ChevronLeft size={16} />
-                            </Button>
-                        </div>
-                        <div className="flex-1 overflow-hidden h-full">
+                    <div className="flex flex-col w-full">
+                        <div className="flex-1 overflow-hidden">
                             <StickerSidebar />
                         </div>
                     </div>
                 )}
 
                 {activeTab === "music" && (
-                    <div className="flex h-full flex-col w-full">
-                        <div className="flex items-center justify-between p-4 shadow-sm mb-1 bg-white">
-                            <h3 className="font-semibold text-sm capitalize">Music & Audio</h3>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={closePanel}>
-                                <ChevronLeft size={16} />
-                            </Button>
-                        </div>
-                        <div className="flex-1 overflow-hidden h-full">
+                    <div className="flex flex-col w-full">
+                        <div className="flex-1 overflow-hidden">
                             <MusicSidebar />
                         </div>
                     </div>

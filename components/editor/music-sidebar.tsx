@@ -121,133 +121,101 @@ export function MusicSidebar() {
     };
 
     return (
-        <div className="h-full flex flex-col">
-            <div className="p-4 border-b border-gray-100">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Music className="w-5 h-5 text-purple-600" />
-                    Music & Audio
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                    Add background music or record a message.
-                </p>
-            </div>
-
-            <ScrollArea className="flex-1 p-4">
-                {currentAudio && (
-                    <div className="mb-6 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                        <Label className="text-xs font-bold text-purple-900 uppercase mb-2 block">
-                            Current Audio
-                        </Label>
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 overflow-hidden">
-                                <Music className="w-4 h-4 text-purple-400 shrink-0" />
-                                <span className="text-sm truncate text-purple-700">
-                                    Audio Track
-                                </span>
-                            </div>
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-50"
-                                onClick={handleRemoveAudio}
-                                title="Remove Audio"
-                            >
-                                <X size={14} />
-                            </Button>
+        <div className="flex flex-col p-3">
+            {currentAudio && (
+                <div className="mb-3 p-2 bg-purple-50 rounded-xl border border-purple-100">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                            <Music className="w-4 h-4 text-purple-400 shrink-0" />
+                            <span className="text-sm truncate text-purple-700">Audio Track</span>
                         </div>
-                        <audio controls className="w-full mt-2 h-8" src={currentAudio} />
+                        <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-50"
+                            onClick={handleRemoveAudio}
+                            title="Remove Audio"
+                        >
+                            <X size={14} />
+                        </Button>
                     </div>
-                )}
+                    <audio controls className="w-full mt-2 h-8" src={currentAudio} />
+                </div>
+            )}
 
-                <div className="space-y-8">
-                    {/* Recording Section */}
-                    <div>
-                        <Label className="text-sm font-medium mb-3 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            Record Voice
-                        </Label>
+            {/* Upload & Record Row */}
+            {!isRecording && !recordedUrl && (
+                <div className="grid grid-cols-2 gap-2">
+                    <label htmlFor="audio-upload" className="flex flex-col items-center justify-center gap-1 p-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl cursor-pointer transition-colors">
+                        <Upload className="w-5 h-5 text-purple-500" />
+                        <span className="text-xs font-semibold text-gray-700">Upload</span>
+                        <span className="text-[10px] text-gray-400">MP3, WAV</span>
+                        <input
+                            id="audio-upload"
+                            type="file"
+                            className="hidden"
+                            accept="audio/*,video/mp4"
+                            onChange={handleFileUpload}
+                        />
+                    </label>
+                    <button
+                        onClick={startRecording}
+                        className="flex flex-col items-center justify-center gap-1 p-3 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl transition-colors"
+                    >
+                        <Mic className="w-5 h-5 text-red-500" />
+                        <span className="text-xs font-semibold text-gray-700">Record</span>
+                        <span className="text-[10px] text-gray-400">Voice message</span>
+                    </button>
+                </div>
+            )}
 
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col items-center gap-4 text-center">
-                            {!isRecording && !recordedUrl ? (
-                                <div className="space-y-2 flex flex-col items-center">
-                                    <p className="text-xs text-gray-500">Click the mic to record.</p>
-                                    <Button
-                                        onClick={startRecording}
-                                        className="bg-red-500 hover:bg-red-600 text-white rounded-full w-14 h-14 p-0 shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center border-4 border-red-100"
-                                    >
-                                        <Mic className="w-6 h-6" />
-                                    </Button>
-                                </div>
-                            ) : isRecording ? (
-                                <div className="space-y-3 w-full">
-                                    <div className="text-2xl font-mono font-bold text-red-500">
-                                        {formatTime(recordingTime)}
-                                    </div>
-                                    <div className="flex items-center justify-center gap-1 h-8">
-                                        {[...Array(5)].map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="w-1 bg-red-400 rounded-full animate-pulse"
-                                                style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}
-                                            />
-                                        ))}
-                                    </div>
-                                    <Button
-                                        onClick={stopRecording}
-                                        variant="outline"
-                                        className="h-12 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2"
-                                    >
-                                        <div className="w-3 h-3 bg-red-600 rounded-sm" />
-                                        Stop Recording
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="space-y-3 w-full">
-                                    <div className="flex items-center justify-center gap-2 mb-2">
-                                        <audio controls src={recordedUrl!} className="h-8 w-full" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => setRecordedUrl(null)}
-                                            className="text-xs h-8"
-                                        >
-                                            Discard
-                                        </Button>
-                                        <Button
-                                            onClick={saveRecording}
-                                            className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-8 font-semibold"
-                                        >
-                                            Attach to Card
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+            {/* Recording in progress */}
+            {isRecording && (
+                <div className="bg-red-50 rounded-xl p-4 border border-red-100 flex flex-col items-center gap-3">
+                    <div className="text-2xl font-mono font-bold text-red-500">
+                        {formatTime(recordingTime)}
                     </div>
+                    <div className="flex items-center justify-center gap-1 h-6">
+                        {[...Array(5)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="w-1 bg-red-400 rounded-full animate-pulse"
+                                style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}
+                            />
+                        ))}
+                    </div>
+                    <Button
+                        onClick={stopRecording}
+                        variant="outline"
+                        className="h-10 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 gap-2 w-full"
+                    >
+                        <div className="w-3 h-3 bg-red-600 rounded-sm" />
+                        Stop
+                    </Button>
+                </div>
+            )}
 
-                    {/* Upload Section */}
-                    <div>
-                        <Label className="text-sm font-medium mb-3 block">Upload Audio</Label>
-                        <div className="flex items-center justify-center w-full">
-                            <label htmlFor="audio-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <Upload className="w-8 h-8 mb-3 text-gray-400" />
-                                    <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span></p>
-                                    <p className="text-xs text-gray-500">MP3, WAV, M4A, MP4 (Audio)</p>
-                                </div>
-                                <input
-                                    id="audio-upload"
-                                    type="file"
-                                    className="hidden"
-                                    accept="audio/*,video/mp4"
-                                    onChange={handleFileUpload}
-                                />
-                            </label>
-                        </div>
+            {/* Recorded result */}
+            {!isRecording && recordedUrl && (
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+                    <audio controls src={recordedUrl!} className="h-8 w-full" />
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setRecordedUrl(null)}
+                            className="text-xs h-8"
+                        >
+                            Discard
+                        </Button>
+                        <Button
+                            onClick={saveRecording}
+                            className="bg-purple-600 hover:bg-purple-700 text-white text-xs h-8 font-semibold"
+                        >
+                            Attach to Card
+                        </Button>
                     </div>
                 </div>
-            </ScrollArea>
+            )}
         </div>
     );
 }
