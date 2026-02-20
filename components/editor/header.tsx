@@ -4,10 +4,11 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Undo2, Redo2, Cloud, FileText,
-    Home, Save
+    Home, Save, Plus
 } from "lucide-react";
 import { useEditor } from "./editor-context";
 import { useParams, useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { UserAvatar } from "./user-avatar";
 import { ShareDialog } from "./share-dialog";
 import { SaveModal } from "./save-modal";
@@ -19,7 +20,8 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const {
         undo, redo, canUndo, canRedo,
         saveCurrentProject, saveProjectAs,
-        currentProjectId
+        currentProjectId,
+        cards, activeCardId, addCard, activateCard
     } = useEditor();
 
     const [showSaveModal, setShowSaveModal] = useState(false);
@@ -81,6 +83,37 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                         className="h-8 w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
                     >
                         <Redo2 size={16} />
+                    </Button>
+                </div>
+
+                {/* Page indicator + Add page */}
+                <div className="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5 border border-white/5">
+                    {cards.map((card, index) => (
+                        <Button
+                            key={card.id}
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => activateCard(card.id)}
+                            className={cn(
+                                "h-8 w-8 rounded-md text-xs font-semibold transition-all",
+                                activeCardId === card.id
+                                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                                    : "text-white/60 hover:bg-white/10 hover:text-white"
+                            )}
+                            title={`Page ${index + 1}`}
+                        >
+                            {index + 1}
+                        </Button>
+                    ))}
+                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={addCard}
+                        className="h-8 w-8 hover:bg-white/10 text-white/60 hover:text-white rounded-md"
+                        title="Add new page"
+                    >
+                        <Plus size={16} />
                     </Button>
                 </div>
 

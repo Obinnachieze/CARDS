@@ -71,7 +71,7 @@ export const Canvas = () => {
         };
     }, [cardIsOpen, activeCard?.celebration]);
 
-    const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+
 
     const getFaceContent = (face: CardFace, cardElements: EditorElement[]) => {
         const faceElements = cardElements.filter(el => el.face === face);
@@ -102,6 +102,12 @@ export const Canvas = () => {
         );
     };
 
+    // Only render the active card
+    const card = activeCard;
+    if (!card) return <div className="flex-1 bg-[#f0f0f3]" />;
+
+    const currentCardIsOpen = isOpen(card.currentFace);
+
     return (
         <div
             className="flex-1 bg-[#f0f0f3] overflow-y-auto relative flex flex-col items-center"
@@ -110,77 +116,65 @@ export const Canvas = () => {
             <div
                 id="card-canvas-container"
                 className={cn(
-                    "p-4 md:p-20 w-full transition-all duration-300 pb-32 md:pb-20",
-                    activeTool ? "md:pb-20 origin-top scale-[0.6] -translate-y-[10vh] md:scale-100 md:translate-y-0" : "",
-                    viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-12 justify-items-center" : "flex flex-col items-center gap-12 md:gap-24 items-center"
-                )}>
-                {cards.map(card => {
-                    const isCardActive = activeCardId === card.id;
-                    const cardIsOpen = isOpen(card.currentFace);
+                    "p-4 md:p-20 w-full transition-all duration-300 pb-32 md:pb-20 flex flex-col items-center",
+                    activeTool ? "md:pb-20 origin-top scale-[0.6] -translate-y-[10vh] md:scale-100 md:translate-y-0" : ""
+                )}
+            >
+                <motion.div
+                    key={card.id}
+                    className="relative group transition-all duration-300 perspective-[2000px]"
+                    style={{
+                        transform: `scale(${zoom})`,
+                        transformOrigin: 'top center'
+                    }}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        activateCard(card.id);
+                    }}
+                >
+                    <div className="transition-all duration-200 rounded-xl">
+                        <CardWrapper
+                            frontContent={getFaceContent("front", card.elements)}
+                            insideLeftContent={getFaceContent("inside-left", card.elements)}
+                            insideRightContent={getFaceContent("inside-right", card.elements)}
+                            backContent={getFaceContent("back", card.elements)}
+                            interactive={false}
+                            isOpen={currentCardIsOpen}
+                            backgroundColor={card.backgroundColor}
+                            audioSrc={card.audioSrc}
+                        />
+                        {/* Floating Emoji Overlay */}
+                        {showFloating && card.celebration === "floating-emoji" && (
+                            <FloatingParticles emoji={card.celebrationEmoji || "🎈"} count={15} />
+                        )}
+                    </div>
 
-                    return (
-                        <div
-                            key={card.id}
-                            className="relative group transition-all duration-300 perspective-[2000px]"
-                            style={{
-                                transform: `scale(${zoom})`,
-                                transformOrigin: 'top center'
-                            }}
+                    {/* Sticky Open/Close Button */}
+                    <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 z-50 w-max">
+                        <Button
+                            variant="default"
+                            size="sm"
+                            className={cn(
+                                "rounded-full h-10 px-6 gap-2 font-semibold transition-all hover:scale-105",
+                                currentCardIsOpen ? "bg-white text-gray-900 border hover:bg-gray-100" : "bg-purple-600 hover:bg-purple-700 text-white"
+                            )}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                activateCard(card.id);
+                                if (cardMode === "postcard") {
+                                    setCardFace(card.id, card.currentFace === "back" ? "front" : "back");
+                                } else {
+                                    setCardFace(card.id, currentCardIsOpen ? "front" : "inside-right");
+                                }
                             }}
                         >
-
-
-                            <div className={cn(
-                                "transition-all duration-200 rounded-xl",
-                                isCardActive ? "" : "opacity-90 hover:opacity-100"
-                            )}>
-                                <CardWrapper
-                                    frontContent={getFaceContent("front", card.elements)}
-                                    insideLeftContent={getFaceContent("inside-left", card.elements)}
-                                    insideRightContent={getFaceContent("inside-right", card.elements)}
-                                    backContent={getFaceContent("back", card.elements)}
-                                    interactive={false}
-                                    isOpen={cardIsOpen}
-                                    backgroundColor={card.backgroundColor}
-                                    audioSrc={card.audioSrc}
-                                />
-                                {/* Floating Emoji Overlay */}
-                                {showFloating && card.id === activeCardId && card.celebration === "floating-emoji" && (
-                                    <FloatingParticles emoji={card.celebrationEmoji || "🎈"} count={15} />
-                                )}
-                            </div>
-
-                            {/* Sticky Open/Close Button */}
-                            <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 z-50 w-max">
-                                <Button
-                                    variant="default"
-                                    size="sm"
-                                    className={cn(
-                                        "rounded-full h-10 px-6 gap-2 font-semibold transition-all hover:scale-105",
-                                        cardIsOpen ? "bg-white text-gray-900 border hover:bg-gray-100" : "bg-purple-600 hover:bg-purple-700 text-white"
-                                    )}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        activateCard(card.id);
-                                        if (cardMode === "postcard") {
-                                            setCardFace(card.id, card.currentFace === "back" ? "front" : "back");
-                                        } else {
-                                            setCardFace(card.id, cardIsOpen ? "front" : "inside-right");
-                                        }
-                                    }}
-                                >
-                                    {cardIsOpen ? <><X size={16} /> Close</> : <><BookOpen size={16} /> Open</>}
-                                </Button>
-                            </div>
-                        </div>
-                    );
-                })}
+                            {currentCardIsOpen ? <><X size={16} /> Close</> : <><BookOpen size={16} /> Open</>}
+                        </Button>
+                    </div>
+                </motion.div>
             </div>
-
-
         </div>
     );
 };
