@@ -110,14 +110,14 @@ export const Canvas = () => {
 
     return (
         <div
-            className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center"
+            className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center pb-24"
             onClick={() => selectElement(null)}
         >
             <div
                 id="card-canvas-container"
                 className={cn(
-                    "w-full h-full flex flex-col items-center justify-center transition-all duration-300",
-                    activeTool ? "origin-top scale-[0.55] -translate-y-[8vh] md:scale-100 md:translate-y-0" : ""
+                    "w-full h-full flex flex-col items-center justify-center transition-all duration-300 scale-[0.85] md:scale-[0.9]",
+                    activeTool ? "origin-top scale-[0.5] -translate-y-[10vh] md:scale-[0.85] md:translate-y-0" : ""
                 )}
             >
                 <motion.div
