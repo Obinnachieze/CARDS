@@ -2,8 +2,26 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export const colors = [
-    "#000000", "#ffffff", "#ef4444", "#f97316", "#eab308", "#22c55e",
-    "#06b6d4", "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#f43f5e"
+    // Neutrals
+    "#000000", "#374151", "#6b7280", "#9ca3af", "#d1d5db", "#f3f4f6", "#ffffff",
+    // Reds
+    "#fecaca", "#f87171", "#ef4444", "#dc2626", "#991b1b",
+    // Oranges
+    "#fed7aa", "#fb923c", "#f97316", "#ea580c", "#9a3412",
+    // Yellows
+    "#fef08a", "#facc15", "#eab308", "#ca8a04", "#854d0e",
+    // Greens
+    "#bbf7d0", "#4ade80", "#22c55e", "#16a34a", "#166534",
+    // Teals & Cyans
+    "#a5f3fc", "#22d3ee", "#06b6d4", "#0891b2", "#155e75",
+    // Blues
+    "#bfdbfe", "#60a5fa", "#3b82f6", "#2563eb", "#1e3a8a",
+    // Purples
+    "#e9d5ff", "#a78bfa", "#8b5cf6", "#7c3aed", "#5b21b6",
+    // Pinks
+    "#fbcfe8", "#f472b6", "#ec4899", "#db2777", "#9d174d",
+    // Rose
+    "#fecdd3", "#fb7185", "#f43f5e", "#e11d48", "#9f1239",
 ];
 
 interface ColorPickerProps {
