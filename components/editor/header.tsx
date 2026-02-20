@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Undo2, Redo2, Cloud, FileText,
-    Home, Save, Plus
+    Home, Save, Plus, Settings
 } from "lucide-react";
 import { useEditor } from "./editor-context";
 import { useParams, useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { UserAvatar } from "./user-avatar";
 import { ShareDialog } from "./share-dialog";
 import { SaveModal } from "./save-modal";
+import { SettingsSidebar } from "./settings-sidebar";
 
 export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const params = useParams();
@@ -26,6 +27,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
 
     const [showSaveModal, setShowSaveModal] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const defaultTitle = typeof type === "string"
         ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
@@ -128,16 +130,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
             </div>
 
             <div className="flex items-center gap-2 md:gap-3">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-white/10 text-white h-9 px-3 md:px-4 rounded-full"
-                    onClick={handleSave}
-                    title="Save"
-                >
-                    <Save size={16} className="md:mr-2" />
-                    <span className="hidden md:inline">Save</span>
-                </Button>
+                <div />
 
                 <Button
                     variant="secondary"
@@ -157,6 +150,18 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 */}
                 <div className="h-4 w-px bg-white/10 hidden sm:block" />
                 <UserAvatar />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                        "hover:bg-white/10 transition-colors w-8 h-8 md:w-9 md:h-9",
+                        isSettingsOpen ? "text-purple-400" : "text-white/70 hover:text-white"
+                    )}
+                    title="Settings"
+                    onClick={() => setIsSettingsOpen(true)}
+                >
+                    <Settings size={18} />
+                </Button>
             </div>
 
             <SaveModal
@@ -165,6 +170,12 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 onSave={handleModalSave}
                 defaultTitle={defaultTitle}
                 isSaving={isSaving}
+            />
+
+            <SettingsSidebar
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                onSaveClick={() => setShowSaveModal(true)}
             />
         </header>
     );

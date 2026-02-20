@@ -110,24 +110,7 @@ export const Toolbar = () => {
     const [isLoadingFonts, setIsLoadingFonts] = useState(false);
     const [fontError, setFontError] = useState<string | null>(null);
 
-    const loadTemplate = (templateId: string) => {
-        const template = templates.find(t => t.id === templateId);
-        if (template && activeCardId) {
-            const templateCard = template.cards[0];
-
-            setCards(prev => prev.map(card => {
-                if (card.id === activeCardId) {
-                    return {
-                        ...card,
-                        elements: templateCard.elements.map(el => ({ ...el })),
-                        backgroundColor: templateCard.backgroundColor,
-                        celebration: templateCard.celebration
-                    };
-                }
-                return card;
-            }));
-        }
-    };
+    // loadTemplate logic removed - moved to SettingsSidebar
 
     // Fetch fonts on mount
     useEffect(() => {
@@ -205,23 +188,18 @@ export const Toolbar = () => {
     return (
         <div className="flex md:h-full z-40 relative shrink-0 md:shrink-0">
             {/* Mobile FAB */}
-            {/* Mobile FAB - Disappears when panel is open */}
             <button
                 className={cn(
                     "md:hidden fixed bottom-6 left-6 w-14 h-14 bg-purple-600 rounded-full shadow-lg z-50 flex items-center justify-center text-white hover:bg-purple-700 transition-all duration-300 active:scale-95",
                     activeTab ? "scale-0 opacity-0 pointer-events-none" : "scale-100 opacity-100"
                 )}
-                onClick={() => setActiveTab("templates")}
+                onClick={() => setActiveTab("text")}
             >
                 <div className="text-3xl font-light">+</div>
             </button>
 
             {/* Dark Icon Rail - Desktop Only */}
             <div id="sidebar-tools" className="hidden md:flex flex-col items-center w-[72px] py-4 bg-transparent text-gray-600 gap-2 z-50">
-                <SidebarTab icon={<FolderOpen size={20} />} label="Projects" active={activeTab === "projects"} onClick={() => setActiveTab(activeTab === "projects" ? null : "projects")} onMouseEnter={() => setActiveTab("projects")} />
-                <div id="sidebar-templates">
-                    <SidebarTab icon={<LayoutTemplate size={20} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab(activeTab === "templates" ? null : "templates")} onMouseEnter={() => setActiveTab("templates")} />
-                </div>
                 <SidebarTab icon={<LayoutTemplate size={20} />} label="Design" active={activeTab === "design"} onClick={() => setActiveTab(activeTab === "design" ? null : "design")} onMouseEnter={() => setActiveTab("design")} />
                 <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab(activeTab === "text" ? null : "text")} onMouseEnter={() => setActiveTab("text")} />
                 <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab(activeTab === "elements" ? null : "elements")} onMouseEnter={() => setActiveTab("elements")} />
@@ -263,7 +241,6 @@ export const Toolbar = () => {
                     <div className="flex h-full overflow-hidden">
                         {/* Mobile Sidebar (Vertical List) */}
                         <div className="w-[72px] bg-gray-50 border-r border-gray-100 flex flex-col items-center py-4 gap-2 overflow-y-auto no-scrollbar shrink-0 md:hidden">
-                            <SidebarTab icon={<LayoutTemplate size={20} />} label="Templates" active={activeTab === "templates"} onClick={() => setActiveTab("templates")} />
                             <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => setActiveTab("text")} />
                             <SidebarTab icon={<Smile size={20} />} label="Elements" active={activeTab === "elements"} onClick={() => setActiveTab("elements")} />
                             <SidebarTab icon={<Upload size={20} />} label="Uploads" active={activeTab === "uploads"} onClick={() => setActiveTab("uploads")} />
@@ -517,70 +494,7 @@ export const Toolbar = () => {
                                 </div>
                             )}
 
-                            {activeTab === "projects" && (
-                                <div className="space-y-6">
-                                    <div className="space-y-4">
-                                        <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Current Project</Label>
-                                        <div className="flex flex-col gap-2">
-                                            <Input
-                                                id="project-name"
-                                                placeholder="Project Name"
-                                                className="h-10"
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        saveProjectAs(e.currentTarget.value || "Untitled Project");
-                                                        e.currentTarget.value = "";
-                                                    }
-                                                }}
-                                            />
-                                            <Button
-                                                className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2"
-                                                onClick={() => {
-                                                    const input = document.getElementById("project-name") as HTMLInputElement;
-                                                    saveProjectAs(input?.value || "Untitled Project");
-                                                    if (input) input.value = "";
-                                                }}
-                                            >
-                                                <Save size={16} />
-                                                Save Project
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4 border-t pt-4">
-                                        <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Saved Projects</Label>
-                                        {projects.length === 0 ? (
-                                            <div className="text-center py-8 text-gray-400 text-xs">
-                                                No saved projects yet.
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                {projects.map((project) => (
-                                                    <div key={project.id} className="group flex items-center justify-between p-3 bg-gray-50 hover:bg-white border rounded-lg shadow-sm transition-all">
-                                                        <div className="flex flex-col cursor-pointer flex-1" onClick={() => loadProject(project.id)}>
-                                                            <span className="font-medium text-sm text-gray-700 group-hover:text-purple-700">{project.name}</span>
-                                                            <span className="text-[10px] text-gray-400">{new Date(project.updatedAt).toLocaleDateString()}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-7 w-7 text-gray-400 hover:text-red-500 hover:bg-red-50"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    deleteProject(project.id);
-                                                                }}
-                                                            >
-                                                                <Trash2 size={14} />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                            {/* Projects and Templates moved to SettingsSidebar */}
 
                             {activeTab === "draw" && (
                                 <div className="space-y-6">
@@ -699,76 +613,7 @@ export const Toolbar = () => {
                                 </div>
                             )}
 
-                            {activeTab === "templates" && (
-                                <div className="space-y-6">
-                                    <div className="space-y-4">
-                                        <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Templates</Label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {templates.map(template => (
-                                                <button
-                                                    key={template.id}
-                                                    className="group relative aspect-3/4 bg-gray-100 rounded-xl overflow-hidden border hover:border-purple-400 hover:shadow-md transition-all text-left"
-                                                    onClick={() => loadTemplate(template.id)}
-                                                >
-                                                    <div
-                                                        className="absolute inset-0 w-full h-full"
-                                                        style={{ background: template.thumbnail.startsWith("#") ? template.thumbnail : template.thumbnail }}
-                                                    />
-                                                    <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent">
-                                                        <span className="text-white text-xs font-medium truncate w-full block">
-                                                            {template.name}
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4 pt-4 border-t border-gray-100">
-                                        <Label className="font-bold text-xs text-gray-500 uppercase tracking-wider">Card Format</Label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <button
-                                                className={cn(
-                                                    "aspect-video rounded-md border-2 flex flex-col items-center justify-center gap-2 transition-all",
-                                                    cardMode === "foldable"
-                                                        ? "border-purple-600 bg-purple-50 text-purple-700"
-                                                        : "border-gray-200 bg-white hover:border-purple-300 text-gray-600"
-                                                )}
-                                                onClick={() => setCardMode("foldable")}
-                                            >
-                                                <LayoutTemplate size={24} />
-                                                <span className="text-xs font-medium">Foldable</span>
-                                            </button>
-                                            <button
-                                                className={cn(
-                                                    "aspect-video rounded-md border-2 flex flex-col items-center justify-center gap-2 transition-all",
-                                                    cardMode === "envelope"
-                                                        ? "border-amber-600 bg-amber-50 text-amber-700"
-                                                        : "border-gray-200 bg-white hover:border-amber-300 text-gray-600"
-                                                )}
-                                                onClick={() => setCardMode("envelope")}
-                                            >
-                                                <div className="w-6 h-4 border-2 border-current rounded-sm relative">
-                                                    <div className="absolute top-0 left-0 right-0 h-2 border-b-2 border-current transform origin-top scale-y-100" />
-                                                </div>
-                                                <span className="text-xs font-medium">Envelope</span>
-                                            </button>
-                                            <button
-                                                className={cn(
-                                                    "aspect-video rounded-md border-2 flex flex-col items-center justify-center gap-2 transition-all",
-                                                    cardMode === "postcard"
-                                                        ? "border-teal-600 bg-teal-50 text-teal-700"
-                                                        : "border-gray-200 bg-white hover:border-teal-300 text-gray-600"
-                                                )}
-                                                onClick={() => setCardMode("postcard")}
-                                            >
-                                                <div className="w-6 h-4 border-2 border-current rounded-sm relative" />
-                                                <span className="text-xs font-medium">Postcard</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            {/* Templates section moved to SettingsSidebar */}
 
                             {activeTab === "effects" && (
                                 <EffectsSidebar />

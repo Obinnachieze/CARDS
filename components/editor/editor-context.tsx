@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project, EditorTab } from "./types";
 import { createClient } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -72,6 +73,13 @@ interface EditorContextType {
 
     activeTool: EditorTab | null;
     setActiveTool: (tool: EditorTab | null) => void;
+
+    // Project Name for Sidebar Sync
+    projectName: string;
+    setProjectName: (name: string) => void;
+
+    // Auth
+    user: User | null;
 }
 
 const EditorContext = createContext<EditorContextType | null>(null);
@@ -130,6 +138,30 @@ export const EditorProvider = ({
 
     // UI State
     const [activeTool, setActiveTool] = useState<import("./types").EditorTab | null>(null);
+    const [projectName, setProjectName] = useState("");
+
+    // Auth State
+    const [user, setUser] = useState<User | null>(null);
+    const supabase = createClient();
+
+    // Ref for debouncing auto-save
+    const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Initial Auth Load
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+
+        getUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [supabase]);
 
     // Load projects from local storage on mount
     useEffect(() => {
@@ -147,6 +179,7 @@ export const EditorProvider = ({
         setCards([{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }]);
         setCardMode("postcard");
         setCurrentProjectId(null);
+        setProjectName(""); // Clear name on new project
         setActiveCardId("card-1");
         setPast([]);
         setFuture([]);
@@ -164,6 +197,7 @@ export const EditorProvider = ({
         const updatedProjects = [...projects, newProject];
         setProjects(updatedProjects);
         setCurrentProjectId(newId);
+        setProjectName(name); // Sync name state
         localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
 
         // Save to Supabase
@@ -171,6 +205,7 @@ export const EditorProvider = ({
         try {
             await supabase.from('projects').insert({
                 id: newId,
+                user_id: user?.id, // Track owner
                 name: name,
                 cards: cards,
                 card_mode: cardMode,
@@ -181,38 +216,56 @@ export const EditorProvider = ({
             console.error("Failed to save to Supabase:", error.message || error);
             throw error;
         }
-    }, [cards, cardMode, projects]);
+    }, [cards, cardMode, projects, user]);
 
     const saveCurrentProject = useCallback(async () => {
         if (!currentProjectId) return;
 
+        const project = projects.find(p => p.id === currentProjectId);
+        const currentName = projectName || project?.name || "Untitled Project";
+
         const updatedProjects = projects.map(p =>
             p.id === currentProjectId
-                ? { ...p, cards, cardMode, updatedAt: Date.now() }
+                ? { ...p, cards, cardMode, name: currentName, updatedAt: Date.now() }
                 : p
         );
         setProjects(updatedProjects);
         localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
 
-        // Save to Supabase
-        const supabase = createClient();
-        try {
-            const project = projects.find(p => p.id === currentProjectId);
-            const currentName = project?.name || "Untitled Project";
+        // Save to Supabase (only if logged in)
+        if (!user) return;
 
-            const { error } = await supabase.from('projects').upsert({
+        const supabaseClient = createClient();
+        try {
+            const { error } = await supabaseClient.from('projects').upsert({
                 id: currentProjectId,
+                user_id: user.id, // Ensure user_id is set
                 name: currentName,
                 cards: cards,
                 card_mode: cardMode,
                 updated_at: new Date().toISOString()
             });
             if (error) throw error;
+            console.log("Auto-saved to cloud");
         } catch (error: any) {
-            console.error("Failed to save to Supabase (Upsert):", error.message || JSON.stringify(error));
-            throw error;
+            console.error("Failed to save to Supabase (Auto-save):", error.message || JSON.stringify(error));
         }
-    }, [cards, cardMode, projects, currentProjectId]);
+    }, [cards, cardMode, projects, currentProjectId, user, projectName]);
+
+    // Auto-save logic
+    useEffect(() => {
+        if (currentProjectId && user) {
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+
+            autoSaveTimerRef.current = setTimeout(() => {
+                saveCurrentProject();
+            }, 3000); // 3 second debounce
+        }
+
+        return () => {
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        };
+    }, [cards, cardMode, saveCurrentProject, currentProjectId, user]);
 
     const exportProjectAsJSON = useCallback(() => {
         const projectData = {
@@ -294,9 +347,9 @@ export const EditorProvider = ({
             setCards(project.cards);
             setCardMode(project.cardMode);
             setCurrentProjectId(project.id);
+            setProjectName(project.name); // Keep names in sync
             setActiveCardId(project.cards[0]?.id || null);
-            saveHistory(); // Optional: Save "Load" as a history step? checking this might break undo/redo stack
-            // Better to clear history on new project load
+            saveHistory();
             setPast([]);
             setFuture([]);
         }
@@ -524,7 +577,10 @@ export const EditorProvider = ({
             setCelebration,
             setAudio,
             activeTool,
-            setActiveTool
+            setActiveTool,
+            projectName,
+            setProjectName,
+            user
         }}>
             {children}
         </EditorContext.Provider>
