@@ -104,9 +104,6 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                     <Label className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">Active Workspace</Label>
                                                     <p className="text-sm font-semibold text-purple-900 whitespace-nowrap min-w-max">
                                                         {projectName || "Untitled Card"}
-                                                        <span className="ml-1.5 opacity-60 font-normal">
-                                                            [{cards.length === 1 ? "Page 1" : `Page ${cards.length}`}]
-                                                        </span>
                                                     </p>
                                                 </div>
                                             )}
@@ -198,12 +195,9 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                     }}
                                                 >
                                                     <div className="flex flex-col flex-1 min-w-0 pr-4">
-                                                        <span className="font-semibold text-sm text-gray-800 whitespace-nowrap min-w-max block">
-                                                            {project.name}
-                                                            <span className="ml-1.5 opacity-40 font-normal">
-                                                                [{project.cards.length === 1 ? "Page 1" : `Page ${project.cards.length}`}]
-                                                            </span>
-                                                        </span>
+                                                        <p className="font-semibold text-purple-900 group-hover:text-purple-700 transition-colors truncate">
+                                                            {project.name || "Untitled Card"}
+                                                        </p>
                                                         <span className="text-[10px] text-gray-400">{new Date(project.updatedAt).toLocaleDateString()}</span>
                                                     </div>
                                                     <Button
