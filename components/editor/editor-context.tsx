@@ -179,7 +179,7 @@ export const EditorProvider = ({
         setCards([{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }]);
         setCardMode("postcard");
         setCurrentProjectId(null);
-        setProjectName(""); // Clear name on new project
+        setProjectName(""); // Reset name
         setActiveCardId("card-1");
         setPast([]);
         setFuture([]);
@@ -395,6 +395,10 @@ export const EditorProvider = ({
         };
         setCards(prev => [...prev, newCard]);
         setActiveCardId(newCard.id);
+
+        // Requirement: New page resets save state to show input
+        setCurrentProjectId(null);
+        setProjectName("");
     }, [saveHistory]);
 
     const removeCard = useCallback((id: string) => {

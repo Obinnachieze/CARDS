@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     X, Save, LayoutTemplate, FolderOpen,
-    Trash2, ChevronLeft, Search, FilePlus
+    Trash2, ChevronLeft, Check, Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { templates } from "./templates";
@@ -36,9 +36,9 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
         setActiveTool,
         projectName,
         setProjectName,
-        downloadAsImage,
-        exportProjectAsJSON,
-        user
+        user,
+        createNewProject,
+        addCard
     } = useEditor();
 
     const loadTemplate = (templateId: string) => {
@@ -96,36 +96,26 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                 <section className="space-y-4">
                                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Save & Export</h3>
                                     <div className="bg-purple-50 p-4 rounded-2xl space-y-3">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Project Name</Label>
-                                            <Input
-                                                id="sidebar-project-name"
-                                                placeholder="Enter project name..."
-                                                value={projectName}
-                                                onChange={(e) => setProjectName(e.target.value)}
-                                                className="bg-white border-purple-200 focus:ring-purple-500"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-1 gap-2">
-                                            {currentProjectId ? (
+                                        {currentProjectId ? (
+                                            <Button
+                                                disabled
+                                                className="w-full bg-green-500 text-white gap-2 h-11 rounded-xl shadow-lg shadow-green-100 opacity-100 cursor-default"
+                                            >
+                                                <Check size={18} />
+                                                Saved
+                                            </Button>
+                                        ) : (
+                                            <>
                                                 <div className="space-y-2">
-                                                    <Button
-                                                        className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2 h-11 rounded-xl shadow-lg shadow-purple-200"
-                                                        onClick={() => saveCurrentProject()}
-                                                    >
-                                                        <Save size={18} />
-                                                        Update Project
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        className="w-full border-purple-200 text-purple-600 hover:bg-purple-50 gap-2 h-11 rounded-xl"
-                                                        onClick={() => saveProjectAs(`${projectName} (Copy)`)}
-                                                    >
-                                                        <FilePlus size={18} />
-                                                        Save as New Copy
-                                                    </Button>
+                                                    <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Project Name</Label>
+                                                    <Input
+                                                        id="sidebar-project-name"
+                                                        placeholder="Enter project name..."
+                                                        value={projectName}
+                                                        onChange={(e) => setProjectName(e.target.value)}
+                                                        className="bg-white border-purple-200 focus:ring-purple-500"
+                                                    />
                                                 </div>
-                                            ) : (
                                                 <Button
                                                     className="w-full bg-purple-600 hover:bg-purple-700 text-white gap-2 h-11 rounded-xl shadow-lg shadow-purple-200"
                                                     onClick={() => saveProjectAs(projectName || "Untitled Project")}
@@ -133,31 +123,21 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                     <Save size={18} />
                                                     Save Project
                                                 </Button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </section>
-
-                                {/* Export & Download Section */}
-                                <section className="space-y-4">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Export & Download</h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Button
-                                            variant="outline"
-                                            className="border-gray-200 hover:bg-gray-50 rounded-xl h-20 flex-col gap-2"
-                                            onClick={downloadAsImage}
-                                        >
-                                            <FilePlus size={20} className="text-blue-500" />
-                                            <span className="text-xs">PNG Image</span>
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            className="border-gray-200 hover:bg-gray-50 rounded-xl h-20 flex-col gap-2"
-                                            onClick={exportProjectAsJSON}
-                                        >
-                                            <Search size={20} className="text-purple-500" />
-                                            <span className="text-xs">JSON Data</span>
-                                        </Button>
+                                            </>
+                                        )}
+                                        {currentProjectId && (
+                                            <Button
+                                                variant="outline"
+                                                className="w-full border-purple-200 text-purple-600 hover:bg-purple-50 gap-2 h-11 rounded-xl"
+                                                onClick={() => {
+                                                    addCard();
+                                                    onClose();
+                                                }}
+                                            >
+                                                <Plus size={18} />
+                                                Create New Design
+                                            </Button>
+                                        )}
                                     </div>
                                 </section>
 
@@ -232,8 +212,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                         </ScrollArea>
                     </motion.div>
                 </>
-            )
-            }
-        </AnimatePresence >
+            )}
+        </AnimatePresence>
     );
 };
