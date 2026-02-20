@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { EditorProvider } from "@/components/editor/editor-context";
+import { useEditor, EditorProvider } from "@/components/editor/editor-context";
 import { Canvas } from "@/components/editor/canvas";
 import { Toolbar } from "@/components/editor/toolbar";
 import { Header } from "@/components/editor/header";
 import { PreviewModal } from "@/components/editor/preview-modal";
 import { OnboardingTour } from "@/components/editor/onboarding-tour";
 import { EditorElement } from "@/components/editor/types";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 
 const getTemplate = (type: string) => {
     const template = {
@@ -101,15 +102,68 @@ export default function CreateCardPage() {
             initialBackgroundColor={initialBackgroundColor}
             initialCardMode={initialCardMode}
         >
-            <div className="flex flex-col h-screen bg-gray-100 text-black">
-                <Header onPreview={() => setIsPreviewOpen(true)} />
-                <div className="flex flex-1 overflow-hidden relative flex-col-reverse md:flex-row">
-                    <Toolbar />
-                    <Canvas />
-                </div>
-                <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} />
-                <OnboardingTour />
-            </div>
+            <SwipeNavigationWrapper onPreview={() => setIsPreviewOpen(true)} />
+            <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} />
+            <OnboardingTour />
         </EditorProvider>
+    );
+}
+
+function SwipeNavigationWrapper({ onPreview }: { onPreview: () => void }) {
+    const {
+        activeWorkspaceIndex,
+        workspaceProjects,
+        switchToWorkspaceProject
+    } = useEditor();
+
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
+    const handleSwipe = (direction: number) => {
+        const nextIndex = activeWorkspaceIndex + direction;
+        if (nextIndex >= 0 && nextIndex < workspaceProjects.length) {
+            switchToWorkspaceProject(nextIndex);
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-screen bg-gray-100 text-black">
+            <Header onPreview={onPreview} />
+            <motion.div
+                className="flex flex-1 overflow-hidden relative flex-col-reverse md:flex-row"
+                drag={isMobile ? "x" : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                onDragEnd={(e: any, { offset }: PanInfo) => {
+                    if (!isMobile) return;
+
+                    const swipe = offset.x; // Positive is right swipe (previous), Negative is left (next)
+                    if (Math.abs(swipe) > 50) {
+                        handleSwipe(swipe > 0 ? -1 : 1);
+                    }
+                }}
+            >
+                <Toolbar />
+                <div className="flex-1 relative overflow-hidden">
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeWorkspaceIndex}
+                            initial={{ x: 300, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            exit={{ x: -300, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="absolute inset-0"
+                        >
+                            <Canvas />
+                        </motion.div>
+                    </AnimatePresence>
+                </div>
+            </motion.div>
+        </div>
     );
 }

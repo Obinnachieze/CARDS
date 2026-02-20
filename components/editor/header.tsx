@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Undo2, Redo2, Cloud, FileText,
-    Home, Save, Plus, Settings
+    Home, Save, Plus, Settings, Eye
 } from "lucide-react";
 import { useEditor } from "./editor-context";
 import { useParams, useRouter } from "next/navigation";
@@ -66,7 +66,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     <Home size={18} />
                 </Button>
 
-                <div className="hidden sm:flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/5">
+                <div className="flex items-center gap-1 p-0.5">
                     <Button
                         variant="ghost"
                         size="icon"
@@ -89,7 +89,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 </div>
 
                 {/* Project Tabs (Rooms) */}
-                <div className="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5 border border-white/5 max-w-[180px] md:max-w-none overflow-x-auto scrollbar-hide">
+                <div className="hidden sm:flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5 border border-white/5 max-w-[180px] md:max-w-none overflow-x-auto scrollbar-hide">
                     {workspaceProjects.map((project, index) => (
                         <Button
                             key={project.id}
@@ -133,12 +133,12 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 <div />
 
                 <Button
-                    variant="secondary"
-                    size="sm"
-                    className="bg-purple-600 hover:bg-purple-700 text-white border-0 h-9 px-3 md:px-4 rounded-full shadow-lg shadow-purple-900/20"
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-white/10 text-white border-0 md:border md:border-white/20 h-9 w-9 md:w-auto md:px-4 rounded-[5px] transition-all"
                     onClick={onPreview}
                 >
-                    <FileText size={16} className="md:mr-2" />
+                    <Eye size={16} className="md:mr-2" />
                     <span className="hidden md:inline">Preview</span>
                 </Button>
 
@@ -149,7 +149,9 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     Let's just show avatar.
                 */}
                 <div className="h-4 w-px bg-white/10 hidden sm:block" />
-                <UserAvatar />
+                <div className="hidden sm:block">
+                    <UserAvatar />
+                </div>
                 <Button
                     variant="ghost"
                     size="icon"
@@ -160,7 +162,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     title="Settings"
                     onClick={() => setIsSettingsOpen(true)}
                 >
-                    <Settings size={18} />
+                    <Settings size={22} />
                 </Button>
             </div>
 

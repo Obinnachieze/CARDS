@@ -79,7 +79,7 @@ export const Canvas = () => {
 
         return (
             <div
-                className={cn("relative w-full h-full overflow-hidden bg-white", isActive ? "z-10" : "z-0")}
+                className={cn("relative w-full h-full overflow-hidden", isActive ? "z-10" : "z-0")}
                 onClick={(e) => {
                     e.stopPropagation();
                     if (currentFace !== face) setCurrentFace(face);
@@ -97,6 +97,7 @@ export const Canvas = () => {
                     brushSize={brushSize}
                     brushType={brushType}
                     zoom={zoom}
+                    backgroundColor={activeCard?.backgroundColor}
                 />
             </div>
         );

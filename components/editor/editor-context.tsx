@@ -199,7 +199,7 @@ export const EditorProvider = ({
                 name: "",
                 updatedAt: Date.now(),
                 cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
-                cardMode: "postcard"
+                cardMode: "foldable"
             }]);
         };
 

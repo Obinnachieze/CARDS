@@ -16,6 +16,7 @@ interface FabricCanvasProps {
     brushSize?: number;
     brushType?: string;
     zoom?: number;
+    backgroundColor?: string;
 }
 
 export const FabricCanvas = ({
@@ -30,6 +31,7 @@ export const FabricCanvas = ({
     brushSize = 5,
     brushType = "pencil",
     zoom = 1,
+    backgroundColor = "transparent",
 }: FabricCanvasProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
@@ -288,6 +290,13 @@ export const FabricCanvas = ({
             }
         }
     }, [isDrawing, brushColor, brushSize, brushType]);
+
+    // Update Background Color
+    useEffect(() => {
+        if (!fabricCanvasRef.current) return;
+        const canvas = fabricCanvasRef.current;
+        canvas.setBackgroundColor(backgroundColor, canvas.renderAll.bind(canvas));
+    }, [backgroundColor]);
 
 
     return <canvas ref={canvasRef} />;

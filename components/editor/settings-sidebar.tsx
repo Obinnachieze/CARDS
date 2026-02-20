@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { templates } from "./templates";
+import { UserAvatar } from "./user-avatar";
 
 interface SettingsSidebarProps {
     isOpen: boolean;
@@ -87,7 +88,12 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                     >
                         {/* Header */}
                         <div className="flex shrink-0 items-center justify-between p-4 sm:p-6 border-b border-gray-100 min-w-0">
-                            <h2 className="text-xl font-bold text-gray-900">Settings</h2>
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-xl font-bold text-gray-900 hidden sm:block">Settings</h2>
+                                <div className="sm:hidden">
+                                    <UserAvatar />
+                                </div>
+                            </div>
                             <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
                                 <X size={20} />
                             </Button>

@@ -12,7 +12,7 @@ import {
     Type, Image as ImageIcon, Smile, Shapes,
     Palette, LayoutTemplate, Pencil, Upload, PenTool, Highlighter, Eraser,
     MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight, Loader2,
-    FolderOpen, Save, Download, FilePlus, Star
+    FolderOpen, Save, Download, FilePlus, Star, Plus
 } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { cn } from "@/lib/utils";
@@ -45,18 +45,20 @@ const fallbackFonts = [
 import { templates } from "./templates";
 
 
-const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: React.ReactNode, label: string, active: boolean, onClick: () => void, onMouseEnter?: () => void }) => (
+const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: React.ReactNode, label: string, active: boolean, onClick: (e: React.MouseEvent<HTMLButtonElement>) => void, onMouseEnter?: () => void }) => (
     <button
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         className={cn(
-            "flex flex-col items-center justify-center min-w-[44px] py-1.5 px-1 transition-colors relative group rounded-xl",
-            active ? "text-purple-600 bg-purple-50" : "text-gray-500 hover:text-purple-600 hover:bg-purple-50/50"
+            "flex items-center justify-center min-w-[40px] md:min-w-[56px] h-10 md:h-12 transition-all duration-300 relative group rounded-xl md:rounded-2xl",
+            active
+                ? "text-purple-600 bg-purple-50/80 scale-105"
+                : "text-zinc-500 hover:text-purple-600 hover:bg-purple-50/40 hover:scale-105 active:scale-95"
         )}
+        title={label}
     >
-        <div className={cn("mb-0.5", active ? "text-purple-600" : "")}>{icon}</div>
-        <span className="text-[9px] font-medium leading-tight">{label}</span>
-        {active && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-purple-600 rounded-t-full" />}
+        <div className={cn("transition-transform duration-300 group-hover:-translate-y-0.5 scale-100 md:scale-110", active ? "text-purple-600" : "")}>{icon}</div>
+        {active && <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full shadow-[0_0_8px_rgba(147,51,234,0.5)]" />}
     </button>
 );
 
@@ -97,11 +99,37 @@ export const Toolbar = () => {
         activeTool: activeTab,
         setActiveTool: setActiveTab,
         isSettingsOpen,
-        setIsSettingsOpen
+        setIsSettingsOpen,
+        createNewProject,
+        workspaceProjects,
+        activeWorkspaceIndex,
+        switchToWorkspaceProject
     } = useEditor();
 
     // const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates"); // Removed local state
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [panelLeft, setPanelLeft] = useState<number | null>(null);
+
+    const handleTabClick = (tab: string, e: React.MouseEvent<HTMLButtonElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPanelLeft(rect.left + rect.width / 2);
+        setIsSettingsOpen(false);
+        setActiveTab(activeTab === tab ? null : tab as any);
+    };
+
+    // Click-away listener
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            // Don't close if clicking the dock or the panel itself
+            if (target.closest('.dock-container') || target.closest('.sliding-panel')) return;
+            setActiveTab(null);
+        };
+        if (activeTab) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [activeTab]);
 
     // Google Fonts State
     const [googleFonts, setGoogleFonts] = useState<GoogleFont[]>([]);
@@ -185,7 +213,7 @@ export const Toolbar = () => {
     const closePanel = () => setActiveTab(null);
 
     const fileInputRef = React.useRef<HTMLInputElement>(null);
-    const handleUploadClick = () => {
+    const handleUploadClick = (_e: React.MouseEvent<HTMLButtonElement>) => {
         setActiveTab(null);
         setIsSettingsOpen(false);
         fileInputRef.current?.click();
@@ -194,27 +222,62 @@ export const Toolbar = () => {
     return (
         <div className="flex flex-col md:flex-col z-40 relative shrink-0">
             {/* Universal Bottom Dock */}
-            <div className="fixed bottom-2 left-1/2 -translate-x-1/2 h-14 bg-white/95 backdrop-blur-md border border-gray-200/60 flex items-center justify-around px-2 z-50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl w-[calc(100%-16px)] max-w-lg md:max-w-4xl md:h-12 md:px-4">
-                <SidebarTab icon={<LayoutTemplate size={20} />} label="Color" active={activeTab === "design"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "design" ? null : "design"); }} />
-                <SidebarTab icon={<Type size={20} />} label="Text" active={activeTab === "text"} onClick={() => { setIsSettingsOpen(false); if (activeTab !== "text") { addElement("text", "Your text here", { fontSize: 24 }); setActiveTab("text"); } else { setActiveTab(null); } }} />
-                <SidebarTab icon={<Smile size={20} />} label="Emojis" active={activeTab === "elements"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "elements" ? null : "elements"); }} />
-                <SidebarTab icon={<Upload size={20} />} label="Uploads" active={false} onClick={handleUploadClick} />
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                <SidebarTab icon={<Highlighter size={20} />} label="Draw" active={activeTab === "draw"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "draw" ? null : "draw"); }} />
-                <SidebarTab icon={<Sparkles size={20} />} label="Effects" active={activeTab === "effects"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "effects" ? null : "effects"); }} />
-                <SidebarTab icon={<MusicIcon size={20} />} label="Audio" active={activeTab === "music"} onClick={() => { setIsSettingsOpen(false); setActiveTab(activeTab === "music" ? null : "music"); }} />
+            <div className="fixed bottom-0 md:bottom-2 left-0 md:left-1/2 md:-translate-x-1/2 h-14 bg-white/95 md:bg-white/70 backdrop-blur-xl md:backdrop-blur-2xl border-t md:border border-white/20 flex items-center px-2 md:px-6 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] md:shadow-[0_8px_32px_rgba(0,0,0,0.15)] rounded-none md:rounded-[5px] w-full md:w-[calc(100%-16px)] max-w-none md:max-w-2xl dock-container transition-all">
+                <div className="flex w-full items-center justify-start md:justify-around overflow-x-auto scrollbar-hide px-2">
+                    {/* New Card Button - Mobile Only */}
+                    <div className="flex items-center md:hidden shrink-0">
+                        <SidebarTab
+                            icon={<Plus size={22} />}
+                            label="New"
+                            active={false}
+                            onClick={() => createNewProject()}
+                        />
+                        <div className="w-px h-6 bg-zinc-200/50 mx-1" />
+                    </div>
+
+                    <SidebarTab icon={<Palette size={22} />} label="Color" active={activeTab === "design"} onClick={(e) => handleTabClick("design", e)} />
+                    <SidebarTab icon={<Type size={22} />} label="Text" active={activeTab === "text"} onClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setPanelLeft(rect.left + rect.width / 2);
+                        setIsSettingsOpen(false);
+                        if (activeTab !== "text") {
+                            addElement("text", "Your text here", { fontSize: 32, fontFamily: "Inter", color: "#000000" });
+                            setActiveTab("text");
+                        } else {
+                            setActiveTab(null);
+                        }
+                    }} />
+                    <SidebarTab icon={<Smile size={22} />} label="Stickers" active={activeTab === "stickers"} onClick={(e) => handleTabClick("stickers", e)} />
+                    <SidebarTab icon={<Upload size={22} />} label="Uploads" active={activeTab === "uploads"} onClick={(e) => handleTabClick("uploads", e)} />
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                    <SidebarTab icon={<Highlighter size={22} />} label="Draw" active={activeTab === "draw"} onClick={(e) => handleTabClick("draw", e)} />
+                    <SidebarTab icon={<Sparkles size={22} />} label="Effects" active={activeTab === "effects"} onClick={(e) => handleTabClick("effects", e)} />
+                    <SidebarTab icon={<MusicIcon size={22} />} label="Audio" active={activeTab === "music"} onClick={(e) => handleTabClick("music", e)} />
+                </div>
             </div>
 
             {/* Sliding Panel */}
             <div
                 className={cn(
-                    "fixed bg-white shadow-xl transform transition-all duration-300 ease-in-out z-40 overflow-hidden flex flex-col rounded-2xl",
-                    // Floating panel centered above the dock
-                    "bottom-[76px] left-2 right-2 max-h-[50vh] md:max-h-[70vh] md:bottom-[76px]",
-                    "md:left-1/2 md:-translate-x-1/2 md:right-auto",
-                    activeTab && ["draw", "effects", "music"].includes(activeTab) ? "md:w-fit" : "md:w-96",
-                    activeTab ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
+                    "fixed bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-3xl border border-white/20 sliding-panel",
+                    // Sliding panel above dock
+                    "bottom-14 md:bottom-19 max-h-[50vh] md:max-h-[70vh]",
+                    activeTab && ["draw", "effects", "music", "text"].includes(activeTab)
+                        ? "left-1/2 -translate-x-1/2 w-[300px]"
+                        : "left-4 right-4 md:w-[400px]",
+                    "md:right-auto",
+                    activeTab ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
                 )}
+                style={panelLeft !== null ? { '--panel-left': `${panelLeft}px` } as React.CSSProperties : undefined}
+                ref={(el) => {
+                    if (el && panelLeft !== null && window.innerWidth >= 768) {
+                        el.style.left = `${panelLeft}px`;
+                        el.style.transform = 'translateX(-50%)';
+                    } else if (el && window.innerWidth < 768) {
+                        el.style.left = '';
+                        el.style.transform = '';
+                    }
+                }}
             >                        {activeTab && activeTab !== "music" && (
                 <>
                     <div className="flex items-center justify-between p-2 md:hidden">
@@ -251,7 +314,7 @@ export const Toolbar = () => {
                                             />
                                         </div>
                                         {fontError && (
-                                            <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 break-words">
+                                            <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
                                                 {fontError}
                                             </div>
                                         )}
@@ -286,33 +349,37 @@ export const Toolbar = () => {
                                 </div>
                             )}
 
-                            {activeTab === "elements" && (
-                                <div>
-                                    <EmojiPicker
-                                        onEmojiClick={(emojiData: EmojiClickData) => {
-                                            addElement("text", emojiData.emoji, { fontSize: 48 });
-                                        }}
-                                        width="100%"
-                                        height={250}
-                                        skinTonesDisabled
-                                        searchPlaceHolder="Search emojis..."
-                                    />
+                            {activeTab === "stickers" && (
+                                <div className="h-[400px]">
+                                    <StickerSidebar />
                                 </div>
+                            )}
+
+                            {activeTab === "elements" && (
+                                <EmojiPicker
+                                    onEmojiClick={(emojiData: EmojiClickData) => {
+                                        addElement("text", emojiData.emoji, { fontSize: 48 });
+                                    }}
+                                    width="100%"
+                                    height={350}
+                                    skinTonesDisabled
+                                    searchPlaceHolder="Search emojis..."
+                                    reactionsDefaultOpen={false}
+                                />
                             )}
 
                             {activeTab === "uploads" && (
                                 <div className="space-y-6">
-                                    <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                                        <Label htmlFor="image-upload" className="cursor-pointer w-full h-full flex items-center justify-center gap-2 text-white">
+                                    <Button className="w-full bg-purple-600 hover:bg-purple-700 rounded-xl h-12 shadow-lg shadow-purple-900/10" onClick={() => fileInputRef.current?.click()}>
+                                        <div className="flex items-center justify-center gap-2 text-white font-bold">
                                             <Upload size={18} />
-                                            Upload files
-                                            <Input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                                        </Label>
+                                            Upload Files
+                                        </div>
                                     </Button>
 
-                                    <div className="text-center py-10 text-gray-400 text-sm">
-                                        <ImageIcon size={48} className="mx-auto mb-2 opacity-20" />
-                                        <p>No uploads yet</p>
+                                    <div className="text-center py-10 text-zinc-400 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
+                                        <ImageIcon size={48} className="mx-auto mb-2 opacity-10" />
+                                        <p className="text-[10px] uppercase font-bold tracking-widest">No uploads yet</p>
                                     </div>
                                 </div>
                             )}
@@ -320,7 +387,7 @@ export const Toolbar = () => {
                             {/* Projects and Templates moved to SettingsSidebar */}
 
                             {activeTab === "draw" && (
-                                <div className="flex items-center gap-2 flex-wrap p-2">
+                                <div className="flex items-center gap-2 p-2">
                                     <button
                                         className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
                                         onClick={() => setIsDrawing(false)}
