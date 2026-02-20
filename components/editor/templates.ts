@@ -87,5 +87,210 @@ export const templates: Template[] = [
                 ]
             }
         ]
+    },
+    {
+        id: "wedding-elegant",
+        name: "Elegant Wedding",
+        thumbnail: "linear-gradient(to bottom, #fdfbfb 0%, #ebedee 100%)",
+        cards: [
+            {
+                id: uuidv4(),
+                backgroundColor: "#ffffff",
+                currentFace: "front",
+                elements: [
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 150,
+                        content: "Save the Date",
+                        fontSize: 40,
+                        fontFamily: "Playfair Display",
+                        color: "#b8860b",
+                        width: 400,
+                        height: 50,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    },
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 250,
+                        content: "Sarah & Mark",
+                        fontSize: 56,
+                        fontFamily: "Great Vibes",
+                        color: "#333333",
+                        width: 400,
+                        height: 70,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: "christmas-festive",
+        name: "Merry Christmas",
+        thumbnail: "#c41e3a",
+        cards: [
+            {
+                id: uuidv4(),
+                backgroundColor: "#c41e3a",
+                currentFace: "front",
+                celebration: "fireworks",
+                elements: [
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 200,
+                        content: "Merry Christmas",
+                        fontSize: 52,
+                        fontFamily: "Mountains of Christmas",
+                        color: "#ffffff",
+                        width: 400,
+                        height: 60,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    },
+                    {
+                        id: uuidv4(),
+                        type: "shape",
+                        content: "",
+                        x: 200,
+                        y: 300,
+                        width: 100,
+                        height: 100,
+                        shapeType: "star",
+                        color: "#ffd700",
+                        face: "front",
+                        rotation: 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: "baby-welcome",
+        name: "Welcome Baby",
+        thumbnail: "#a7dbd8",
+        cards: [
+            {
+                id: uuidv4(),
+                backgroundColor: "#f0f9ff",
+                currentFace: "front",
+                celebration: "floating-emoji",
+                elements: [
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 180,
+                        content: "Welcome Little One",
+                        fontSize: 44,
+                        fontFamily: "Caveat",
+                        color: "#0ea5e9",
+                        width: 400,
+                        height: 50,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    },
+                    {
+                        id: uuidv4(),
+                        type: "shape",
+                        content: "",
+                        x: 200,
+                        y: 280,
+                        width: 80,
+                        height: 80,
+                        shapeType: "heart",
+                        color: "#38bdf8",
+                        face: "front",
+                        rotation: 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: "graduation-cap",
+        name: "Graduation",
+        thumbnail: "#1a1a1a",
+        cards: [
+            {
+                id: uuidv4(),
+                backgroundColor: "#111827",
+                currentFace: "front",
+                celebration: "confetti",
+                elements: [
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 200,
+                        content: "CONGRATS!",
+                        fontSize: 64,
+                        fontFamily: "Montserrat",
+                        color: "#fbbf24",
+                        fontWeight: "bold",
+                        width: 400,
+                        height: 80,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    },
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 300,
+                        content: "Class of 2024",
+                        fontSize: 32,
+                        fontFamily: "Lato",
+                        color: "#ffffff",
+                        width: 400,
+                        height: 40,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        id: "get-well-soon",
+        name: "Get Well Soon",
+        thumbnail: "#ff9a9e",
+        cards: [
+            {
+                id: uuidv4(),
+                backgroundColor: "#fff5f5",
+                currentFace: "front",
+                elements: [
+                    {
+                        id: uuidv4(),
+                        type: "text",
+                        x: 50,
+                        y: 220,
+                        content: "Get Well Soon",
+                        fontSize: 52,
+                        fontFamily: "Pacifico",
+                        color: "#f87171",
+                        width: 400,
+                        height: 60,
+                        face: "front",
+                        textAlign: "center",
+                        rotation: 0
+                    }
+                ]
+            }
+        ]
     }
 ];
