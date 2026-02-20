@@ -104,10 +104,8 @@ export const CardWrapper = ({
                     }}
                     animate={{ rotateY: (currentFace === "back" || isOpen) ? 180 : 0 }}
                     transition={{
-                        duration: 0.8, // Slower duration
-                        type: "spring",
-                        stiffness: 120, // Reduced stiffness (was 260) for softer feel
-                        damping: 20
+                        duration: 0.6,
+                        ease: [0.4, 0, 0.2, 1]
                     }}
                 >
                     {/* Front Face */}
@@ -295,7 +293,7 @@ export const CardWrapper = ({
                 animate={{
                     width: isOpen ? 600 : 300
                 }}
-                transition={{ duration: 0.8, type: "spring", stiffness: 40, damping: 14 }}
+                transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             >
                 {/* RIGHT SIDE (Inside Right) - Pinned to Right */}
                 <div
@@ -330,7 +328,7 @@ export const CardWrapper = ({
                     animate={{
                         rotateY: isOpen ? -180 : 0,
                     }}
-                    transition={{ duration: 0.8, type: "spring", stiffness: 40, damping: 14 }}
+                    transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 >
                     {/* SPINE (Thickness at the hinge) */}
                     <div

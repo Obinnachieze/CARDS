@@ -140,7 +140,16 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full bg-black/80 border-0 shadow-none flex items-center justify-center p-0 overflow-hidden outline-none backdrop-blur-sm">
+            <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full border-0 shadow-none flex items-center justify-center p-0 overflow-hidden outline-none"
+                style={{
+                    background: "linear-gradient(135deg, rgba(26, 5, 51, 0.85) 0%, rgba(13, 0, 21, 0.8) 20%, rgba(0, 0, 0, 0.75) 40%, rgba(5, 0, 13, 0.8) 60%, rgba(13, 0, 21, 0.8) 80%, rgba(26, 5, 51, 0.85) 100%)",
+                    backdropFilter: "blur(16px)",
+                }}
+            >
+                {/* Smooth gradient glow overlay */}
+                <div className="absolute inset-0 pointer-events-none" style={{
+                    background: "radial-gradient(circle at 15% 15%, rgba(147, 51, 234, 0.1) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(126, 34, 206, 0.08) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.04) 0%, transparent 60%)"
+                }} />
 
                 {/* Close Button */}
                 <button
@@ -165,13 +174,13 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                     className="relative flex items-center justify-center transition-transform duration-300 ease-in-out"
                     style={{
                         transform: "scale(var(--preview-scale))",
-                        "--preview-scale": "0.42",
+                        "--preview-scale": "0.85",
                     } as React.CSSProperties}
                 >
                     <style jsx global>{`
-                        @media (min-width: 640px) { :root { --preview-scale: 0.6; } }
-                        @media (min-width: 1024px) { :root { --preview-scale: 0.85; } }
-                        @media (min-width: 1280px) { :root { --preview-scale: 1; } }
+                        @media (min-width: 640px) { :root { --preview-scale: 1.1; } }
+                        @media (min-width: 1024px) { :root { --preview-scale: 1.5; } }
+                        @media (min-width: 1280px) { :root { --preview-scale: 1.7; } }
                     `}</style>
 
                     <div
