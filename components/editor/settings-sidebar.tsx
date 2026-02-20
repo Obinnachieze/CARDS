@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     X, Save, LayoutTemplate, FolderOpen,
-    Trash2, ChevronLeft, Check, Plus, Trash
+    Trash2, ChevronLeft, Check, Plus, Trash,
+    CreditCard, Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { templates } from "./templates";
@@ -215,6 +216,31 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                             ))}
                                         </div>
                                     )}
+                                </section>
+
+                                <section className="space-y-4 min-w-0 overflow-x-hidden">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Card Type</h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[
+                                            { id: "foldable", name: "Foldable", icon: <LayoutTemplate size={18} /> },
+                                            { id: "postcard", name: "Postcard", icon: <CreditCard size={18} /> },
+                                            { id: "envelope", name: "Envelope", icon: <Mail size={18} /> },
+                                        ].map((mode) => (
+                                            <button
+                                                key={mode.id}
+                                                onClick={() => setCardMode(mode.id as any)}
+                                                className={cn(
+                                                    "flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all gap-1.5",
+                                                    cardMode === mode.id
+                                                        ? "border-purple-600 bg-purple-50 text-purple-600 shadow-sm"
+                                                        : "border-gray-100 bg-white text-gray-400 hover:border-purple-200 hover:text-purple-400"
+                                                )}
+                                            >
+                                                {mode.icon}
+                                                <span className="text-[10px] font-bold uppercase tracking-tight">{mode.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </section>
 
                                 <section className="space-y-4 min-w-0 overflow-x-hidden">
