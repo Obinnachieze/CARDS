@@ -53,26 +53,26 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
 
     return (
         <header className="h-14 bg-gradient-to-r from-slate-900 to-slate-900 border-b border-white/10 flex items-center justify-between px-3 md:px-4 text-white z-50 relative">
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-1 md:gap-3 min-w-0">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-white/10 text-white w-9 h-9"
+                    className="hover:bg-white/10 text-white w-8 h-8 md:w-9 md:h-9 shrink-0"
                     onClick={() => router.push("/")}
                     title="Go to Homepage"
                 >
-                    <Home size={20} />
+                    <Home size={18} />
                 </Button>
 
-                <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/5">
+                <div className="hidden sm:flex items-center gap-1 bg-white/5 rounded-lg p-0.5 border border-white/5">
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={undo}
                         disabled={!canUndo}
-                        className="h-8 w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
+                        className="h-7 w-7 md:h-8 md:w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
                     >
-                        <Undo2 size={16} />
+                        <Undo2 size={14} />
                     </Button>
                     <div className="w-px h-4 bg-white/10" />
                     <Button
@@ -80,14 +80,14 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                         size="icon"
                         onClick={redo}
                         disabled={!canRedo}
-                        className="h-8 w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
+                        className="h-7 w-7 md:h-8 md:w-8 hover:bg-white/10 text-white disabled:opacity-30 rounded-md"
                     >
-                        <Redo2 size={16} />
+                        <Redo2 size={14} />
                     </Button>
                 </div>
 
                 {/* Page indicator + Add page */}
-                <div className="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5 border border-white/5">
+                <div className="flex items-center gap-0.5 bg-white/5 rounded-lg p-0.5 border border-white/5 max-w-[180px] md:max-w-none overflow-x-auto scrollbar-hide">
                     {cards.map((card, index) => (
                         <Button
                             key={card.id}
@@ -95,7 +95,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                             size="icon"
                             onClick={() => activateCard(card.id)}
                             className={cn(
-                                "h-8 w-8 rounded-md text-xs font-semibold transition-all",
+                                "h-7 w-7 md:h-8 md:w-8 rounded-md text-xs font-semibold transition-all shrink-0",
                                 activeCardId === card.id
                                     ? "bg-purple-600 text-white hover:bg-purple-700"
                                     : "text-white/60 hover:bg-white/10 hover:text-white"
@@ -105,25 +105,25 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                             {index + 1}
                         </Button>
                     ))}
-                    <div className="w-px h-4 bg-white/10 mx-0.5" />
+                    <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0" />
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={addCard}
-                        className="h-8 w-8 hover:bg-white/10 text-white/60 hover:text-white rounded-md"
+                        className="h-7 w-7 md:h-8 md:w-8 hover:bg-white/10 text-white/60 hover:text-white rounded-md shrink-0"
                         title="Add new page"
                     >
-                        <Plus size={16} />
+                        <Plus size={14} />
                     </Button>
                 </div>
 
-                {/* Title - Hidden on very small screens, truncate on mobile */}
-                <div className="hidden xs:flex items-center gap-2 ml-1">
-                    <div className="h-8 w-px bg-white/10 hidden sm:block" />
-                    <div className="text-sm font-medium text-white/90 truncate max-w-[120px] sm:max-w-xs">
+                {/* Title - Hidden on mobile */}
+                <div className="hidden md:flex items-center gap-2 ml-1">
+                    <div className="h-8 w-px bg-white/10" />
+                    <div className="text-sm font-medium text-white/90 truncate max-w-xs">
                         {type}
                     </div>
-                    <Cloud size={14} className="text-blue-400/80 hidden sm:block" />
+                    <Cloud size={14} className="text-blue-400/80" />
                 </div>
             </div>
 

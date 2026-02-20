@@ -74,8 +74,8 @@ export const CardWrapper = ({
     }, [isOpen, audioSrc]);
 
     // Dimensions
-    const width = 450;
-    const height = 600;
+    const width = 300;
+    const height = 400;
 
     const handleFaceClick = (targetFace: "front" | "inside-left" | "inside-right" | "back") => {
         if (!interactive) return;
@@ -98,8 +98,8 @@ export const CardWrapper = ({
                 <motion.div
                     className="relative bg-transparent"
                     style={{
-                        width: 600,
-                        height: 400,
+                        width: 480,
+                        height: 320,
                         transformStyle: "preserve-3d"
                     }}
                     animate={{ rotateY: (currentFace === "back" || isOpen) ? 180 : 0 }}
@@ -159,7 +159,7 @@ export const CardWrapper = ({
     if (cardMode === "envelope") {
         return (
             <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
-                <div className="relative w-[600px] h-[400px] bg-transparent group">
+                <div className="relative w-[480px] h-[320px] bg-transparent group">
                     {/* 1. Base (Back of Envelope) */}
                     <div
                         className="absolute inset-0 bg-white shadow-xl rounded-md"
@@ -168,7 +168,7 @@ export const CardWrapper = ({
 
                     {/* 2. Card Insert (Slides Up) */}
                     <motion.div
-                        className="absolute left-6 right-6 bottom-4 h-[350px] bg-white shadow-sm border border-gray-100 flex items-center justify-center p-8 text-center overflow-hidden"
+                        className="absolute left-6 right-6 bottom-4 h-[280px] bg-white shadow-sm border border-gray-100 flex items-center justify-center p-8 text-center overflow-hidden"
                         initial={{ y: 0 }}
                         animate={{
                             y: isOpen ? -150 : 0,
@@ -291,9 +291,9 @@ export const CardWrapper = ({
             <motion.div
                 className="relative transform-style-3d bg-transparent"
                 style={{ height }}
-                initial={{ width: 450 }}
+                initial={{ width: 300 }}
                 animate={{
-                    width: isOpen ? 900 : 450
+                    width: isOpen ? 600 : 300
                 }}
                 transition={{ duration: 0.8, type: "spring", stiffness: 40, damping: 14 }}
             >

@@ -86,8 +86,8 @@ export const Canvas = () => {
                 }}
             >
                 <FabricCanvas
-                    width={450}
-                    height={600}
+                    width={300}
+                    height={400}
                     elements={faceElements}
                     readOnly={!isActive} // Only active face is interactive
                     onUpdate={updateElement}
@@ -110,22 +110,22 @@ export const Canvas = () => {
 
     return (
         <div
-            className="flex-1 bg-[#f0f0f3] overflow-y-auto relative flex flex-col items-center"
+            className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center"
             onClick={() => selectElement(null)}
         >
             <div
                 id="card-canvas-container"
                 className={cn(
-                    "p-4 md:p-20 w-full transition-all duration-300 pb-32 md:pb-20 flex flex-col items-center",
-                    activeTool ? "md:pb-20 origin-top scale-[0.6] -translate-y-[10vh] md:scale-100 md:translate-y-0" : ""
+                    "w-full h-full flex flex-col items-center justify-center transition-all duration-300",
+                    activeTool ? "origin-top scale-[0.55] -translate-y-[8vh] md:scale-100 md:translate-y-0" : ""
                 )}
             >
                 <motion.div
                     key={card.id}
-                    className="relative group transition-all duration-300 perspective-[2000px]"
+                    className="relative group perspective-[2000px]"
                     style={{
                         transform: `scale(${zoom})`,
-                        transformOrigin: 'top center'
+                        transformOrigin: 'center center'
                     }}
                     initial={{ opacity: 0, x: 30 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -152,13 +152,13 @@ export const Canvas = () => {
                         )}
                     </div>
 
-                    {/* Sticky Open/Close Button */}
-                    <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 z-50 w-max">
+                    {/* Open/Close Button - always visible below card */}
+                    <div className="flex justify-center mt-4 md:mt-6">
                         <Button
                             variant="default"
                             size="sm"
                             className={cn(
-                                "rounded-full h-10 px-6 gap-2 font-semibold transition-all hover:scale-105",
+                                "rounded-full h-9 md:h-10 px-5 md:px-6 gap-2 font-semibold transition-all hover:scale-105 text-sm",
                                 currentCardIsOpen ? "bg-white text-gray-900 border hover:bg-gray-100" : "bg-purple-600 hover:bg-purple-700 text-white"
                             )}
                             onClick={(e) => {
