@@ -65,6 +65,7 @@ interface EditorContextType {
     saveCurrentProject: () => Promise<void>;
     loadProject: (id: string) => void;
     deleteProject: (id: string) => void;
+    clearAllProjects: () => Promise<void>;
     exportProjectAsJSON: () => void;
     importProjectFromJSON: (file: File) => void;
     downloadAsImage: () => void;
@@ -361,6 +362,26 @@ export const EditorProvider = ({
         localStorage.setItem("card-projects", JSON.stringify(updatedProjects));
     }, [projects]);
 
+    const clearAllProjects = useCallback(async () => {
+        setProjects([]);
+        localStorage.removeItem("card-projects");
+        createNewProject();
+
+        if (user) {
+            const supabaseClient = createClient();
+            try {
+                const { error } = await supabaseClient
+                    .from('projects')
+                    .delete()
+                    .eq('user_id', user.id);
+                if (error) throw error;
+                console.log("Cleared cloud projects");
+            } catch (error: any) {
+                console.error("Failed to clear cloud projects:", error.message);
+            }
+        }
+    }, [user]);
+
 
 
 
@@ -575,6 +596,7 @@ export const EditorProvider = ({
             saveCurrentProject,
             loadProject,
             deleteProject,
+            clearAllProjects,
             exportProjectAsJSON,
             importProjectFromJSON,
             downloadAsImage,
