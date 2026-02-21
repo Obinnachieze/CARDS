@@ -22,9 +22,9 @@ function Hero() {
     }, [titleNumber, titles]);
 
     return (
-        <div className="w-full relative z-10 pt-20">
+        <div className="w-full relative z-10 pt-8">
             <div className="container mx-auto px-4">
-                <div className="flex gap-8 pt-10 pb-20 items-center justify-center flex-col">
+                <div className="flex gap-8 pt-0 pb-20 items-center justify-center flex-col">
                     <div>
                         <Button variant="secondary" size="sm" className="gap-4 rounded-full bg-white/10 hover:bg-white/20 text-black dark:text-white border border-black/10 dark:border-white/10 backdrop-blur-sm">
                             ✨ The Future of Gifting <MoveRight className="w-4 h-4" />
@@ -64,12 +64,13 @@ function Hero() {
                             Avoid generic ecards—unwrap the moment with VibePost.
                         </p>
                     </div>
-                    <div className="flex flex-row gap-4 mt-4">
-                        <Button size="lg" className="gap-2 rounded-full" onClick={() => window.location.href = '/create/new'}>
-                            Start Creating <MoveRight className="w-4 h-4" />
-                        </Button>
-                        <Button size="lg" className="gap-2 rounded-full" variant="outline" onClick={() => document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' })}>
-                            View Occasions
+                    <div className="flex flex-row justify-center mt-4">
+                        <Button
+                            size="lg"
+                            className="gap-2 rounded-full px-8 bg-linear-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white border-none shadow-lg shadow-rose-500/20 transition-all duration-300 hover:scale-105 active:scale-95 group/btn"
+                            onClick={() => window.location.href = '/create/new'}
+                        >
+                            Create a Card <MoveRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
                         </Button>
                     </div>
                 </div>
