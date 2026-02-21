@@ -121,7 +121,7 @@ const templates = [
 
 export function TemplateMasonry() {
     return (
-        <section className="w-full py-20 px-4 md:px-8">
+        <section id="gallery" className="w-full py-20 px-4 md:px-8">
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col items-center mb-12 space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-white/60">

@@ -21,6 +21,10 @@ export function Header() {
         {
             label: 'Home',
             href: '/',
+        },
+        {
+            label: 'Gallery',
+            href: '#gallery',
         }
     ];
 
