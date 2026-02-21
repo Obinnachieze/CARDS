@@ -2,6 +2,7 @@ import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-w
 import { Header } from "@/components/ui/header";
 import { Hero } from "@/components/landing/hero";
 import { Footer } from "@/components/landing/footer";
+import { TemplateMasonry } from "@/components/landing/template-masonry";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <Header />
       <div className="relative z-10">
         <Hero />
+        <TemplateMasonry />
       </div>
       <div className="relative z-10">
         <Footer />
