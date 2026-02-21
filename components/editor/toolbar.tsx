@@ -185,7 +185,7 @@ export const Toolbar = () => {
 
 
     useEffect(() => {
-        if (selectedElement?.type === "text") {
+        if (selectedElement?.type === "text" && activeTab !== "stickers") {
             setActiveTab("text");
         } else if (selectedElement?.type === "line" || selectedElement?.type === "shape") {
             setActiveTab("elements");
@@ -248,7 +248,7 @@ export const Toolbar = () => {
                         }
                     }} />
                     <SidebarTab icon={<Smile size={22} />} label="Stickers" active={activeTab === "stickers"} onClick={(e) => handleTabClick("stickers", e)} />
-                    <SidebarTab icon={<Upload size={22} />} label="Uploads" active={activeTab === "uploads"} onClick={(e) => handleTabClick("uploads", e)} />
+                    <SidebarTab icon={<Upload size={22} />} label="Uploads" active={activeTab === "uploads"} onClick={handleUploadClick} />
                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                     <SidebarTab icon={<Highlighter size={22} />} label="Draw" active={activeTab === "draw"} onClick={(e) => handleTabClick("draw", e)} />
                     <SidebarTab icon={<Sparkles size={22} />} label="Effects" active={activeTab === "effects"} onClick={(e) => handleTabClick("effects", e)} />
@@ -278,8 +278,8 @@ export const Toolbar = () => {
                         el.style.transform = '';
                     }
                 }}
-            >                        {activeTab && activeTab !== "music" && (
-                <>
+            >
+                {activeTab && (
                     <div className="flex items-center justify-between p-2 md:hidden">
                         <div className="w-8" />
                         <div className="w-10 h-1 bg-gray-200 rounded-full" />
@@ -287,163 +287,149 @@ export const Toolbar = () => {
                             <ChevronLeft size={14} className="-rotate-90" />
                         </Button>
                     </div>
+                )}
 
-                    {/* Content Layout */}
-                    <div className="flex overflow-hidden">
+                {activeTab && !["music", "stickers"].includes(activeTab) && (
+                    <>
+                        {/* Content Layout */}
+                        <div className="flex overflow-hidden">
 
-                        <ScrollArea className="p-4 bg-white max-h-[inherit] w-full">
-                            {/* Panel Content Based on Tab */}
+                            <ScrollArea className="p-4 bg-white max-h-[inherit] w-full">
+                                {/* Panel Content Based on Tab */}
 
-                            {activeTab === "text" && (
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
-                                            Fonts ({googleFonts.length > 0 ? googleFonts.length : fallbackFonts.length})
-                                        </Label>
-                                        {isLoadingFonts && <Loader2 className="animate-spin text-purple-600" size={14} />}
-                                    </div>
-
-                                    <div className="bg-gray-100 p-2 rounded-md flex flex-col gap-2 sticky top-0 z-10">
-                                        <div className="flex gap-2 items-center">
-                                            <Search size={16} className="text-gray-400" />
-                                            <input
-                                                className="bg-transparent text-sm w-full outline-none"
-                                                placeholder="Type to search fonts..."
-                                                value={fontSearch}
-                                                onChange={(e) => setFontSearch(e.target.value)}
-                                            />
+                                {activeTab === "text" && (
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                                                Fonts ({googleFonts.length > 0 ? googleFonts.length : fallbackFonts.length})
+                                            </Label>
+                                            {isLoadingFonts && <Loader2 className="animate-spin text-purple-600" size={14} />}
                                         </div>
-                                        {fontError && (
-                                            <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
-                                                {fontError}
+
+                                        <div className="bg-gray-100 p-2 rounded-md flex flex-col gap-2 sticky top-0 z-10">
+                                            <div className="flex gap-2 items-center">
+                                                <Search size={16} className="text-gray-400" />
+                                                <input
+                                                    className="bg-transparent text-sm w-full outline-none"
+                                                    placeholder="Type to search fonts..."
+                                                    value={fontSearch}
+                                                    onChange={(e) => setFontSearch(e.target.value)}
+                                                />
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 gap-2 min-h-[100px]">
-                                        {filteredFonts.length === 0 ? (
-                                            <div className="text-center py-8 text-gray-400 text-xs text-balance px-4">
-                                                No fonts found matching "{fontSearch}". <br />Try "Roboto", "Open Sans", "Lato"...
-                                            </div>
-                                        ) : (
-                                            filteredFonts.map((font, index) => {
-                                                const familyName = typeof font === 'string' ? font : font.family;
-                                                // Auto-load visible fonts (top 10)
-                                                if (index < 10) loadFont(familyName);
-
-                                                return (
-                                                    <Button
-                                                        key={familyName}
-                                                        variant="outline"
-                                                        className="h-12 justify-start px-3 overflow-hidden hover:bg-gray-50 bg-white shadow-sm border-0 w-full text-left font-normal group relative"
-                                                        onClick={() => handleFontSelect(familyName)}
-                                                        onMouseEnter={() => loadFont(familyName)}
-                                                    >
-                                                        <span className="truncate text-lg group-hover:text-purple-600 transition-colors" style={{ fontFamily: familyName }}>{familyName}</span>
-                                                        {/* <div className="absolute right-2 opacity-0 group-hover:opacity-100 text-xs text-gray-400 bg-white px-1">Apply</div> */}
-                                                    </Button>
-                                                );
-                                            })
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {activeTab === "stickers" && (
-                                <div className="h-[400px]">
-                                    <StickerSidebar />
-                                </div>
-                            )}
-
-                            {activeTab === "elements" && (
-                                <EmojiPicker
-                                    onEmojiClick={(emojiData: EmojiClickData) => {
-                                        addElement("text", emojiData.emoji, { fontSize: 48 });
-                                    }}
-                                    width="100%"
-                                    height={350}
-                                    skinTonesDisabled
-                                    searchPlaceHolder="Search emojis..."
-                                    reactionsDefaultOpen={false}
-                                />
-                            )}
-
-                            {activeTab === "uploads" && (
-                                <div className="space-y-6">
-                                    <Button className="w-full bg-purple-600 hover:bg-purple-700 rounded-xl h-12 shadow-lg shadow-purple-900/10" onClick={() => fileInputRef.current?.click()}>
-                                        <div className="flex items-center justify-center gap-2 text-white font-bold">
-                                            <Upload size={18} />
-                                            Upload Files
+                                            {fontError && (
+                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
+                                                    {fontError}
+                                                </div>
+                                            )}
                                         </div>
-                                    </Button>
 
-                                    <div className="text-center py-10 text-zinc-400 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                                        <ImageIcon size={48} className="mx-auto mb-2 opacity-10" />
-                                        <p className="text-[10px] uppercase font-bold tracking-widest">No uploads yet</p>
+                                        <div className="grid grid-cols-1 gap-2 min-h-[100px]">
+                                            {filteredFonts.length === 0 ? (
+                                                <div className="text-center py-8 text-gray-400 text-xs text-balance px-4">
+                                                    No fonts found matching "{fontSearch}". <br />Try "Roboto", "Open Sans", "Lato"...
+                                                </div>
+                                            ) : (
+                                                filteredFonts.map((font, index) => {
+                                                    const familyName = typeof font === 'string' ? font : font.family;
+                                                    // Auto-load visible fonts (top 10)
+                                                    if (index < 10) loadFont(familyName);
+
+                                                    return (
+                                                        <Button
+                                                            key={familyName}
+                                                            variant="outline"
+                                                            className="h-12 justify-start px-3 overflow-hidden hover:bg-gray-50 bg-white shadow-sm border-0 w-full text-left font-normal group relative"
+                                                            onClick={() => handleFontSelect(familyName)}
+                                                            onMouseEnter={() => loadFont(familyName)}
+                                                        >
+                                                            <span className="truncate text-lg group-hover:text-purple-600 transition-colors" style={{ fontFamily: familyName }}>{familyName}</span>
+                                                            {/* <div className="absolute right-2 opacity-0 group-hover:opacity-100 text-xs text-gray-400 bg-white px-1">Apply</div> */}
+                                                        </Button>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Projects and Templates moved to SettingsSidebar */}
 
-                            {activeTab === "draw" && (
-                                <div className="flex items-center gap-2 p-2">
-                                    <button
-                                        className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                        onClick={() => setIsDrawing(false)}
-                                        title="Select / Move"
-                                    >
-                                        <MousePointer2 size={20} />
-                                    </button>
-                                    <button
-                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                        onClick={() => { setBrushType("pencil"); setIsDrawing(true); }}
-                                        title="Pencil"
-                                    >
-                                        <Pencil size={20} />
-                                    </button>
-                                    <button
-                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                        onClick={() => { setBrushType("marker"); setIsDrawing(true); }}
-                                        title="Marker"
-                                    >
-                                        <PenTool size={20} />
-                                    </button>
-                                    <button
-                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                        onClick={() => { setBrushType("highlighter"); setIsDrawing(true); }}
-                                        title="Highlighter"
-                                    >
-                                        <Highlighter size={20} />
-                                    </button>
-                                    <button
-                                        className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-gray-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                        onClick={() => { setBrushType("eraser"); setIsDrawing(true); }}
-                                        title="Eraser"
-                                    >
-                                        <Eraser size={20} />
-                                    </button>
-                                </div>
-                            )}
-                            {activeTab === "design" && (
-                                <div className="space-y-3">
-                                    <div className="space-y-2">
-                                        <Label>Background Color</Label>
-                                        <ColorPicker color={backgroundColor} onChange={setBackgroundColor} />
+
+                                {activeTab === "uploads" && (
+                                    <div className="space-y-6">
+                                        <Button className="w-full bg-purple-600 hover:bg-purple-700 rounded-xl h-12 shadow-lg shadow-purple-900/10" onClick={() => fileInputRef.current?.click()}>
+                                            <div className="flex items-center justify-center gap-2 text-white font-bold">
+                                                <Upload size={18} />
+                                                Upload Files
+                                            </div>
+                                        </Button>
+
+                                        <div className="text-center py-10 text-zinc-400 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
+                                            <ImageIcon size={48} className="mx-auto mb-2 opacity-10" />
+                                            <p className="text-[10px] uppercase font-bold tracking-widest">No uploads yet</p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Templates section moved to SettingsSidebar */}
+                                {/* Projects and Templates moved to SettingsSidebar */}
 
-                            {activeTab === "effects" && (
-                                <EffectsSidebar />
-                            )}
+                                {activeTab === "draw" && (
+                                    <div className="flex items-center gap-2 p-2">
+                                        <button
+                                            className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                            onClick={() => setIsDrawing(false)}
+                                            title="Select / Move"
+                                        >
+                                            <MousePointer2 size={20} />
+                                        </button>
+                                        <button
+                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                            onClick={() => { setBrushType("pencil"); setIsDrawing(true); }}
+                                            title="Pencil"
+                                        >
+                                            <Pencil size={20} />
+                                        </button>
+                                        <button
+                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                            onClick={() => { setBrushType("marker"); setIsDrawing(true); }}
+                                            title="Marker"
+                                        >
+                                            <PenTool size={20} />
+                                        </button>
+                                        <button
+                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                            onClick={() => { setBrushType("highlighter"); setIsDrawing(true); }}
+                                            title="Highlighter"
+                                        >
+                                            <Highlighter size={20} />
+                                        </button>
+                                        <button
+                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-gray-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                            onClick={() => { setBrushType("eraser"); setIsDrawing(true); }}
+                                            title="Eraser"
+                                        >
+                                            <Eraser size={20} />
+                                        </button>
+                                    </div>
+                                )}
+                                {activeTab === "design" && (
+                                    <div className="space-y-3">
+                                        <div className="space-y-2">
+                                            <Label>Background Color</Label>
+                                            <ColorPicker color={backgroundColor} onChange={setBackgroundColor} />
+                                        </div>
+                                    </div>
+                                )}
 
-                        </ScrollArea>
-                    </div>
-                </>
-            )
+                                {/* Templates section moved to SettingsSidebar */}
+
+                                {activeTab === "effects" && (
+                                    <EffectsSidebar />
+                                )}
+
+                            </ScrollArea>
+                        </div>
+                    </>
+                )
                 }
 
                 {
