@@ -159,6 +159,14 @@ export const Toolbar = () => {
     }, []);
 
     // Filtered fonts
+    const popularCardFonts = useMemo(() => [
+        "Dancing Script",
+        "Pacifico",
+        "Caveat",
+        "Satisfy",
+        "Great Vibes"
+    ], []);
+
     const filteredFonts = useMemo(() => {
         if (!googleFonts.length) return fallbackFonts;
         const search = fontSearch.toLowerCase();
@@ -166,6 +174,13 @@ export const Toolbar = () => {
             .filter(f => f.family.toLowerCase().includes(search))
             .slice(0, 50); // Limit to top 50 matches for performance
     }, [googleFonts, fontSearch]);
+
+    // Load popular fonts immediately
+    useEffect(() => {
+        if (activeTab === "text") {
+            popularCardFonts.forEach(font => loadFont(font));
+        }
+    }, [activeTab, popularCardFonts]);
 
     // Handle font selection
     const handleFontSelect = (family: string) => {
@@ -336,6 +351,35 @@ export const Toolbar = () => {
                                         </div>
 
                                         <div className="grid grid-cols-1 gap-2 min-h-[100px]">
+                                            {fontSearch === "" && (
+                                                <div className="mb-4">
+                                                    <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-2 block px-1">
+                                                        Popular for Cards
+                                                    </Label>
+                                                    <div className="grid grid-cols-1 gap-2">
+                                                        {popularCardFonts.map((familyName) => {
+                                                            const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
+                                                            return (
+                                                                <Button
+                                                                    key={familyName}
+                                                                    variant="outline"
+                                                                    className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
+                                                                    onClick={() => handleFontSelect(familyName)}
+                                                                >
+                                                                    <span className={cn("truncate text-xl transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
+                                                                </Button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {fontSearch === "" && (
+                                                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-2 block px-1 mt-2">
+                                                    All Fonts
+                                                </Label>
+                                            )}
+
                                             {filteredFonts.length === 0 ? (
                                                 <div className="text-center py-8 text-gray-400 text-xs text-balance px-4">
                                                     No fonts found matching "{fontSearch}". <br />Try "Roboto", "Open Sans", "Lato"...
