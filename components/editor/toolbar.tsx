@@ -207,11 +207,17 @@ export const Toolbar = () => {
     useEffect(() => {
         if (!selectedElement) return;
 
-        if (selectedElement.type === "text" && activeTab !== "text" && activeTab !== "stickers") {
-            setActiveTab("text");
-        } else if ((selectedElement.type === "line" || selectedElement.type === "shape") && activeTab !== "elements") {
-            setActiveTab("elements");
-        }
+        // Add a tiny delay to allow the initial click/selection interaction 
+        // to complete before triggering a layout shift.
+        const timer = setTimeout(() => {
+            if (selectedElement.type === "text" && activeTab !== "text" && activeTab !== "stickers") {
+                setActiveTab("text");
+            } else if ((selectedElement.type === "line" || selectedElement.type === "shape") && activeTab !== "elements") {
+                setActiveTab("elements");
+            }
+        }, 50);
+
+        return () => clearTimeout(timer);
     }, [selectedElement, activeTab, setActiveTab]);
 
     const handleAddEmoji = (emojiData: EmojiClickData) => {
@@ -350,7 +356,7 @@ export const Toolbar = () => {
                                                 />
                                             </div>
                                             {fontError && (
-                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 break-words">
+                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
                                                     {fontError}
                                                 </div>
                                             )}

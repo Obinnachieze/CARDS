@@ -120,8 +120,8 @@ export const Canvas = () => {
             <div
                 id="card-canvas-container"
                 className={cn(
-                    "w-full h-full flex flex-col items-center justify-center transition-all duration-300 scale-[0.85] md:scale-[0.9]",
-                    activeTool ? "origin-top scale-[0.5] -translate-y-[10vh] md:scale-[0.85] md:translate-y-0" : ""
+                    "w-full h-full flex flex-col items-center justify-center transition-all duration-300 transform-gpu scale-[0.85] md:scale-[0.9]",
+                    activeTool ? "origin-top translate-y-4 md:translate-y-0" : ""
                 )}
             >
                 <motion.div

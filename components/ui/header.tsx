@@ -125,7 +125,7 @@ export function Header() {
                                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                                     aria-expanded={isProfileOpen}
                                     aria-label="User profile menu"
-                                    className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"
+                                    className="w-9 h-9 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"
                                 >
                                     {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
                                 </button>
@@ -216,7 +216,7 @@ export function Header() {
                                 {user ? (
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
                                                 {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0">

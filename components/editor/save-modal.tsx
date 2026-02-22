@@ -80,7 +80,7 @@ export const SaveModal = ({
                             onMouseDown={(e) => e.stopPropagation()}
                         >
                             {/* Header gradient */}
-                            <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 px-6 py-5 relative overflow-hidden">
+                            <div className="bg-linear-to-r from-purple-600 via-violet-600 to-indigo-600 px-6 py-5 relative overflow-hidden">
                                 <div className="absolute inset-0 opacity-20">
                                     <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl" />
                                     <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-white/5 rounded-full blur-2xl" />
@@ -155,7 +155,7 @@ export const SaveModal = ({
                                     <Button
                                         type="submit"
                                         disabled={!title.trim() || isSaving}
-                                        className="flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium gap-2 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 h-11 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium gap-2 shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <Save size={16} />
                                         {isSaving ? "Saving..." : "Save Card"}
