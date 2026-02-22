@@ -152,6 +152,42 @@ export const FabricCanvas = ({
             onUpdateRef.current?.(id, updates);
         });
 
+        // Text Editing Events
+        canvas.on("text:editing:exited", (e) => {
+            const obj = e.target;
+            if (obj && obj.type === "textbox") {
+                // @ts-ignore - custom property
+                const id = obj.id;
+                if (id && onUpdateRef.current) {
+                    onUpdateRef.current(id, { content: (obj as fabric.Textbox).text });
+                }
+            }
+        });
+
+        // Hover Effects
+        canvas.on("mouse:over", (e) => {
+            if (e.target && !readOnly) {
+                if (e.target.type === "textbox") {
+                    // Provide visual indication of draggability/editability
+                    e.target.set({
+                        borderColor: '#9333ea',
+                        cornerColor: '#9333ea',
+                        transparentCorners: false,
+                        borderOpacityWhenMoving: 0.8,
+                    });
+                    canvas.renderAll();
+                }
+            }
+        });
+
+        canvas.on("mouse:out", (e) => {
+            if (e.target && !readOnly) {
+                // Revert custom hover properties if needed, 
+                // though mostly default active selection handles borders when clicked.
+                canvas.renderAll();
+            }
+        });
+
         // Path Created (Unused if external drawing, but good to have)
         canvas.on("path:created", (e) => {
             // Handle drawing output if needed
@@ -206,7 +242,7 @@ export const FabricCanvas = ({
             if (!obj) {
                 // Create new object
                 if (el.type === "text") {
-                    obj = new fabric.Textbox(el.content, {
+                    const textOptions: any = {
                         // @ts-ignore
                         id: el.id,
                         left: el.x,
@@ -215,9 +251,38 @@ export const FabricCanvas = ({
                         fontFamily: el.fontFamily,
                         fill: el.color,
                         angle: el.rotation,
-                        width: el.width, // Textbox needs width
                         selectable: !readOnly,
-                    });
+                        padding: 8, // Adds breathing room for the border
+                        editingBorderColor: '#9333ea',
+                        cursorColor: '#9333ea',
+                        transparentCorners: false,
+                        cornerStyle: 'circle',
+                        cornerColor: 'white',
+                        cornerStrokeColor: '#9333ea',
+                        borderColor: '#9333ea',
+                        borderDashArray: [4, 4],
+                        hoverCursor: 'grab',
+                        moveCursor: 'grabbing',
+                    };
+                    if (el.width !== undefined) textOptions.width = el.width;
+
+                    obj = new fabric.Textbox(el.content, textOptions);
+
+                    // Auto-focus new text elements
+                    if (!readOnly) {
+                        setTimeout(() => {
+                            try {
+                                if (!isMounted.current || !fabricCanvasRef.current) return;
+                                const canvasInstance = fabricCanvasRef.current;
+                                canvasInstance.setActiveObject(obj as fabric.Object);
+                                (obj as fabric.Textbox).enterEditing();
+                                (obj as fabric.Textbox).selectAll();
+                                canvasInstance.requestRenderAll();
+                            } catch (e) {
+                                console.error("Auto-focus failed:", e);
+                            }
+                        }, 50);
+                    }
                 } else if (el.type === "image" || el.type === "draw") {
                     fabric.Image.fromURL(el.content, (img) => {
                         if (!isMounted.current || !fabricCanvasRef.current) return;
@@ -302,6 +367,19 @@ export const FabricCanvas = ({
                     if (obj.fill !== el.color) obj.set('fill', el.color);
                     if (obj.fontSize !== el.fontSize) obj.set('fontSize', el.fontSize);
                     if (obj.fontFamily !== el.fontFamily) obj.set('fontFamily', el.fontFamily);
+                    obj.set({
+                        padding: 8,
+                        editingBorderColor: '#9333ea',
+                        cursorColor: '#9333ea',
+                        transparentCorners: false,
+                        cornerStyle: 'circle',
+                        cornerColor: 'white',
+                        cornerStrokeColor: '#9333ea',
+                        borderColor: '#9333ea',
+                        borderDashArray: [4, 4],
+                        hoverCursor: 'grab',
+                        moveCursor: 'grabbing',
+                    });
                 }
 
                 if (el.type === 'shape') {
