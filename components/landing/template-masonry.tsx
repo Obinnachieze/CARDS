@@ -137,7 +137,7 @@ export function TemplateMasonry() {
                     </p>
                 </div>
 
-                <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+                <div className="columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                     {templates.map((template, index) => (
                         <motion.div
                             key={template.id}
