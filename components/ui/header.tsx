@@ -246,7 +246,7 @@ export function Header() {
                                             href="/login"
                                             className={cn(
                                                 buttonVariants({ variant: 'outline' }),
-                                                "w-full h-12 text-lg border-white/20 text-white hover:bg-white/10 rounded-xl justify-center"
+                                                "w-full h-12 text-lg bg-transparent border-white/20 text-white hover:text-white hover:bg-white/10 rounded-xl justify-center"
                                             )}
                                             onClick={() => setOpen(false)}
                                         >
