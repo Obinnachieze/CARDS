@@ -14,7 +14,6 @@ import {
     CreditCard, Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getTemplates } from "./templates";
 import { UserAvatar } from "./user-avatar";
 
 interface SettingsSidebarProps {
@@ -45,25 +44,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
         clearAllProjects
     } = useEditor();
 
-    const loadTemplate = (templateId: string) => {
-        const template = getTemplates().find(t => t.id === templateId);
-        if (template && activeCardId) {
-            const templateCard = template.cards[0];
 
-            setCards(prev => prev.map(card => {
-                if (card.id === activeCardId) {
-                    return {
-                        ...card,
-                        elements: templateCard.elements.map(el => ({ ...el, id: crypto.randomUUID() })),
-                        backgroundColor: templateCard.backgroundColor,
-                        celebration: templateCard.celebration
-                    };
-                }
-                return card;
-            }));
-            onClose(); // Close sidebar after loading template
-        }
-    };
 
     return (
         <AnimatePresence>
@@ -94,8 +75,8 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                     <UserAvatar />
                                 </div>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-                                <X size={20} />
+                            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full bg-gray-100/50 hover:bg-gray-200 text-gray-500 hover:text-gray-900">
+                                <X size={20} className="stroke-2" />
                             </Button>
                         </div>
 
@@ -246,29 +227,6 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                             >
                                                 {mode.icon}
                                                 <span className="text-[10px] font-bold uppercase tracking-tight">{mode.name}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </section>
-
-                                <section className="space-y-4 min-w-0 overflow-x-hidden">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Templates</h3>
-                                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                                        {getTemplates().map(template => (
-                                            <button
-                                                key={template.id}
-                                                className="group relative aspect-3/4 bg-gray-100 rounded-2xl overflow-hidden border-2 border-transparent hover:border-purple-500 transition-all text-left shadow-sm w-full"
-                                                onClick={() => loadTemplate(template.id)}
-                                            >
-                                                <div
-                                                    className="absolute inset-0 w-full h-full"
-                                                    style={{ background: template.thumbnail }}
-                                                />
-                                                <div className="absolute inset-x-0 bottom-0 p-3 bg-linear-to-t from-black/80 via-black/40 to-transparent">
-                                                    <span className="text-white text-xs font-bold truncate block">
-                                                        {template.name}
-                                                    </span>
-                                                </div>
                                             </button>
                                         ))}
                                     </div>

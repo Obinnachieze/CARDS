@@ -118,15 +118,6 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                         <Plus size={14} />
                     </Button>
                 </div>
-
-                {/* Title - Hidden on mobile */}
-                <div className="hidden md:flex items-center gap-2 ml-1">
-                    <div className="h-8 w-px bg-white/10" />
-                    <div className="text-sm font-medium text-white/90 truncate max-w-xs">
-                        {projectName ? projectName : defaultTitle}
-                    </div>
-                    <Cloud size={14} className="text-blue-400/80" />
-                </div>
             </div>
 
             <div className="flex items-center gap-2 md:gap-3">
@@ -179,6 +170,6 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 onClose={() => setIsSettingsOpen(false)}
                 onSaveClick={() => setShowSaveModal(true)}
             />
-        </header>
+        </header >
     );
 };
