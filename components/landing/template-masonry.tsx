@@ -13,109 +13,181 @@ const templates = [
         id: 'birthday-1',
         title: 'Neon Birthday Bash',
         description: 'Vibrant neon colors with animated balloons.',
-        image: 'https://images.unsplash.com/photo-1530103043960-ef38714abb15?auto=format&fit=crop&q=80&w=800',
         href: '/create/birthday-neon',
         category: 'Birthday',
-        aspect: 'aspect-3/4'
+        aspect: 'aspect-[3/4]',
+        design: {
+            bg: 'bg-zinc-950 border-2 border-fuchsia-500 shadow-[inset_0_0_50px_rgba(217,70,239,0.3)]',
+            text: 'Happy Birthday!',
+            font: 'font-sans font-black uppercase tracking-widest',
+            textColor: 'text-fuchsia-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.8)]',
+            emojis: ['🎈', '🎂', '✨']
+        }
     },
     {
         id: 'wedding-1',
         title: 'Minimalist Elegance',
         description: 'Clean typography for sophisticated invites.',
-        image: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800',
         href: '/create/wedding-minimal',
         category: 'Wedding',
-        aspect: 'aspect-square'
+        aspect: 'aspect-square',
+        design: {
+            bg: 'bg-stone-100',
+            text: 'You are invited',
+            font: 'font-serif italic',
+            textColor: 'text-stone-800',
+            emojis: ['🕊️', '🤍', '🌿']
+        }
     },
     {
         id: 'anniversary-1',
         title: 'Golden Moments',
         description: 'Warm, shimmering effects for milestones.',
-        image: 'https://images.unsplash.com/photo-1522673607200-164883efbfc1?auto=format&fit=crop&q=80&w=800',
         href: '/create/anniversary-gold',
         category: 'Anniversary',
-        aspect: 'aspect-9/16'
+        aspect: 'aspect-[9/16]',
+        design: {
+            bg: 'bg-gradient-to-br from-amber-900 via-stone-900 to-amber-950 border border-amber-500/50',
+            text: 'Happy Anniversary',
+            font: 'font-serif',
+            textColor: 'text-amber-400',
+            emojis: ['🥂', '✨', '💛']
+        }
     },
     {
         id: 'love-1',
         title: 'Romantic Sunset',
         description: 'Express your feelings with a beautiful sunset.',
-        image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800',
         href: '/create/love-sunset',
         category: 'Love',
-        aspect: 'aspect-3/4'
+        aspect: 'aspect-[3/4]',
+        design: {
+            bg: 'bg-gradient-to-br from-orange-400 via-rose-400 to-purple-500',
+            text: 'Love You',
+            font: 'font-[cursive] text-5xl',
+            textColor: 'text-white drop-shadow-md',
+            emojis: ['🌅', '💖', '💌']
+        }
     },
     {
         id: 'thank-you-1',
         title: 'Floral Appreciation',
         description: 'Soft pastel flowers with handwritten notes.',
-        image: 'https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&q=80&w=800',
         href: '/create/thank-you-floral',
         category: 'Thank You',
-        aspect: 'aspect-3/4'
+        aspect: 'aspect-[3/4]',
+        design: {
+            bg: 'bg-rose-50',
+            text: 'Thank You',
+            font: 'font-[cursive] text-4xl',
+            textColor: 'text-rose-600',
+            emojis: ['🌸', '🌿', '🎀']
+        }
     },
     {
         id: 'party-1',
         title: 'Midnight Revelry',
         description: 'Dark theme with confetti and glow effects.',
-        image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800',
         href: '/create/party-midnight',
         category: 'Party',
-        aspect: 'aspect-9/16'
+        aspect: 'aspect-[9/16]',
+        design: {
+            bg: 'bg-indigo-950',
+            text: "Let's Party",
+            font: 'font-sans font-bold text-4xl',
+            textColor: 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]',
+            emojis: ['🪩', '🍸', '🥳']
+        }
     },
     {
         id: 'just-because-1',
         title: 'Abstract Joy',
         description: 'Colorful shapes for a quick pick-me-up.',
-        image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&q=80&w=800',
         href: '/create/abstract-joy',
         category: 'Just Because',
-        aspect: 'aspect-square'
+        aspect: 'aspect-square',
+        design: {
+            bg: 'bg-yellow-300',
+            text: 'Smile!',
+            font: 'font-sans font-black text-5xl rotate-[-5deg]',
+            textColor: 'text-black',
+            emojis: ['😊', '🎨', '🌈']
+        }
     },
     {
         id: 'nature-1',
         title: 'Serene Forest',
         description: 'Peaceful woods for thoughtful messages.',
-        image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=800',
         href: '/create/nature-forest',
         category: 'Nature',
-        aspect: 'aspect-3/5'
+        aspect: 'aspect-[3/5]',
+        design: {
+            bg: 'bg-gradient-to-b from-emerald-800 to-emerald-950',
+            text: 'Thinking of you',
+            font: 'font-serif text-3xl',
+            textColor: 'text-emerald-100',
+            emojis: ['🌲', '🦌', '🍃']
+        }
     },
     {
         id: 'holiday-1',
         title: 'Winter Wonderland',
         description: 'Animated snow and cozy textures.',
-        image: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&q=80&w=800',
         href: '/create/holiday-winter',
         category: 'Holidays',
-        aspect: 'aspect-3/5'
+        aspect: 'aspect-[3/5]',
+        design: {
+            bg: 'bg-cyan-50',
+            text: 'Happy Holidays',
+            font: 'font-[cursive] text-4xl',
+            textColor: 'text-cyan-700',
+            emojis: ['❄️', '⛄', '🎄']
+        }
     },
     {
         id: 'adventure-1',
         title: 'Mountain Peak',
         description: 'Inspiring views for adventurous friends.',
-        image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800',
         href: '/create/adventure-peak',
         category: 'Adventure',
-        aspect: 'aspect-3/4'
+        aspect: 'aspect-[3/4]',
+        design: {
+            bg: 'bg-slate-800',
+            text: 'Next Adventure',
+            font: 'font-sans font-bold uppercase tracking-widest',
+            textColor: 'text-slate-200',
+            emojis: ['⛰️', '🏕️', '🦅']
+        }
     },
     {
         id: 'graduation-1',
         title: 'Academic Success',
         description: 'Classic navy and gold for new graduates.',
-        image: 'https://images.unsplash.com/photo-1523050335456-adeba27201b1?auto=format&fit=crop&q=80&w=800',
         href: '/create/graduation-classic',
         category: 'Graduation',
-        aspect: 'aspect-3/4'
+        aspect: 'aspect-[3/4]',
+        design: {
+            bg: 'bg-blue-950 border-4 border-yellow-500/80',
+            text: 'Class of 2024',
+            font: 'font-serif font-bold text-3xl',
+            textColor: 'text-yellow-500',
+            emojis: ['🎓', '📜', '🌟']
+        }
     },
     {
         id: 'baby-shower-1',
         title: 'Cloud Nine',
         description: 'Dreamy clouds and starry backgrounds.',
-        image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&q=80&w=800',
         href: '/create/baby-shower-clouds',
         category: 'Baby Shower',
-        aspect: 'aspect-9/16'
+        aspect: 'aspect-[9/16]',
+        design: {
+            bg: 'bg-gradient-to-b from-sky-100 to-white',
+            text: 'Oh Baby!',
+            font: 'font-sans font-medium text-4xl',
+            textColor: 'text-sky-400',
+            emojis: ['☁️', '🍼', '🧸']
+        }
     }
 ];
 
@@ -149,12 +221,21 @@ export function TemplateMasonry() {
                         >
                             <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-black/50">
                                 <div className={cn("relative overflow-hidden", template.aspect)}>
-                                    <img
-                                        src={template.image}
-                                        alt={template.title}
-                                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                                    <div className={cn("w-full h-full flex flex-col items-center justify-center p-6 relative transition-transform duration-500 group-hover:scale-105", template.design.bg)}>
+                                        <div className="absolute top-6 right-6 text-2xl md:text-4xl animate-bounce" style={{ animationDuration: '3s' }}>
+                                            {template.design.emojis[0]}
+                                        </div>
+                                        <div className="absolute bottom-20 left-6 text-3xl md:text-5xl rotate-12 opacity-80">
+                                            {template.design.emojis[1]}
+                                        </div>
+                                        <div className="absolute top-1/3 left-8 text-xl md:text-3xl -rotate-12 opacity-60">
+                                            {template.design.emojis[2]}
+                                        </div>
+                                        <span className={cn("text-center z-10 p-4 leading-tight break-words", template.design.font, template.design.textColor)}>
+                                            {template.design.text}
+                                        </span>
+                                    </div>
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-black/10 opacity-80 group-hover:opacity-90 transition-opacity" />
 
                                     <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                         <div className="space-y-2">
