@@ -11,6 +11,8 @@ interface FabricCanvasProps {
     readOnly?: boolean;
     onUpdate?: (id: string, updates: Partial<EditorElement>) => void;
     onSelect?: (id: string | null) => void;
+    onAdd?: (type: any, content: any, style?: any) => void;
+    onRemove?: (id: string) => void;
     isDrawing?: boolean;
     brushColor?: string;
     brushSize?: number;
@@ -26,6 +28,8 @@ export const FabricCanvas = ({
     readOnly = false,
     onUpdate,
     onSelect,
+    onAdd,
+    onRemove,
     isDrawing = false,
     brushColor = "#000000",
     brushSize = 5,
@@ -39,12 +43,16 @@ export const FabricCanvas = ({
 
     const onSelectRef = useRef(onSelect);
     const onUpdateRef = useRef(onUpdate);
+    const onAddRef = useRef(onAdd);
+    const onRemoveRef = useRef(onRemove);
     const isMounted = useRef(true);
 
     useEffect(() => {
         onSelectRef.current = onSelect;
         onUpdateRef.current = onUpdate;
-    }, [onSelect, onUpdate]);
+        onAddRef.current = onAdd;
+        onRemoveRef.current = onRemove;
+    }, [onSelect, onUpdate, onAdd, onRemove]);
 
     useEffect(() => {
         return () => { isMounted.current = false; };
@@ -175,10 +183,26 @@ export const FabricCanvas = ({
             }
         });
 
-        // Path Created (Unused if external drawing, but good to have)
-        canvas.on("path:created", (e) => {
-            // Handle drawing output if needed
-            // For now, drawing is handled via adding objects
+        canvas.on("path:created", (e: any) => {
+            if (!isMounted.current || readOnly) return;
+            const pathObj = e.path as fabric.Path;
+            if (pathObj) {
+                // Determine if we need to remove the path from canvas immediately
+                // because React state will re-render it. Best to remove it so we don't duplicate.
+                canvas.remove(pathObj);
+
+                onAddRef.current?.("draw", "", {
+                    path: pathObj.path,
+                    color: pathObj.stroke,
+                    brushSize: pathObj.strokeWidth,
+                    x: pathObj.left,
+                    y: pathObj.top,
+                    width: pathObj.width,
+                    height: pathObj.height,
+                    opacity: pathObj.opacity,
+                    mixBlendMode: pathObj.globalCompositeOperation,
+                });
+            }
         });
 
 
@@ -270,7 +294,22 @@ export const FabricCanvas = ({
                             }
                         }, 50);
                     }
-                } else if (el.type === "image" || el.type === "draw") {
+                } else if (el.type === "draw" && el.path) {
+                    obj = new fabric.Path(el.path, {
+                        // @ts-ignore
+                        id: el.id,
+                        left: el.x,
+                        top: el.y,
+                        stroke: el.color,
+                        strokeWidth: el.brushSize || 5,
+                        fill: '', // Paths are usually just strokes
+                        opacity: el.opacity || 1,
+                        globalCompositeOperation: el.mixBlendMode || 'source-over',
+                        selectable: !readOnly,
+                        angle: el.rotation || 0,
+                    });
+                    canvas.add(obj);
+                } else if (el.type === "image" || (el.type === "draw" && !el.path)) {
                     fabric.Image.fromURL(el.content, (img) => {
                         if (!isMounted.current || !fabricCanvasRef.current) return;
 
@@ -373,6 +412,14 @@ export const FabricCanvas = ({
                     obj.set('fill', el.color);
                 }
 
+                if (el.type === 'draw') {
+                    obj.set({
+                        left: el.x,
+                        top: el.y,
+                        angle: el.rotation,
+                    })
+                }
+
                 obj.setCoords();
             }
         });
@@ -401,15 +448,50 @@ export const FabricCanvas = ({
         if (!fabricCanvasRef.current) return;
         const canvas = fabricCanvasRef.current;
 
-        canvas.isDrawingMode = isDrawing;
+        // Reset state
+        canvas.isDrawingMode = isDrawing && brushType !== "eraser";
+
+        // Remove active eraser handlers if any to prevent memory leaks
+        canvas.off('mouse:down');
+        canvas.off('mouse:move');
+
+        if (isDrawing && brushType === "eraser") {
+            const handleEraser = (e: fabric.IEvent) => {
+                if (!e.pointer) return;
+                const pointer = e.pointer;
+                const objects = canvas.getObjects();
+
+                // Find objects intersecting with the mouse pointer
+                objects.forEach((obj) => {
+                    if (obj.containsPoint(pointer)) {
+                        // @ts-ignore
+                        const id = obj.id;
+                        if (id && onRemoveRef.current) {
+                            onRemoveRef.current(id);
+                        }
+                    }
+                });
+            };
+
+            canvas.on('mouse:down', handleEraser);
+            canvas.on('mouse:move', (e) => {
+                if (e.e.buttons === 1) handleEraser(e); // Only erase when dragging (mouse button down)
+            });
+
+            return; // Exit early since eraser isn't standard drawing mode
+        }
+
         if (isDrawing) {
             canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
             canvas.freeDrawingBrush.color = brushColor;
             canvas.freeDrawingBrush.width = brushSize;
 
             if (brushType === 'marker') {
-                canvas.freeDrawingBrush.width = brushSize * 3;
-                // Alpha handling? Fabric brush has alpha in color hex usually
+                canvas.freeDrawingBrush.width = brushSize * 2.5;
+            } else if (brushType === 'highlighter') {
+                canvas.freeDrawingBrush.width = brushSize * 4;
+                // Add transparency to the hex code (e.g., 50% opacity -> ~80 in hex)
+                canvas.freeDrawingBrush.color = brushColor.length === 7 ? brushColor + '80' : brushColor;
             }
         }
     }, [isDrawing, brushColor, brushSize, brushType]);

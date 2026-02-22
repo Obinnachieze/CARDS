@@ -14,6 +14,8 @@ export interface EditorElement {
     color?: string;
     opacity?: number;
     mixBlendMode?: "normal" | "multiply" | "screen" | "overlay"; // For highlighter
+    brushSize?: number;
+    path?: any[]; // Fabric.js Path data array for drawings
     fontSize?: number;
     fontFamily?: string;
     rotation: number;

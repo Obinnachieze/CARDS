@@ -18,7 +18,8 @@ export const Canvas = () => {
         cards, activeCardId, activateCard,
         updateElement, selectElement, selectedElementId, selectedElement,
         currentFace, setCurrentFace, isDrawing, zoom, setZoom,
-        setCardFace, activeTool, brushColor, brushSize, brushType
+        setCardFace, activeTool, brushColor, brushSize, brushType,
+        addElement, removeElement
     } = useEditor();
 
     const { cardMode } = useEditor(); // Get cardMode separately or add to above
@@ -92,6 +93,8 @@ export const Canvas = () => {
                     readOnly={!isActive} // Only active face is interactive
                     onUpdate={updateElement}
                     onSelect={selectElement}
+                    onAdd={addElement}
+                    onRemove={removeElement}
                     isDrawing={isActive && isDrawing}
                     brushColor={brushColor}
                     brushSize={brushSize}
