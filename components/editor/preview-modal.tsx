@@ -142,8 +142,9 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full border-0 shadow-none flex items-center justify-center p-0 overflow-hidden outline-none"
                 style={{
-                    background: "linear-gradient(135deg, rgba(26, 5, 51, 0.85) 0%, rgba(13, 0, 21, 0.8) 20%, rgba(0, 0, 0, 0.75) 40%, rgba(5, 0, 13, 0.8) 60%, rgba(13, 0, 21, 0.8) 80%, rgba(26, 5, 51, 0.85) 100%)",
-                    backdropFilter: "blur(16px)",
+                    background: "linear-gradient(135deg, rgba(26, 5, 51, 0.45) 0%, rgba(13, 0, 21, 0.4) 20%, rgba(0, 0, 0, 0.35) 40%, rgba(5, 0, 13, 0.4) 60%, rgba(13, 0, 21, 0.4) 80%, rgba(26, 5, 51, 0.45) 100%)",
+                    backdropFilter: "blur(24px)",
+                    WebkitBackdropFilter: "blur(24px)",
                 }}
             >
                 {/* Smooth gradient glow overlay */}
