@@ -4,6 +4,11 @@ import React, { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { EditorElement } from "./types";
 
+const PENCIL_CURSOR = 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE3IDNsNCA0TDcuNSAyMC41IDIgMjJsMS41LTUuNXoiLz48cGF0aCBkPSJNMTUgNmw0IDQiLz48L3N2Zz4=") 0 24, auto';
+const ERASER_CURSOR = 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0ibTcgMTEgMiAyIDItMi0yIDJ6Ii8+PHBhdGggZD0iTTIwIDljLTIuMiAwLTQtMS44LTQtNHMtMS44LTQtNC00LTQgMS44LTQgNHMxLjggNCA0IDR6Ii8+PHBhdGggZD0iTTE4IDEzdjRjMCAxLjEtLjkgMi0yIDJ6Ii8+PC9zdmc+") 0 24, auto';
+const MARKER_CURSOR = 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0ibTEyIDUgNyA3LTkgOWgtNGwtMi0yIDItMnoiLz48cGF0aCBkPSJtMTUgOCA0IDQiLz48L3N2Zz4=") 0 24, auto';
+const HIGHLIGHTER_CURSOR = 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0ibTkgMTIgMiAybDktOWwtMi0yeiIvPjxwYXRoIGQ9Im0xNyA0IDIgMiIvPjxwYXRoIGQ9Im0xMSA4IDQgNCIvPjxwYXRoIGQ9Im0yIDExIDkgOSIvPjwvc3ZnZz4=") 0 24, auto';
+
 interface FabricCanvasProps {
     width: number;
     height: number;
@@ -458,6 +463,19 @@ export const FabricCanvas = ({
 
         // Reset state
         canvas.isDrawingMode = isDrawing && brushType !== "eraser";
+
+        // Calculate current cursor
+        let currentCursor = 'default';
+        if (isDrawing) {
+            if (brushType === 'eraser') currentCursor = ERASER_CURSOR;
+            else if (brushType === 'pencil') currentCursor = PENCIL_CURSOR;
+            else if (brushType === 'marker') currentCursor = MARKER_CURSOR;
+            else if (brushType === 'highlighter') currentCursor = HIGHLIGHTER_CURSOR;
+            else currentCursor = 'crosshair';
+        }
+
+        canvas.defaultCursor = currentCursor;
+        canvas.hoverCursor = currentCursor;
 
         // Remove active eraser handlers if any
         if (handleEraserRef.current) {
