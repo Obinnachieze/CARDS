@@ -158,7 +158,7 @@ function SwipeNavigationWrapper({ onPreview }: { onPreview: () => void }) {
                 }}
             >
                 <Toolbar />
-                <div className="flex-1 relative overflow-hidden">
+                <div className="flex-1 overflow-hidden relative">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeWorkspaceIndex}

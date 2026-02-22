@@ -50,15 +50,16 @@ const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: Reac
         onClick={onClick}
         onMouseEnter={onMouseEnter}
         className={cn(
-            "flex items-center justify-center min-w-[40px] md:min-w-[56px] h-10 md:h-12 transition-all duration-300 relative group rounded-xl md:rounded-2xl",
+            "flex flex-col items-center justify-center min-w-[48px] md:w-14 h-12 md:h-14 transition-all duration-300 relative group rounded-xl md:rounded-2xl",
             active
                 ? "text-purple-600 bg-purple-50/80 scale-105"
                 : "text-zinc-500 hover:text-purple-600 hover:bg-purple-50/40 hover:scale-105 active:scale-95"
         )}
         title={label}
     >
-        <div className={cn("transition-transform duration-300 group-hover:-translate-y-0.5 scale-100 md:scale-110", active ? "text-purple-600" : "")}>{icon}</div>
-        {active && <div className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full shadow-[0_0_8px_rgba(147,51,234,0.5)]" />}
+        <div className={cn("transition-transform duration-300 group-hover:-translate-y-1 scale-100 md:scale-110", active ? "text-purple-600" : "")}>{icon}</div>
+        <span className="hidden md:block text-[9px] font-bold opacity-0 group-hover:opacity-100 absolute bottom-1 transition-opacity text-purple-600 tracking-wide">{label}</span>
+        {active && <div className="absolute -bottom-0.5 md:bottom-auto md:left-0 md:top-1/2 md:-translate-y-1/2 left-1/2 -translate-x-1/2 md:translate-x-0 w-1 md:w-1 md:h-6 h-1 bg-purple-600 rounded-full shadow-[0_0_8px_rgba(147,51,234,0.5)]" />}
     </button>
 );
 
@@ -108,11 +109,8 @@ export const Toolbar = () => {
 
     // const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates"); // Removed local state
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [panelLeft, setPanelLeft] = useState<number | null>(null);
 
     const handleTabClick = (tab: string, e: React.MouseEvent<HTMLButtonElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        setPanelLeft(rect.left + rect.width / 2);
         setIsSettingsOpen(false);
         setActiveTab(activeTab === tab ? null : tab as any);
     };
@@ -220,10 +218,10 @@ export const Toolbar = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-col z-40 relative shrink-0">
-            {/* Universal Bottom Dock */}
-            <div className="fixed bottom-0 md:bottom-2 left-0 md:left-1/2 md:-translate-x-1/2 h-14 bg-white/95 md:bg-white/70 backdrop-blur-xl md:backdrop-blur-2xl border-t md:border border-white/20 flex items-center px-2 md:px-6 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] md:shadow-[0_8px_32px_rgba(0,0,0,0.15)] rounded-none md:rounded-[5px] w-full md:w-[calc(100%-16px)] max-w-none md:max-w-2xl dock-container transition-all">
-                <div className="flex w-full items-center justify-start md:justify-around overflow-x-auto scrollbar-hide px-2">
+        <div className="flex flex-col md:flex-col z-40 relative shrink-0 md:w-20 bg-white/95 md:bg-zinc-50 md:border-r border-zinc-200">
+            {/* Universal Bottom Dock / Left Sidebar */}
+            <div className="fixed bottom-0 left-0 w-full md:static md:w-full md:h-full md:flex border-t md:border-t-0 border-white/20 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] md:shadow-none bg-white/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none transition-all dock-container">
+                <div className="flex w-full items-center justify-start overflow-x-auto scrollbar-hide px-2 md:px-0 md:py-6 md:flex-col md:items-center md:justify-start md:overflow-visible gap-1 md:gap-3 h-14 md:h-full mx-auto">
                     {/* New Card Button - Mobile Only */}
                     <div className="flex items-center md:hidden shrink-0">
                         <SidebarTab
@@ -237,8 +235,6 @@ export const Toolbar = () => {
 
                     <SidebarTab icon={<Palette size={22} />} label="Color" active={activeTab === "design"} onClick={(e) => handleTabClick("design", e)} />
                     <SidebarTab icon={<Type size={22} />} label="Text" active={activeTab === "text"} onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        setPanelLeft(rect.left + rect.width / 2);
                         setIsSettingsOpen(false);
                         if (activeTab !== "text") {
                             addElement("text", "Your text here", { fontSize: 32, fontFamily: "Inter", color: "#000000" });
@@ -259,25 +255,17 @@ export const Toolbar = () => {
             {/* Sliding Panel */}
             <div
                 className={cn(
-                    "fixed bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-3xl border border-white/20 sliding-panel",
-                    // Sliding panel above dock
-                    "bottom-14 md:bottom-19 max-h-[50vh] md:max-h-[70vh]",
+                    "fixed bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-t-3xl md:rounded-none border border-white/20 md:border-y-0 md:border-r md:border-l-0 md:border-zinc-200 sliding-panel",
+                    // Mobile: Pops up from bottom. Desktop: Slides out from left sidebar
+                    "bottom-14 max-h-[50vh]",
+                    "md:bottom-0 md:top-0 md:left-20 md:translate-y-0 md:h-full md:max-h-full",
                     activeTab && ["draw", "effects", "music", "text"].includes(activeTab)
-                        ? "left-1/2 -translate-x-1/2 w-[300px]"
-                        : "left-4 right-4 md:w-[400px]",
-                    "md:right-auto",
-                    activeTab ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
+                        ? "left-1/2 -translate-x-1/2 w-[300px] md:translate-x-0 md:w-[320px]"
+                        : "left-4 right-4 md:right-auto md:w-[320px] lg:w-[400px]",
+                    activeTab
+                        ? "translate-y-0 md:translate-x-0 opacity-100"
+                        : "translate-y-8 md:translate-y-0 md:-translate-x-full opacity-0 pointer-events-none"
                 )}
-                style={panelLeft !== null ? { '--panel-left': `${panelLeft}px` } as React.CSSProperties : undefined}
-                ref={(el) => {
-                    if (el && panelLeft !== null && window.innerWidth >= 768) {
-                        el.style.left = `${panelLeft}px`;
-                        el.style.transform = 'translateX(-50%)';
-                    } else if (el && window.innerWidth < 768) {
-                        el.style.left = '';
-                        el.style.transform = '';
-                    }
-                }}
             >
                 {activeTab && (
                     <div className="flex items-center justify-between p-2 md:hidden">
@@ -292,9 +280,9 @@ export const Toolbar = () => {
                 {activeTab && !["music", "stickers"].includes(activeTab) && (
                     <>
                         {/* Content Layout */}
-                        <div className="flex overflow-hidden">
+                        <div className="flex overflow-hidden h-full">
 
-                            <ScrollArea className="p-4 bg-white max-h-[inherit] w-full">
+                            <ScrollArea className="p-4 bg-white max-h-[inherit] w-full h-full">
                                 {/* Panel Content Based on Tab */}
 
                                 {activeTab === "text" && (
