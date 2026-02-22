@@ -231,7 +231,7 @@ export function TemplateMasonry() {
                                         <div className="absolute top-1/3 left-8 text-xl md:text-3xl -rotate-12 opacity-60">
                                             {template.design.emojis[2]}
                                         </div>
-                                        <span className={cn("text-center z-10 p-4 leading-tight break-words", template.design.font, template.design.textColor)}>
+                                        <span className={cn("text-center z-10 p-4 leading-tight wrap-break-word", template.design.font, template.design.textColor)}>
                                             {template.design.text}
                                         </span>
                                     </div>

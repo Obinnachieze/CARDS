@@ -304,6 +304,22 @@ export const FabricCanvas = ({
                             }
                         }, 50);
                     }
+                } else if (el.type === "emoji") {
+                    obj = new fabric.Text(el.content, {
+                        // @ts-ignore
+                        id: el.id,
+                        left: el.x,
+                        top: el.y,
+                        fontSize: el.fontSize || 64,
+                        angle: el.rotation || 0,
+                        selectable: !readOnly,
+                        // Custom styles
+                        borderColor: '#9333ea',
+                        cornerColor: 'white',
+                        cornerStrokeColor: '#9333ea',
+                        cornerStyle: 'circle',
+                        transparentCorners: false,
+                    });
                 } else if (el.type === "draw" && el.path) {
                     obj = new fabric.Path(el.path, {
                         // @ts-ignore
@@ -415,6 +431,11 @@ export const FabricCanvas = ({
                         hoverCursor: 'grab',
                         moveCursor: 'grabbing',
                     });
+                }
+
+                if (el.type === 'emoji' && obj instanceof fabric.Text) {
+                    if (obj.text !== el.content) obj.set('text', el.content);
+                    if (obj.fontSize !== el.fontSize) obj.set('fontSize', el.fontSize);
                 }
 
                 if (el.type === 'shape') {
