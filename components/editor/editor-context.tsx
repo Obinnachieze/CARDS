@@ -32,6 +32,7 @@ interface EditorContextType {
 
     backgroundColor: string;
     setBackgroundColor: (color: string) => void;
+    setSmartColor: (color: string) => void;
 
     // New Features
     currentFace: CardFace; // Keeps compatibility, but derived from active card
@@ -663,6 +664,19 @@ export const EditorProvider = ({
         }));
     }, []);
 
+    const setSmartColor = useCallback((color: string) => {
+        // Always update brush color so it stays in sync
+        setBrushColor(color);
+
+        if (selectedElementId) {
+            // Update selected element
+            updateElement(selectedElementId, { color });
+        } else if (activeCardId) {
+            // Update background
+            setBackgroundColor(color);
+        }
+    }, [selectedElementId, activeCardId, updateElement, setBackgroundColor]);
+
     const removeElement = useCallback((id: string) => {
         saveHistory();
         setCards(prev => prev.map(c => ({
@@ -723,6 +737,7 @@ export const EditorProvider = ({
             selectedElement,
             backgroundColor,
             setBackgroundColor,
+            setSmartColor,
 
             currentFace,
             setCurrentFace,

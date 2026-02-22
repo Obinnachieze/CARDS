@@ -83,6 +83,7 @@ export const Toolbar = () => {
         loadProject,
         deleteProject,
         setBackgroundColor,
+        setSmartColor,
         backgroundColor,
         currentFont,
         setCurrentFont,
@@ -110,6 +111,7 @@ export const Toolbar = () => {
     // const [activeTab, setActiveTab] = useState<Tab | "projects" | null>("templates"); // Removed local state
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [panelTop, setPanelTop] = useState<number | null>(null);
+    const previousSelectedIdRef = React.useRef<string | null>(null);
 
     const handleTabClick = (tab: string, e: React.MouseEvent<HTMLButtonElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -122,15 +124,20 @@ export const Toolbar = () => {
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
-            // Don't close if clicking the dock or the panel itself
-            if (target.closest('.dock-container') || target.closest('.sliding-panel')) return;
+            // Don't close if clicking the dock, the panel, or the canvas
+            if (
+                target.closest('.dock-container') ||
+                target.closest('.sliding-panel') ||
+                target.closest('.canvas-container') ||
+                target.tagName.toLowerCase() === 'canvas'
+            ) return;
             setActiveTab(null);
         };
         if (activeTab) {
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [activeTab]);
+    }, [activeTab, setActiveTab]);
 
     // Google Fonts State
     const [googleFonts, setGoogleFonts] = useState<GoogleFont[]>([]);
@@ -205,20 +212,24 @@ export const Toolbar = () => {
 
 
     useEffect(() => {
-        if (!selectedElement) return;
+        // Track previous selected element ID to only trigger auto-switch when selection CHANGES
+        if (selectedElement?.id !== previousSelectedIdRef.current) {
+            previousSelectedIdRef.current = selectedElement?.id || null;
 
-        // Add a tiny delay to allow the initial click/selection interaction 
-        // to complete before triggering a layout shift.
-        const timer = setTimeout(() => {
-            if (selectedElement.type === "text" && activeTab !== "text" && activeTab !== "stickers") {
-                setActiveTab("text");
-            } else if ((selectedElement.type === "line" || selectedElement.type === "shape") && activeTab !== "elements") {
-                setActiveTab("elements");
+            if (selectedElement) {
+                // Add a tiny delay to allow the initial click/selection interaction 
+                // to complete before triggering a layout shift.
+                const timer = setTimeout(() => {
+                    if (selectedElement.type === "text" && activeTab !== "text" && activeTab !== "stickers") {
+                        setActiveTab("text");
+                    } else if ((selectedElement.type === "line" || selectedElement.type === "shape") && activeTab !== "elements") {
+                        setActiveTab("elements");
+                    }
+                }, 50);
+                return () => clearTimeout(timer);
             }
-        }, 50);
-
-        return () => clearTimeout(timer);
-    }, [selectedElement, activeTab, setActiveTab]);
+        }
+    }, [selectedElement?.id, selectedElement?.type, activeTab, setActiveTab]);
 
     const handleAddEmoji = (emojiData: EmojiClickData) => {
         addElement("emoji", emojiData.emoji, { x: 50, y: 50 });
@@ -337,84 +348,86 @@ export const Toolbar = () => {
                                 {/* Panel Content Based on Tab */}
 
                                 {activeTab === "text" && (
-                                    <div className="space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
-                                                Fonts ({googleFonts.length > 0 ? googleFonts.length : fallbackFonts.length})
-                                            </Label>
-                                            {isLoadingFonts && <Loader2 className="animate-spin text-purple-600" size={14} />}
-                                        </div>
-
-                                        <div className="bg-gray-100 p-2 rounded-md flex flex-col gap-2 sticky top-0 z-10">
-                                            <div className="flex gap-2 items-center">
-                                                <Search size={16} className="text-gray-400" />
-                                                <input
-                                                    className="bg-transparent text-sm w-full outline-none"
-                                                    placeholder="Type to search fonts..."
-                                                    value={fontSearch}
-                                                    onChange={(e) => setFontSearch(e.target.value)}
-                                                />
-                                            </div>
-                                            {fontError && (
-                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
-                                                    {fontError}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="grid grid-cols-1 gap-2 min-h-[100px]">
-                                            {fontSearch === "" && (
-                                                <div className="mb-4">
-                                                    <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-2 block px-1">
-                                                        Popular for Cards
-                                                    </Label>
-                                                    <div className="grid grid-cols-1 gap-2">
-                                                        {popularCardFonts.map((familyName) => {
-                                                            const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
-                                                            return (
-                                                                <Button
-                                                                    key={familyName}
-                                                                    variant="outline"
-                                                                    className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
-                                                                    onClick={() => handleFontSelect(familyName)}
-                                                                >
-                                                                    <span className={cn("truncate text-xl transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
-                                                                </Button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {fontSearch === "" && (
-                                                <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-2 block px-1 mt-2">
-                                                    All Fonts
+                                    <div className="space-y-4">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                                                    Fonts ({googleFonts.length > 0 ? googleFonts.length : fallbackFonts.length})
                                                 </Label>
-                                            )}
+                                                {isLoadingFonts && <Loader2 className="animate-spin text-purple-600" size={14} />}
+                                            </div>
 
-                                            {filteredFonts.length === 0 ? (
-                                                <div className="text-center py-8 text-gray-400 text-xs text-balance px-4">
-                                                    No fonts found matching "{fontSearch}". <br />Try "Roboto", "Open Sans", "Lato"...
+                                            <div className="bg-gray-100 p-2 rounded-md flex flex-col gap-2 sticky top-0 z-10">
+                                                <div className="flex gap-2 items-center">
+                                                    <Search size={16} className="text-gray-400" />
+                                                    <input
+                                                        className="bg-transparent text-sm w-full outline-none"
+                                                        placeholder="Type to search fonts..."
+                                                        value={fontSearch}
+                                                        onChange={(e) => setFontSearch(e.target.value)}
+                                                    />
                                                 </div>
-                                            ) : (
-                                                filteredFonts.map((font, index) => {
-                                                    const familyName = typeof font === 'string' ? font : font.family;
-                                                    const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
+                                                {fontError && (
+                                                    <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
+                                                        {fontError}
+                                                    </div>
+                                                )}
+                                            </div>
 
-                                                    return (
-                                                        <Button
-                                                            key={familyName}
-                                                            variant="outline"
-                                                            className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
-                                                            onClick={() => handleFontSelect(familyName)}
-                                                            onMouseEnter={() => loadFont(familyName)}
-                                                        >
-                                                            <span className={cn("truncate text-lg transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
-                                                            {/* <div className="absolute right-2 opacity-0 group-hover:opacity-100 text-xs text-gray-400 bg-white px-1">Apply</div> */}
-                                                        </Button>
-                                                    );
-                                                })
-                                            )}
+                                            <div className="grid grid-cols-1 gap-2 min-h-[100px]">
+                                                {fontSearch === "" && (
+                                                    <div className="mb-4">
+                                                        <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-2 block px-1">
+                                                            Popular for Cards
+                                                        </Label>
+                                                        <div className="grid grid-cols-1 gap-2">
+                                                            {popularCardFonts.map((familyName) => {
+                                                                const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
+                                                                return (
+                                                                    <Button
+                                                                        key={familyName}
+                                                                        variant="outline"
+                                                                        className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
+                                                                        onClick={() => handleFontSelect(familyName)}
+                                                                    >
+                                                                        <span className={cn("truncate text-xl transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
+                                                                    </Button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {fontSearch === "" && (
+                                                    <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-2 block px-1 mt-2">
+                                                        All Fonts
+                                                    </Label>
+                                                )}
+
+                                                {filteredFonts.length === 0 ? (
+                                                    <div className="text-center py-8 text-gray-400 text-xs text-balance px-4">
+                                                        No fonts found matching "{fontSearch}". <br />Try "Roboto", "Open Sans", "Lato"...
+                                                    </div>
+                                                ) : (
+                                                    filteredFonts.map((font, index) => {
+                                                        const familyName = typeof font === 'string' ? font : font.family;
+                                                        const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
+
+                                                        return (
+                                                            <Button
+                                                                key={familyName}
+                                                                variant="outline"
+                                                                className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
+                                                                onClick={() => handleFontSelect(familyName)}
+                                                                onMouseEnter={() => loadFont(familyName)}
+                                                            >
+                                                                <span className={cn("truncate text-lg transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
+                                                                {/* <div className="absolute right-2 opacity-0 group-hover:opacity-100 text-xs text-gray-400 bg-white px-1">Apply</div> */}
+                                                            </Button>
+                                                        );
+                                                    })
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -440,49 +453,51 @@ export const Toolbar = () => {
                                 {/* Projects and Templates moved to SettingsSidebar */}
 
                                 {activeTab === "draw" && (
-                                    <div className="flex items-center gap-2 p-2">
-                                        <button
-                                            className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                            onClick={() => setIsDrawing(false)}
-                                            title="Select / Move"
-                                        >
-                                            <MousePointer2 size={20} />
-                                        </button>
-                                        <button
-                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                            onClick={() => { setBrushType("pencil"); setIsDrawing(true); }}
-                                            title="Pencil"
-                                        >
-                                            <Pencil size={20} />
-                                        </button>
-                                        <button
-                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                            onClick={() => { setBrushType("marker"); setIsDrawing(true); }}
-                                            title="Marker"
-                                        >
-                                            <PenTool size={20} />
-                                        </button>
-                                        <button
-                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                            onClick={() => { setBrushType("highlighter"); setIsDrawing(true); }}
-                                            title="Highlighter"
-                                        >
-                                            <Highlighter size={20} />
-                                        </button>
-                                        <button
-                                            className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-gray-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
-                                            onClick={() => { setBrushType("eraser"); setIsDrawing(true); }}
-                                            title="Eraser"
-                                        >
-                                            <Eraser size={20} />
-                                        </button>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-2 p-2">
+                                            <button
+                                                className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                onClick={() => setIsDrawing(false)}
+                                                title="Select / Move"
+                                            >
+                                                <MousePointer2 size={20} />
+                                            </button>
+                                            <button
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                onClick={() => { setBrushType("pencil"); setIsDrawing(true); }}
+                                                title="Pencil"
+                                            >
+                                                <Pencil size={20} />
+                                            </button>
+                                            <button
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                onClick={() => { setBrushType("marker"); setIsDrawing(true); }}
+                                                title="Marker"
+                                            >
+                                                <PenTool size={20} />
+                                            </button>
+                                            <button
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                onClick={() => { setBrushType("highlighter"); setIsDrawing(true); }}
+                                                title="Highlighter"
+                                            >
+                                                <Highlighter size={20} />
+                                            </button>
+                                            <button
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-gray-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                onClick={() => { setBrushType("eraser"); setIsDrawing(true); }}
+                                                title="Eraser"
+                                            >
+                                                <Eraser size={20} />
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                                 {activeTab === "design" && (
                                     <div className="space-y-3">
                                         <div className="space-y-2">
-                                            <Label>Background Color</Label>
-                                            <ColorPicker color={backgroundColor} onChange={setBackgroundColor} />
+                                            <Label>Card Color</Label>
+                                            <ColorPicker color={backgroundColor} onChange={setSmartColor} />
                                         </div>
                                     </div>
                                 )}

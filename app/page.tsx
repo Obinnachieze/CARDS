@@ -3,6 +3,7 @@ import { Header } from "@/components/ui/header";
 import { Hero } from "@/components/landing/hero";
 import { Footer } from "@/components/landing/footer";
 import { TemplateMasonry } from "@/components/landing/template-masonry";
+import { AboutContact } from "@/components/landing/about";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <div className="relative z-10">
         <Hero />
         <TemplateMasonry />
+        <AboutContact />
       </div>
       <div className="relative z-10">
         <Footer />

@@ -36,6 +36,10 @@ export function Header() {
         {
             label: 'Gallery',
             href: '#gallery',
+        },
+        {
+            label: 'Contact',
+            href: '#contact',
         }
     ];
 

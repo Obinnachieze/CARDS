@@ -426,6 +426,7 @@ export const FabricCanvas = ({
                         left: el.x,
                         top: el.y,
                         angle: el.rotation,
+                        stroke: el.color,
                     })
                 }
 
