@@ -333,16 +333,17 @@ export const Toolbar = () => {
                                                     const familyName = typeof font === 'string' ? font : font.family;
                                                     // Auto-load visible fonts (top 10)
                                                     if (index < 10) loadFont(familyName);
+                                                    const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
 
                                                     return (
                                                         <Button
                                                             key={familyName}
                                                             variant="outline"
-                                                            className="h-12 justify-start px-3 overflow-hidden hover:bg-gray-50 bg-white shadow-sm border-0 w-full text-left font-normal group relative"
+                                                            className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
                                                             onClick={() => handleFontSelect(familyName)}
                                                             onMouseEnter={() => loadFont(familyName)}
                                                         >
-                                                            <span className="truncate text-lg group-hover:text-purple-600 transition-colors" style={{ fontFamily: familyName }}>{familyName}</span>
+                                                            <span className={cn("truncate text-lg transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
                                                             {/* <div className="absolute right-2 opacity-0 group-hover:opacity-100 text-xs text-gray-400 bg-white px-1">Apply</div> */}
                                                         </Button>
                                                     );

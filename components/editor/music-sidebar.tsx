@@ -202,7 +202,11 @@ export function MusicSidebar() {
                     <div className="grid grid-cols-2 gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => setRecordedUrl(null)}
+                            onClick={() => {
+                                if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+                                setRecordedUrl(null);
+                                setRecordedBlob(null);
+                            }}
                             className="text-xs h-8"
                         >
                             Discard

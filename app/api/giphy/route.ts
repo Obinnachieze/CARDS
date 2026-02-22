@@ -19,9 +19,13 @@ export async function GET(req: Request) {
             ? `https://api.giphy.com/v1/${type}/search?api_key=${apiKey}&q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}&rating=g&ts=${timestamp}`
             : `https://api.giphy.com/v1/${type}/trending?api_key=${apiKey}&limit=${limit}&offset=${offset}&rating=g&ts=${timestamp}`;
 
-        console.log(`Fetching Giphy: ${endpoint}`);
+        console.log(`Fetching Giphy: ${endpoint.replace(apiKey, "****")}`);
         const res = await fetch(endpoint);
         const data = await res.json();
+
+        if (!res.ok) {
+            return NextResponse.json(data, { status: res.status });
+        }
 
         return NextResponse.json(data);
     } catch (error) {

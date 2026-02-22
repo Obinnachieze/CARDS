@@ -35,10 +35,16 @@ export function ShareDialog() {
         setError(null);
         setIsSaving(true);
         try {
+            let idToShare = currentProjectId;
             if (currentProjectId) {
                 await saveCurrentProject();
             }
-            handleCopy();
+            if (idToShare && typeof window !== 'undefined') {
+                const newShareUrl = `${window.location.origin}/share/${idToShare}`;
+                navigator.clipboard.writeText(newShareUrl);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            }
         } catch (e) {
             console.error("Share failed:", e);
             setError("Failed to save project. Please check your connection.");
@@ -54,10 +60,14 @@ export function ShareDialog() {
             const projectName = typeof type === "string"
                 ? `${type.charAt(0).toUpperCase() + type.slice(1)} Card`
                 : "Untitled Card";
-            await saveProjectAs(projectName);
+            const newId = await saveProjectAs(projectName);
+            if (newId && typeof window !== 'undefined') {
+                const newShareUrl = `${window.location.origin}/share/${newId}`;
+                navigator.clipboard.writeText(newShareUrl);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            }
             // After saving, the component will re-render with currentProjectId set,
-            // and the user can then copy the link. We could auto-copy here if we wanted,
-            // but waiting for the UI to update is safer.
         } catch (e) {
             console.error("Save failed:", e);
             setError("Failed to create project. Please check if Supabase is configured.");
@@ -69,7 +79,7 @@ export function ShareDialog() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="bg-transparent sm:bg-white text-white sm:text-black hover:bg-white/10 sm:hover:bg-gray-200 font-semibold h-9 w-9 sm:w-auto px-0 sm:px-4 gap-2 rounded-full sm:rounded-md transition-all border-0 shadow-none sm:shadow-sm">
+                <Button className="bg-gray-800 text-white hover:bg-gray-700 sm:bg-white sm:text-black sm:hover:bg-gray-200 font-semibold h-9 w-9 sm:w-auto px-0 sm:px-4 gap-2 rounded-full sm:rounded-md transition-all border border-gray-200 sm:border-0 shadow-xs sm:shadow-sm">
                     <Share2 size={16} />
                     <span className="hidden sm:inline">Share</span>
                 </Button>

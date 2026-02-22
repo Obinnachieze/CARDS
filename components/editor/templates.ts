@@ -250,7 +250,7 @@ export const templates: Template[] = [
                         type: "text",
                         x: 50,
                         y: 300,
-                        content: "Class of 2024",
+                        content: `Class of ${new Date().getFullYear()}`,
                         fontSize: 32,
                         fontFamily: "Lato",
                         color: "#ffffff",

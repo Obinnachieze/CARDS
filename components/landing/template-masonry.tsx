@@ -169,9 +169,9 @@ export function TemplateMasonry() {
                                             </p>
                                         </div>
 
-                                        <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <Link href={template.href}>
-                                                <Button size="sm" className="w-full bg-white text-black hover:bg-neutral-200 rounded-lg gap-2 font-bold shadow-lg">
+                                        <div className="mt-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300">
+                                            <Link href={template.href} tabIndex={-1} className="focus:outline-hidden">
+                                                <Button size="sm" className="w-full bg-white text-black hover:bg-neutral-200 focus-visible:ring-4 focus-visible:ring-purple-500 rounded-lg gap-2 font-bold shadow-lg">
                                                     Start with this <ExternalLink size={14} />
                                                 </Button>
                                             </Link>

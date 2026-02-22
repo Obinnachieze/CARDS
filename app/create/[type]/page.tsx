@@ -117,6 +117,7 @@ function SwipeNavigationWrapper({ onPreview }: { onPreview: () => void }) {
     } = useEditor();
 
     const [isMobile, setIsMobile] = useState(false);
+    const prevIndexRef = React.useRef(activeWorkspaceIndex);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -125,12 +126,20 @@ function SwipeNavigationWrapper({ onPreview }: { onPreview: () => void }) {
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
+    useEffect(() => {
+        prevIndexRef.current = activeWorkspaceIndex;
+    }, [activeWorkspaceIndex]);
+
     const handleSwipe = (direction: number) => {
         const nextIndex = activeWorkspaceIndex + direction;
         if (nextIndex >= 0 && nextIndex < workspaceProjects.length) {
             switchToWorkspaceProject(nextIndex);
         }
     };
+
+    const delta = activeWorkspaceIndex - prevIndexRef.current;
+    const initialX = delta >= 0 ? 300 : -300;
+    const exitX = delta >= 0 ? -300 : 300;
 
     return (
         <div className="flex flex-col h-screen bg-gray-100 text-black">
@@ -153,9 +162,9 @@ function SwipeNavigationWrapper({ onPreview }: { onPreview: () => void }) {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeWorkspaceIndex}
-                            initial={{ x: 300, opacity: 0 }}
+                            initial={{ x: initialX, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: -300, opacity: 0 }}
+                            exit={{ x: exitX, opacity: 0 }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
                             className="absolute inset-0"
                         >

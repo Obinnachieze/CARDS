@@ -15,7 +15,18 @@ export function Header() {
     const scrolled = useScroll(10);
     const [user, setUser] = useState<User | null>(null);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const supabase = createClient();
+    const supabase = React.useMemo(() => createClient(), []);
+    const profileRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isProfileOpen && profileRef.current && !profileRef.current.contains(event.target as Node)) {
+                setIsProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isProfileOpen]);
 
     const links = [
         {
@@ -104,7 +115,7 @@ export function Header() {
 
                     <div className="flex items-center gap-4 ml-4">
                         {user ? (
-                            <div className="relative">
+                            <div className="relative" ref={profileRef}>
                                 <button
                                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                                     className="w-9 h-9 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"

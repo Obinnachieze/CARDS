@@ -64,8 +64,8 @@ interface EditorContextType {
     activeWorkspaceIndex: number;
     currentProjectId: string | null;
     createNewProject: () => void;
-    saveProjectAs: (name: string) => Promise<void>;
-    saveCurrentProject: () => Promise<void>;
+    saveProjectAs: (name: string) => Promise<string>;
+    saveCurrentProject: () => Promise<string | void>;
     loadProject: (id: string) => void;
     deleteProject: (id: string) => void;
     clearAllProjects: () => Promise<void>;
@@ -168,6 +168,13 @@ export const EditorProvider = ({
     // Ref to prevent infinite loops during state swapping
     const isSwappingRef = useRef(false);
 
+    // Clear isSwappingRef deterministically after state settles
+    useEffect(() => {
+        if (isSwappingRef.current) {
+            isSwappingRef.current = false;
+        }
+    }, [activeWorkspaceIndex, cards, cardMode, currentProjectId, projectName]);
+
     // Update workspace record whenever active project state changes
     useEffect(() => {
         if (isSwappingRef.current) return;
@@ -217,18 +224,22 @@ export const EditorProvider = ({
         if (storedProjects) {
             try {
                 const parsed = JSON.parse(storedProjects);
-                setProjects(parsed);
+                if (Array.isArray(parsed)) {
+                    setProjects(parsed);
 
-                // If we have a project ID in the URL, load it now
-                const projectIdFromUrl = searchParams.get("project");
-                if (projectIdFromUrl) {
-                    const project = parsed.find((p: any) => p.id === projectIdFromUrl);
-                    if (project) {
-                        setCards(project.cards);
-                        setCardMode(project.cardMode);
-                        setCurrentProjectId(project.id);
-                        setProjectName(project.name);
-                        setActiveCardId(project.cards[0]?.id || null);
+                    // If we have a project ID in the URL, load it now
+                    const projectIdFromUrl = searchParams.get("project");
+                    if (projectIdFromUrl) {
+                        const project = parsed.find((p: any) => p.id === projectIdFromUrl);
+                        if (project && project.id && project.cardMode && Array.isArray(project.cards) && project.cards.length > 0) {
+                            setCards(project.cards);
+                            setCardMode(project.cardMode);
+                            setCurrentProjectId(project.id);
+                            setProjectName(project.name || "");
+                            setActiveCardId(project.cards[0].id);
+                        } else {
+                            console.warn("Project found but has invalid shape:", project);
+                        }
                     }
                 }
             } catch (e) {
@@ -268,31 +279,32 @@ export const EditorProvider = ({
         setCards(project.cards);
         setCardMode(project.cardMode);
         setCurrentProjectId(project.id.startsWith("local-") ? null : project.id);
-        setProjectName(project.name);
+        setProjectName(project.name || "");
         setActiveCardId(project.cards[0]?.id || null);
         setPast([]);
         setFuture([]);
-
-        // Brief timeout to let effects finish before re-enabling sync
-        setTimeout(() => {
-            isSwappingRef.current = false;
-        }, 100);
     }, [workspaceProjects]);
 
     const removeWorkspaceProject = useCallback((index: number) => {
         setWorkspaceProjects(prev => {
             if (prev.length <= 1) return prev;
             const updated = prev.filter((_, i) => i !== index);
+            let newActiveIndex = activeWorkspaceIndex;
             if (activeWorkspaceIndex >= updated.length) {
-                switchToWorkspaceProject(updated.length - 1);
+                newActiveIndex = updated.length - 1;
             } else if (activeWorkspaceIndex === index) {
-                switchToWorkspaceProject(Math.max(0, index - 1));
+                newActiveIndex = Math.max(0, index - 1);
+            }
+            if (newActiveIndex !== activeWorkspaceIndex) {
+                setTimeout(() => switchToWorkspaceProject(newActiveIndex), 0);
+            } else {
+                setTimeout(() => switchToWorkspaceProject(activeWorkspaceIndex), 0);
             }
             return updated;
         });
     }, [activeWorkspaceIndex, switchToWorkspaceProject]);
 
-    const saveProjectAs = useCallback(async (name: string) => {
+    const saveProjectAs = useCallback(async (name: string): Promise<string> => {
         const newId = generateId();
         const newProject: Project = {
             id: newId,
@@ -326,9 +338,10 @@ export const EditorProvider = ({
 
         // Redirect to project URL
         router.push(`/create/${cardMode}?project=${newId}`);
+        return newId;
     }, [cards, cardMode, projects, user, router]);
 
-    const saveCurrentProject = useCallback(async () => {
+    const saveCurrentProject = useCallback(async (): Promise<string | void> => {
         if (!currentProjectId) return;
 
         const project = projects.find(p => p.id === currentProjectId);
@@ -360,6 +373,7 @@ export const EditorProvider = ({
         } catch (error: any) {
             console.error("Failed to save to Supabase (Auto-save):", error.message || JSON.stringify(error));
         }
+        return currentProjectId;
     }, [cards, cardMode, projects, currentProjectId, user, projectName]);
 
     // Auto-save logic
@@ -470,6 +484,25 @@ export const EditorProvider = ({
     }, [projects]);
 
     const clearAllProjects = useCallback(async () => {
+        if (!window.confirm("Are you sure you want to delete all projects? This cannot be undone.")) return;
+
+        // Delete all projects from Supabase if user is logged in
+        if (user) {
+            const supabaseClient = createClient();
+            try {
+                const { error } = await supabaseClient
+                    .from('projects')
+                    .delete()
+                    .eq('user_id', user.id);
+                if (error) throw error;
+                console.log("Cleared cloud projects entirely");
+            } catch (error: any) {
+                console.error("Failed to clear cloud projects:", error.message);
+                alert("Failed to clear cloud projects. Please try to delete them individually.");
+                return; // halt local destruct
+            }
+        }
+
         // Clear local storage and state
         setProjects([]);
         localStorage.removeItem("card-projects");
@@ -498,21 +531,6 @@ export const EditorProvider = ({
 
         // Clear URL project parameter
         router.push(`/create/postcard`);
-
-        // Delete all projects from Supabase if user is logged in
-        if (user) {
-            const supabaseClient = createClient();
-            try {
-                const { error } = await supabaseClient
-                    .from('projects')
-                    .delete()
-                    .eq('user_id', user.id);
-                if (error) throw error;
-                console.log("Cleared cloud projects entirely");
-            } catch (error: any) {
-                console.error("Failed to clear cloud projects:", error.message);
-            }
-        }
     }, [user, router]);
 
 
@@ -549,10 +567,7 @@ export const EditorProvider = ({
         };
         setCards(prev => [...prev, newCard]);
         setActiveCardId(newCard.id);
-
-        // Requirement: New page resets save state to show input
-        setCurrentProjectId(null);
-        setProjectName("");
+        // Removed unconditionally resetting currentProjectId and projectName
     }, [saveHistory]);
 
     const removeCard = useCallback((id: string) => {

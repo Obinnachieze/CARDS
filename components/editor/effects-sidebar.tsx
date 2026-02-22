@@ -53,6 +53,7 @@ export const EffectsSidebar = () => {
                                     <button
                                         onClick={() => handleEffectSelect(effect.id)}
                                         title={effect.label}
+                                        aria-label={effect.label}
                                         className={cn(
                                             "p-3 rounded-xl transition-all",
                                             currentEffect === effect.id
@@ -75,6 +76,7 @@ export const EffectsSidebar = () => {
                             key={effect.id}
                             onClick={() => handleEffectSelect(effect.id)}
                             title={effect.label}
+                            aria-label={effect.label}
                             className={cn(
                                 "p-3 rounded-xl transition-all",
                                 currentEffect === effect.id

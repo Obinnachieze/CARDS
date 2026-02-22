@@ -42,7 +42,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
         }
     };
 
-    const handleModalSave = async (title: string, creatorName: string) => {
+    const handleModalSave = async (title: string) => {
         setIsSaving(true);
         try {
             await saveProjectAs(title);

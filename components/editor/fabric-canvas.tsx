@@ -37,6 +37,20 @@ export const FabricCanvas = ({
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
     const isInternalUpdate = useRef(false);
 
+    const onSelectRef = useRef(onSelect);
+    const onUpdateRef = useRef(onUpdate);
+    const pendingUpdatesRef = useRef<Map<string, any>>(new Map());
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        onSelectRef.current = onSelect;
+        onUpdateRef.current = onUpdate;
+    }, [onSelect, onUpdate]);
+
+    useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
+
     // Initialize Fabric Canvas
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -55,19 +69,50 @@ export const FabricCanvas = ({
         canvas.on("selection:created", (e) => {
             if (e.selected && e.selected.length > 0) {
                 // @ts-ignore - custom property
-                onSelect?.(e.selected[0].id);
+                onSelectRef.current?.(e.selected[0].id);
             }
         });
 
         canvas.on("selection:updated", (e) => {
             if (e.selected && e.selected.length > 0) {
                 // @ts-ignore - custom property
-                onSelect?.(e.selected[0].id);
+                onSelectRef.current?.(e.selected[0].id);
             }
         });
 
-        canvas.on("selection:cleared", () => {
-            onSelect?.(null);
+        const flushPendingUpdates = (activeObj: fabric.Object | undefined) => {
+            if (activeObj && (activeObj as any).id) {
+                const id = (activeObj as any).id;
+                if (pendingUpdatesRef.current.has(id)) {
+                    const el = pendingUpdatesRef.current.get(id);
+                    activeObj.set({ left: el.x, top: el.y, angle: el.rotation });
+                    if (el.type === 'text' && activeObj instanceof fabric.Textbox) {
+                        if (activeObj.text !== el.content) activeObj.set('text', el.content);
+                        if (activeObj.fill !== el.color) activeObj.set('fill', el.color);
+                        if (activeObj.fontSize !== el.fontSize) activeObj.set('fontSize', el.fontSize);
+                        if (activeObj.fontFamily !== el.fontFamily) activeObj.set('fontFamily', el.fontFamily);
+                    }
+                    if (el.type === 'shape') {
+                        activeObj.set('fill', el.color);
+                    }
+                    activeObj.setCoords();
+                    pendingUpdatesRef.current.delete(id);
+                    canvas.requestRenderAll();
+                }
+            }
+        };
+
+        canvas.on("mouse:up", () => {
+            const activeObj = canvas.getActiveObject();
+            if (activeObj) flushPendingUpdates(activeObj);
+        });
+
+        canvas.on("selection:cleared", (e) => {
+            // e.deselected contains previously selected objects
+            if (e.deselected) {
+                e.deselected.forEach(obj => flushPendingUpdates(obj));
+            }
+            onSelectRef.current?.(null);
         });
 
         // Modification Events (Move, Scale, Rotate)
@@ -104,7 +149,7 @@ export const FabricCanvas = ({
                 obj.scaleY = 1;
             }
 
-            onUpdate?.(id, updates);
+            onUpdateRef.current?.(id, updates);
         });
 
         // Path Created (Unused if external drawing, but good to have)
@@ -175,6 +220,8 @@ export const FabricCanvas = ({
                     });
                 } else if (el.type === "image" || el.type === "draw") {
                     fabric.Image.fromURL(el.content, (img) => {
+                        if (!isMounted.current || !fabricCanvasRef.current) return;
+
                         img.set({
                             // @ts-ignore
                             id: el.id,
@@ -183,18 +230,26 @@ export const FabricCanvas = ({
                             angle: el.rotation,
                             selectable: !readOnly,
                         });
-                        // Scale image to fit width/height?
-                        if (el.width && el.height) {
-                            img.scaleToWidth(el.width);
-                            img.scaleToHeight(el.height);
+                        // Scale image proportionally
+                        if (el.width && el.height && img.width && img.height) {
+                            const scale = Math.min(el.width / img.width, el.height / img.height);
+                            img.set({ scaleX: scale, scaleY: scale });
                         }
                         if (el.mixBlendMode) {
                             // @ts-ignore
                             img.globalCompositeOperation = el.mixBlendMode;
                         }
+
+                        // Add an error handler for the img element if possible
+                        if (img.getElement()) {
+                            img.getElement().onerror = () => {
+                                console.error("Failed to load image element:", el.content);
+                            };
+                        }
+
                         canvas.add(img);
                         canvas.renderAll();
-                    });
+                    }, el.content ? { crossOrigin: 'anonymous' } : undefined);
                     return; // Async add
                 } else if (el.type === "shape") {
                     if (el.shapeType === 'rect') {
@@ -230,7 +285,10 @@ export const FabricCanvas = ({
             } else {
                 // Update existing object
                 // Skip if currently being dragged/modified by user (to avoid jitter)
-                if (canvas.getActiveObject() === obj) return;
+                if (canvas.getActiveObject() === obj) {
+                    pendingUpdatesRef.current.set(el.id, el);
+                    return;
+                }
 
                 obj.set({
                     left: el.x,

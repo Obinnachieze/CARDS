@@ -23,7 +23,7 @@ export const StickerSidebar = () => {
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
 
-    const fetchGiphy = async (query: string, isLoadMore = false) => {
+    const fetchGiphy = async (query: string, isLoadMore = false, signal?: AbortSignal) => {
         const currentOffset = isLoadMore ? offset + 20 : 0;
 
         if (isLoadMore) {
@@ -35,7 +35,9 @@ export const StickerSidebar = () => {
 
         setError(null);
         try {
-            const res = await fetch(`/api/giphy?q=${encodeURIComponent(query)}&offset=${currentOffset}&limit=20`);
+            const res = await fetch(`/api/giphy?q=${encodeURIComponent(query)}&offset=${currentOffset}&limit=20`, {
+                signal
+            });
             const data = await res.json();
 
             if (data.data) {
@@ -49,19 +51,27 @@ export const StickerSidebar = () => {
             } else {
                 setError("Failed to fetch stickers");
             }
-        } catch (err) {
-            setError("Connection error");
+        } catch (err: any) {
+            if (err.name !== 'AbortError') {
+                setError("Connection error");
+            }
         } finally {
-            setLoading(false);
-            setLoadingMore(false);
+            if (!signal?.aborted) {
+                setLoading(false);
+                setLoadingMore(false);
+            }
         }
     };
 
     useEffect(() => {
+        const controller = new AbortController();
         const timer = setTimeout(() => {
-            fetchGiphy(search);
+            fetchGiphy(search, false, controller.signal);
         }, 500);
-        return () => clearTimeout(timer);
+        return () => {
+            clearTimeout(timer);
+            controller.abort();
+        };
     }, [search]);
 
     const handleLoadMore = () => {
@@ -133,8 +143,7 @@ export const StickerSidebar = () => {
                                                 className="w-full h-full object-contain pointer-events-none"
                                                 loading="lazy"
                                                 onError={(e) => {
-                                                    console.error("Sticker load error:", sticker.id);
-                                                    e.currentTarget.style.opacity = "0.3";
+                                                    e.currentTarget.style.display = "none";
                                                 }}
                                             />
                                         </button>

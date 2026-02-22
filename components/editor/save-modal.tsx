@@ -35,6 +35,7 @@ export const SaveModal = ({
     useEffect(() => {
         if (open) {
             setTitle(defaultTitle);
+            setCreatorName("");
             setTimeout(() => titleInputRef.current?.focus(), 150);
         }
     }, [open, defaultTitle]);
@@ -97,6 +98,7 @@ export const SaveModal = ({
                                     <button
                                         onClick={onClose}
                                         className="p-1.5 rounded-lg hover:bg-white/15 text-white/80 hover:text-white transition-colors"
+                                        aria-label="Close"
                                     >
                                         <X size={18} />
                                     </button>

@@ -54,7 +54,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                 if (card.id === activeCardId) {
                     return {
                         ...card,
-                        elements: templateCard.elements.map(el => ({ ...el })),
+                        elements: templateCard.elements.map(el => ({ ...el, id: crypto.randomUUID() })),
                         backgroundColor: templateCard.backgroundColor,
                         celebration: templateCard.celebration
                     };
@@ -75,7 +75,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 z-60 bg-black/40 backdrop-blur-md"
+                        className="fixed inset-0 z-200 bg-black/40 backdrop-blur-md"
                     />
 
                     {/* Sidebar */}
@@ -84,7 +84,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                        className="fixed top-0 right-0 h-full w-full sm:w-[350px] max-w-full bg-white z-70 shadow-2xl flex flex-col overflow-x-hidden"
+                        className="fixed top-0 right-0 h-full w-full sm:w-[350px] max-w-full bg-white z-201 shadow-2xl flex flex-col overflow-x-hidden"
                     >
                         {/* Header */}
                         <div className="flex shrink-0 items-center justify-between p-4 sm:p-6 border-b border-gray-100 min-w-0">
@@ -213,7 +213,9 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                                         className="h-8 w-8 text-gray-300 hover:text-red-500 hover:bg-red-50 ml-2 shrink-0"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            deleteProject(project.id);
+                                                            if (window.confirm("Are you sure you want to delete this project?")) {
+                                                                deleteProject(project.id);
+                                                            }
                                                         }}
                                                     >
                                                         <Trash2 size={16} />
