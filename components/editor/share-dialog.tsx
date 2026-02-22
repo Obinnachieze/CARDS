@@ -83,7 +83,7 @@ export function ShareDialog() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="bg-gray-800 text-white hover:bg-gray-700 sm:bg-white sm:text-black sm:hover:bg-gray-200 font-semibold h-9 w-9 sm:w-auto px-0 sm:px-4 gap-2 rounded-full sm:rounded-md transition-all border border-gray-200 sm:border-0 shadow-xs sm:shadow-sm">
+                <Button className="bg-gray-800 text-white hover:bg-gray-700 sm:bg-white sm:text-black sm:hover:bg-gray-200 font-semibold h-9 w-9 sm:w-auto px-0 sm:px-4 gap-2 rounded-full sm:rounded-md transition-all shadow-xs sm:shadow-sm">
                     <Share2 size={16} />
                     <span className="hidden sm:inline">Share</span>
                 </Button>
