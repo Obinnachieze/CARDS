@@ -263,7 +263,7 @@ export const Toolbar = () => {
                     "fixed bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-t-3xl md:rounded-3xl border border-white/20 md:border-zinc-200 sliding-panel",
                     // Mobile: Pops up from bottom. Desktop: Floats next to left sidebar
                     "bottom-14 max-h-[50vh]",
-                    "md:bottom-auto md:left-[90px] md:h-auto md:max-h-[80vh]",
+                    "md:bottom-auto md:left-[90px] md:h-auto md:max-h-[calc(100vh-100px)]",
                     activeTab && ["draw", "effects", "music", "text"].includes(activeTab)
                         ? "left-1/2 -translate-x-1/2 w-[300px] md:translate-x-0 md:w-[320px]"
                         : "left-4 right-4 md:right-auto md:w-[320px] lg:w-[400px]",
@@ -274,11 +274,17 @@ export const Toolbar = () => {
                 style={panelTop !== null ? { '--panel-top': `${panelTop}px` } as React.CSSProperties : undefined}
                 ref={(el) => {
                     if (el && panelTop !== null && window.innerWidth >= 768) {
-                        el.style.top = `${panelTop}px`;
-                        // preserve Tailwind transfrom translate-x-0 or -translate-x-8 behavior using opacity or we just leave transform empty. 
-                        // Tailwind transform class modifies --tw-translate-x/y. 
-                        // It is easier to set --tw-translate-y for centering and let Tailwind handle the rest.
-                        el.style.setProperty('--tw-translate-y', '-50%');
+                        const panelHeight = el.offsetHeight;
+                        let targetTop = panelTop - (panelHeight / 2);
+
+                        const MIN_TOP = 80; // top bar avoidance
+                        const MAX_TOP = window.innerHeight - panelHeight - 20; // bottom avoidance
+
+                        targetTop = Math.min(targetTop, MAX_TOP);
+                        targetTop = Math.max(targetTop, MIN_TOP);
+
+                        el.style.top = `${targetTop}px`;
+                        el.style.setProperty('--tw-translate-y', '0px');
                     } else if (el && window.innerWidth < 768) {
                         el.style.top = '';
                         el.style.removeProperty('--tw-translate-y');
