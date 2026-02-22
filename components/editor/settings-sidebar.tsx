@@ -14,7 +14,7 @@ import {
     CreditCard, Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { templates } from "./templates";
+import { getTemplates } from "./templates";
 import { UserAvatar } from "./user-avatar";
 
 interface SettingsSidebarProps {
@@ -46,7 +46,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
     } = useEditor();
 
     const loadTemplate = (templateId: string) => {
-        const template = templates.find(t => t.id === templateId);
+        const template = getTemplates().find(t => t.id === templateId);
         if (template && activeCardId) {
             const templateCard = template.cards[0];
 
@@ -254,7 +254,7 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                 <section className="space-y-4 min-w-0 overflow-x-hidden">
                                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Templates</h3>
                                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                                        {templates.map(template => (
+                                        {getTemplates().map(template => (
                                             <button
                                                 key={template.id}
                                                 className="group relative aspect-3/4 bg-gray-100 rounded-2xl overflow-hidden border-2 border-transparent hover:border-purple-500 transition-all text-left shadow-sm w-full"

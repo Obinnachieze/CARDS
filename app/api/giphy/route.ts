@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q");
-    const type = searchParams.get("type") || "stickers";
+    const rawType = searchParams.get("type");
+    const type = ["stickers", "gifs"].includes(rawType as string) ? rawType : "stickers";
     const offset = searchParams.get("offset") || "0";
     const limit = searchParams.get("limit") || "20";
 

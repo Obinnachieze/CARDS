@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
 
+export const DEFAULT_CARD_MODE: CardMode = "foldable";
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -201,13 +202,16 @@ export const EditorProvider = ({
             setUser(user);
 
             // Initialize workspace if empty
-            setWorkspaceProjects([{
-                id: generateId(),
-                name: "",
-                updatedAt: Date.now(),
-                cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
-                cardMode: "foldable"
-            }]);
+            setWorkspaceProjects(prev => {
+                if (prev.length > 0) return prev;
+                return [{
+                    id: generateId(),
+                    name: "",
+                    updatedAt: Date.now(),
+                    cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
+                    cardMode: DEFAULT_CARD_MODE
+                }];
+            });
         };
 
         setup();
@@ -254,11 +258,14 @@ export const EditorProvider = ({
             name: "",
             updatedAt: Date.now(),
             cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
-            cardMode: "postcard"
+            cardMode: DEFAULT_CARD_MODE
         };
 
-        setWorkspaceProjects(prev => [...prev, newProject]);
-        setActiveWorkspaceIndex(prev => prev + 1);
+        setWorkspaceProjects(prev => {
+            const updated = [...prev, newProject];
+            setTimeout(() => switchToWorkspaceProject(updated.length - 1, updated), 0);
+            return updated;
+        });
 
         // Load the new project state
         setCards(newProject.cards);
@@ -270,8 +277,9 @@ export const EditorProvider = ({
         setFuture([]);
     }, []);
 
-    const switchToWorkspaceProject = useCallback((index: number) => {
-        const project = workspaceProjects[index];
+    const switchToWorkspaceProject = useCallback((index: number, specificProjects?: Project[]) => {
+        const sourceArray = specificProjects || workspaceProjects;
+        const project = sourceArray[index];
         if (!project) return;
 
         isSwappingRef.current = true;
@@ -296,9 +304,9 @@ export const EditorProvider = ({
                 newActiveIndex = Math.max(0, index - 1);
             }
             if (newActiveIndex !== activeWorkspaceIndex) {
-                setTimeout(() => switchToWorkspaceProject(newActiveIndex), 0);
+                setTimeout(() => switchToWorkspaceProject(newActiveIndex, updated), 0);
             } else {
-                setTimeout(() => switchToWorkspaceProject(activeWorkspaceIndex), 0);
+                setTimeout(() => switchToWorkspaceProject(activeWorkspaceIndex, updated), 0);
             }
             return updated;
         });
@@ -514,7 +522,7 @@ export const EditorProvider = ({
             name: "",
             updatedAt: Date.now(),
             cards: [{ id: "card-1", elements: [], backgroundColor: "#ffffff", currentFace: "front" }],
-            cardMode: "postcard"
+            cardMode: DEFAULT_CARD_MODE
         };
 
         setWorkspaceProjects([initialRoom]);

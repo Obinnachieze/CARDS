@@ -24,11 +24,15 @@ export function ShareDialog() {
         ? `${window.location.origin}/share/${currentProjectId}`
         : "";
 
-    const handleCopy = () => {
+    const handleCopy = async () => {
         if (!shareUrl) return;
-        navigator.clipboard.writeText(shareUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        try {
+            await navigator.clipboard.writeText(shareUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+        }
     };
 
     const handleShare = async () => {
@@ -41,13 +45,13 @@ export function ShareDialog() {
             }
             if (idToShare && typeof window !== 'undefined') {
                 const newShareUrl = `${window.location.origin}/share/${idToShare}`;
-                navigator.clipboard.writeText(newShareUrl);
+                await navigator.clipboard.writeText(newShareUrl);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
             }
         } catch (e) {
             console.error("Share failed:", e);
-            setError("Failed to save project. Please check your connection.");
+            setError("Failed to share project or copy to clipboard.");
         } finally {
             setIsSaving(false);
         }
@@ -63,14 +67,14 @@ export function ShareDialog() {
             const newId = await saveProjectAs(projectName);
             if (newId && typeof window !== 'undefined') {
                 const newShareUrl = `${window.location.origin}/share/${newId}`;
-                navigator.clipboard.writeText(newShareUrl);
+                await navigator.clipboard.writeText(newShareUrl);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
             }
             // After saving, the component will re-render with currentProjectId set,
         } catch (e) {
-            console.error("Save failed:", e);
-            setError("Failed to create project. Please check if Supabase is configured.");
+            console.error("Save/Share failed:", e);
+            setError("Failed to create project or copy link. Please check if Supabase is configured.");
         } finally {
             setIsSaving(false);
         }

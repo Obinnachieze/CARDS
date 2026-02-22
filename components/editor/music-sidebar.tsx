@@ -179,8 +179,10 @@ export function MusicSidebar() {
                         {[...Array(5)].map((_, i) => (
                             <div
                                 key={i}
-                                className="w-1 bg-red-400 rounded-full animate-pulse"
-                                style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.1}s` }}
+                                className={cn("w-1 bg-red-400 rounded-full animate-pulse", [
+                                    "h-3", "h-5", "h-4", "h-6", "h-3"
+                                ][i])}
+                                style={{ animationDelay: `${i * 0.1}s` }}
                             />
                         ))}
                     </div>

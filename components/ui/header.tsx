@@ -65,9 +65,14 @@ export function Header() {
     }, [open]);
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        setIsProfileOpen(false);
-        setOpen(false);
+        try {
+            await supabase.auth.signOut();
+        } catch (error) {
+            console.error('Error signing out:', error);
+        } finally {
+            setIsProfileOpen(false);
+            setOpen(false);
+        }
     };
 
     return (
@@ -118,7 +123,9 @@ export function Header() {
                             <div className="relative" ref={profileRef}>
                                 <button
                                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                    className="w-9 h-9 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"
+                                    aria-expanded={isProfileOpen}
+                                    aria-label="User profile menu"
+                                    className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"
                                 >
                                     {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
                                 </button>
@@ -170,7 +177,7 @@ export function Header() {
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} className="md:hidden text-white hover:bg-white/10">
+                <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle mobile menu" aria-controls="mobile-menu" className="md:hidden text-white hover:bg-white/10">
                     <MenuToggleIcon open={open} className="size-5" duration={300} />
                 </Button>
             </nav>
@@ -182,6 +189,7 @@ export function Header() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
+                        id="mobile-menu"
                         className="md:hidden border-t border-white/10 overflow-hidden bg-black/95 backdrop-blur-3xl"
                     >
                         <div className="px-6 py-6 space-y-4">
@@ -208,7 +216,7 @@ export function Header() {
                                 {user ? (
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl">
-                                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
                                                 {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0">

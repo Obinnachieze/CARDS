@@ -1,5 +1,5 @@
 import { EditorElement, CardFace } from "./types";
-import { v4 as uuidv4 } from "uuid";
+
 
 export interface Template {
     id: string;
@@ -14,20 +14,20 @@ export interface Template {
     }>;
 }
 
-export const templates: Template[] = [
+export const getTemplates = (): Template[] => [
     {
         id: "bday-simple",
         name: "Simple Birthday",
         thumbnail: "#FFD700",
         cards: [
             {
-                id: uuidv4(),
+                id: "c1",
                 backgroundColor: "#ffffff",
                 currentFace: "front",
                 celebration: "confetti",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e1",
                         type: "text",
                         x: 100,
                         y: 200,
@@ -42,7 +42,7 @@ export const templates: Template[] = [
                         rotation: 0
                     },
                     {
-                        id: uuidv4(),
+                        id: "e2",
                         type: "shape",
                         content: "",
                         x: 150,
@@ -64,13 +64,13 @@ export const templates: Template[] = [
         thumbnail: "linear-gradient(to right, #a8c0ff, #3f2b96)",
         cards: [
             {
-                id: uuidv4(),
+                id: "c2",
                 backgroundColor: "#e0c3fc", // Fallback or base
                 currentFace: "front",
                 celebration: "confetti",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e3",
                         type: "text",
                         x: 80,
                         y: 250,
@@ -94,12 +94,12 @@ export const templates: Template[] = [
         thumbnail: "linear-gradient(to bottom, #fdfbfb 0%, #ebedee 100%)",
         cards: [
             {
-                id: uuidv4(),
+                id: "c3",
                 backgroundColor: "#ffffff",
                 currentFace: "front",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e4",
                         type: "text",
                         x: 50,
                         y: 150,
@@ -114,7 +114,7 @@ export const templates: Template[] = [
                         rotation: 0
                     },
                     {
-                        id: uuidv4(),
+                        id: "e5",
                         type: "text",
                         x: 50,
                         y: 250,
@@ -138,13 +138,13 @@ export const templates: Template[] = [
         thumbnail: "#c41e3a",
         cards: [
             {
-                id: uuidv4(),
+                id: "c4",
                 backgroundColor: "#c41e3a",
                 currentFace: "front",
                 celebration: "fireworks",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e6",
                         type: "text",
                         x: 50,
                         y: 200,
@@ -159,7 +159,7 @@ export const templates: Template[] = [
                         rotation: 0
                     },
                     {
-                        id: uuidv4(),
+                        id: "e7",
                         type: "shape",
                         content: "",
                         x: 200,
@@ -181,13 +181,13 @@ export const templates: Template[] = [
         thumbnail: "#a7dbd8",
         cards: [
             {
-                id: uuidv4(),
+                id: "c5",
                 backgroundColor: "#f0f9ff",
                 currentFace: "front",
                 celebration: "floating-emoji",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e8",
                         type: "text",
                         x: 50,
                         y: 180,
@@ -202,7 +202,7 @@ export const templates: Template[] = [
                         rotation: 0
                     },
                     {
-                        id: uuidv4(),
+                        id: "e9",
                         type: "shape",
                         content: "",
                         x: 200,
@@ -224,13 +224,13 @@ export const templates: Template[] = [
         thumbnail: "#1a1a1a",
         cards: [
             {
-                id: uuidv4(),
+                id: "c6",
                 backgroundColor: "#111827",
                 currentFace: "front",
                 celebration: "confetti",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e10",
                         type: "text",
                         x: 50,
                         y: 200,
@@ -246,7 +246,7 @@ export const templates: Template[] = [
                         rotation: 0
                     },
                     {
-                        id: uuidv4(),
+                        id: "e11",
                         type: "text",
                         x: 50,
                         y: 300,
@@ -270,12 +270,12 @@ export const templates: Template[] = [
         thumbnail: "#ff9a9e",
         cards: [
             {
-                id: uuidv4(),
+                id: "c7",
                 backgroundColor: "#fff5f5",
                 currentFace: "front",
                 elements: [
                     {
-                        id: uuidv4(),
+                        id: "e12",
                         type: "text",
                         x: 50,
                         y: 220,

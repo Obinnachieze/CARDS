@@ -45,7 +45,12 @@ export const FabricCanvas = ({
     const onUpdateRef = useRef(onUpdate);
     const onAddRef = useRef(onAdd);
     const onRemoveRef = useRef(onRemove);
+    const readOnlyRef = useRef(readOnly);
     const isMounted = useRef(true);
+
+    useEffect(() => {
+        readOnlyRef.current = readOnly;
+    }, [readOnly]);
 
     useEffect(() => {
         onSelectRef.current = onSelect;
@@ -161,7 +166,7 @@ export const FabricCanvas = ({
 
         // Hover Effects
         canvas.on("mouse:over", (e) => {
-            if (e.target && !readOnly) {
+            if (e.target && !readOnlyRef.current) {
                 if (e.target.type === "textbox") {
                     // Provide visual indication of draggability/editability
                     e.target.set({
@@ -176,7 +181,7 @@ export const FabricCanvas = ({
         });
 
         canvas.on("mouse:out", (e) => {
-            if (e.target && !readOnly) {
+            if (e.target && !readOnlyRef.current) {
                 // Revert custom hover properties if needed, 
                 // though mostly default active selection handles borders when clicked.
                 canvas.renderAll();
@@ -308,7 +313,6 @@ export const FabricCanvas = ({
                         selectable: !readOnly,
                         angle: el.rotation || 0,
                     });
-                    canvas.add(obj);
                 } else if (el.type === "image" || (el.type === "draw" && !el.path)) {
                     fabric.Image.fromURL(el.content, (img) => {
                         if (!isMounted.current || !fabricCanvasRef.current) return;
@@ -443,7 +447,11 @@ export const FabricCanvas = ({
     }, [elements, readOnly]);
 
 
-    // Drawing Mode Handlers
+    // Drawing Mode / Eraser Handlers
+    // Keep stable references to avoid memory leaks
+    const handleEraserRef = useRef<((e: fabric.IEvent) => void) | undefined>(undefined);
+    const handleEraserMoveRef = useRef<((e: fabric.IEvent) => void) | undefined>(undefined);
+
     useEffect(() => {
         if (!fabricCanvasRef.current) return;
         const canvas = fabricCanvasRef.current;
@@ -451,9 +459,15 @@ export const FabricCanvas = ({
         // Reset state
         canvas.isDrawingMode = isDrawing && brushType !== "eraser";
 
-        // Remove active eraser handlers if any to prevent memory leaks
-        canvas.off('mouse:down');
-        canvas.off('mouse:move');
+        // Remove active eraser handlers if any
+        if (handleEraserRef.current) {
+            canvas.off('mouse:down', handleEraserRef.current);
+            handleEraserRef.current = undefined;
+        }
+        if (handleEraserMoveRef.current) {
+            canvas.off('mouse:move', handleEraserMoveRef.current);
+            handleEraserMoveRef.current = undefined;
+        }
 
         if (isDrawing && brushType === "eraser") {
             const handleEraser = (e: fabric.IEvent) => {
@@ -461,7 +475,6 @@ export const FabricCanvas = ({
                 const pointer = e.pointer;
                 const objects = canvas.getObjects();
 
-                // Find objects intersecting with the mouse pointer
                 objects.forEach((obj) => {
                     if (obj.containsPoint(pointer)) {
                         // @ts-ignore
@@ -473,10 +486,15 @@ export const FabricCanvas = ({
                 });
             };
 
+            const handleEraserMove = (e: fabric.IEvent) => {
+                if (e.e && (e.e as MouseEvent).buttons === 1) handleEraser(e);
+            };
+
+            handleEraserRef.current = handleEraser;
+            handleEraserMoveRef.current = handleEraserMove;
+
             canvas.on('mouse:down', handleEraser);
-            canvas.on('mouse:move', (e) => {
-                if (e.e.buttons === 1) handleEraser(e); // Only erase when dragging (mouse button down)
-            });
+            canvas.on('mouse:move', handleEraserMove);
 
             return; // Exit early since eraser isn't standard drawing mode
         }
@@ -490,11 +508,17 @@ export const FabricCanvas = ({
                 canvas.freeDrawingBrush.width = brushSize * 2.5;
             } else if (brushType === 'highlighter') {
                 canvas.freeDrawingBrush.width = brushSize * 4;
-                // Add transparency to the hex code (e.g., 50% opacity -> ~80 in hex)
                 canvas.freeDrawingBrush.color = brushColor.length === 7 ? brushColor + '80' : brushColor;
             }
         }
     }, [isDrawing, brushColor, brushSize, brushType]);
+
+    // Apply Zoom
+    useEffect(() => {
+        if (!fabricCanvasRef.current) return;
+        fabricCanvasRef.current.setZoom(zoom);
+        // Ensure boundaries are preserved if scaling occurs (mostly visual)
+    }, [zoom]);
 
     // Update Background Color
     useEffect(() => {

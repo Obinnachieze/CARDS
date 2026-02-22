@@ -42,7 +42,7 @@ const fallbackFonts = [
     "Dancing Script", "Pacifico", "Great Vibes", "Caveat"
 ];
 
-import { templates } from "./templates";
+
 
 
 const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: React.ReactNode, label: string, active: boolean, onClick: (e: React.MouseEvent<HTMLButtonElement>) => void, onMouseEnter?: () => void }) => (
@@ -179,8 +179,12 @@ export const Toolbar = () => {
     useEffect(() => {
         if (activeTab === "text") {
             popularCardFonts.forEach(font => loadFont(font));
+            filteredFonts.slice(0, 10).forEach(font => {
+                const familyName = typeof font === 'string' ? font : font.family;
+                loadFont(familyName);
+            });
         }
-    }, [activeTab, popularCardFonts]);
+    }, [activeTab, popularCardFonts, filteredFonts]);
 
     // Handle font selection
     const handleFontSelect = (family: string) => {
@@ -201,12 +205,14 @@ export const Toolbar = () => {
 
 
     useEffect(() => {
-        if (selectedElement?.type === "text" && activeTab !== "stickers") {
+        if (!selectedElement) return;
+
+        if (selectedElement.type === "text" && activeTab !== "text" && activeTab !== "stickers") {
             setActiveTab("text");
-        } else if (selectedElement?.type === "line" || selectedElement?.type === "shape") {
+        } else if ((selectedElement.type === "line" || selectedElement.type === "shape") && activeTab !== "elements") {
             setActiveTab("elements");
         }
-    }, [selectedElement?.id]);
+    }, [selectedElement, activeTab, setActiveTab]);
 
     const handleAddEmoji = (emojiData: EmojiClickData) => {
         addElement("emoji", emojiData.emoji, { x: 50, y: 50 });
@@ -344,7 +350,7 @@ export const Toolbar = () => {
                                                 />
                                             </div>
                                             {fontError && (
-                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 wrap-break-word">
+                                                <div className="text-[10px] text-red-500 bg-red-50 p-1 rounded border border-red-100 break-words">
                                                     {fontError}
                                                 </div>
                                             )}
@@ -387,8 +393,6 @@ export const Toolbar = () => {
                                             ) : (
                                                 filteredFonts.map((font, index) => {
                                                     const familyName = typeof font === 'string' ? font : font.family;
-                                                    // Auto-load visible fonts (top 10)
-                                                    if (index < 10) loadFont(familyName);
                                                     const isActive = selectedElement?.fontFamily === familyName || (!selectedElement && currentFont === familyName);
 
                                                     return (

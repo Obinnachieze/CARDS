@@ -40,6 +40,10 @@ export const StickerSidebar = () => {
             });
             const data = await res.json();
 
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to fetch stickers");
+            }
+
             if (data.data) {
                 if (isLoadMore) {
                     setStickers(prev => [...prev, ...data.data]);
@@ -47,9 +51,10 @@ export const StickerSidebar = () => {
                     setStickers(data.data);
                 }
                 setOffset(currentOffset);
-                setHasMore(data.pagination.total_count > currentOffset + 20);
+                const totalCount = data.pagination?.total_count || 0;
+                setHasMore(totalCount > currentOffset + 20);
             } else {
-                setError("Failed to fetch stickers");
+                setError("No stickers found");
             }
         } catch (err: any) {
             if (err.name !== 'AbortError') {
@@ -131,23 +136,25 @@ export const StickerSidebar = () => {
                                 </div>
                             ) : (
                                 <>
-                                    {stickers.map((sticker) => (
-                                        <button
-                                            key={sticker.id}
-                                            className="aspect-square relative hover:scale-105 transition-all p-1 rounded-xl hover:bg-white shadow-sm border border-transparent hover:border-zinc-100 active:scale-95 overflow-hidden"
-                                            onClick={() => onStickerClick(sticker.images.fixed_height.url)}
-                                        >
-                                            <img
-                                                src={sticker.images.fixed_height_small.url}
-                                                alt={sticker.title}
-                                                className="w-full h-full object-contain pointer-events-none"
-                                                loading="lazy"
-                                                onError={(e) => {
-                                                    e.currentTarget.style.display = "none";
-                                                }}
-                                            />
-                                        </button>
-                                    ))}
+                                    {stickers
+                                        .filter(s => s.images?.fixed_height?.url && s.images?.fixed_height_small?.url)
+                                        .map((sticker) => (
+                                            <button
+                                                key={sticker.id}
+                                                className="aspect-square relative hover:scale-105 transition-all p-1 rounded-xl hover:bg-white shadow-sm border border-transparent hover:border-zinc-100 active:scale-95 overflow-hidden"
+                                                onClick={() => onStickerClick(sticker.images.fixed_height.url)}
+                                            >
+                                                <img
+                                                    src={sticker.images.fixed_height_small.url}
+                                                    alt={sticker.title}
+                                                    className="w-full h-full object-contain pointer-events-none"
+                                                    loading="lazy"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = "none";
+                                                    }}
+                                                />
+                                            </button>
+                                        ))}
                                     {hasMore && (
                                         <div className="col-span-3 py-6 flex justify-center border-t border-zinc-100 mt-4">
                                             <Button
