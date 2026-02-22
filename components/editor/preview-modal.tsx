@@ -140,7 +140,7 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="fixed !left-0 !top-0 inset-0 w-screen h-screen max-w-none max-h-none border-0 shadow-none flex items-center justify-center p-0 overflow-hidden outline-none bg-transparent !translate-x-0 !translate-y-0"
+            <DialogContent className="fixed left-0! top-0! inset-0 w-screen h-screen max-w-none max-h-none border-0 shadow-none flex items-center justify-center p-0 overflow-hidden outline-none bg-transparent translate-x-0! translate-y-0!"
                 style={{
                     background: "linear-gradient(135deg, rgba(26, 5, 51, 0.45) 0%, rgba(13, 0, 21, 0.4) 20%, rgba(0, 0, 0, 0.35) 40%, rgba(5, 0, 13, 0.4) 60%, rgba(13, 0, 21, 0.4) 80%, rgba(26, 5, 51, 0.45) 100%)",
                     backdropFilter: "blur(24px)",
@@ -173,8 +173,9 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
 
                 <div
                     className="relative flex items-center justify-center transition-transform duration-300 ease-in-out"
+                    data-open={cardIsOpen}
                     style={{
-                        transform: "scale(var(--preview-scale))",
+                        transform: "scale(var(--preview-scale)) translateX(var(--preview-translate-x, 0px))",
                         "--preview-scale": "1",
                     } as React.CSSProperties}
                 >
@@ -182,6 +183,12 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                         @media (min-width: 640px) { :root { --preview-scale: 1; } }
                         @media (min-width: 1024px) { :root { --preview-scale: 1; } }
                         @media (min-width: 1280px) { :root { --preview-scale: 1; } }
+                        
+                        @media (max-width: 639px) {
+                            [data-open="true"] {
+                                --preview-translate-x: -150px;
+                            }
+                        }
                     `}</style>
 
                     <div
