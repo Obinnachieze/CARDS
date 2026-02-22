@@ -39,7 +39,6 @@ export const FabricCanvas = ({
 
     const onSelectRef = useRef(onSelect);
     const onUpdateRef = useRef(onUpdate);
-    const pendingUpdatesRef = useRef<Map<string, any>>(new Map());
     const isMounted = useRef(true);
 
     useEffect(() => {
@@ -80,38 +79,7 @@ export const FabricCanvas = ({
             }
         });
 
-        const flushPendingUpdates = (activeObj: fabric.Object | undefined) => {
-            if (activeObj && (activeObj as any).id) {
-                const id = (activeObj as any).id;
-                if (pendingUpdatesRef.current.has(id)) {
-                    const el = pendingUpdatesRef.current.get(id);
-                    activeObj.set({ left: el.x, top: el.y, angle: el.rotation });
-                    if (el.type === 'text' && activeObj instanceof fabric.Textbox) {
-                        if (activeObj.text !== el.content) activeObj.set('text', el.content);
-                        if (activeObj.fill !== el.color) activeObj.set('fill', el.color);
-                        if (activeObj.fontSize !== el.fontSize) activeObj.set('fontSize', el.fontSize);
-                        if (activeObj.fontFamily !== el.fontFamily) activeObj.set('fontFamily', el.fontFamily);
-                    }
-                    if (el.type === 'shape') {
-                        activeObj.set('fill', el.color);
-                    }
-                    activeObj.setCoords();
-                    pendingUpdatesRef.current.delete(id);
-                    canvas.requestRenderAll();
-                }
-            }
-        };
-
-        canvas.on("mouse:up", () => {
-            const activeObj = canvas.getActiveObject();
-            if (activeObj) flushPendingUpdates(activeObj);
-        });
-
         canvas.on("selection:cleared", (e) => {
-            // e.deselected contains previously selected objects
-            if (e.deselected) {
-                e.deselected.forEach(obj => flushPendingUpdates(obj));
-            }
             onSelectRef.current?.(null);
         });
 
@@ -128,38 +96,57 @@ export const FabricCanvas = ({
                 x: obj.left,
                 y: obj.top,
                 rotation: obj.angle,
-                width: obj.width! * obj.scaleX!, // Bake scale into width/height? Or keep scale?
-                height: obj.height! * obj.scaleY!,
-                // scaleX: obj.scaleX, // If we want to keep scale separate
-                // scaleY: obj.scaleY
             };
 
-            // Using width/height updates for consistency with current model
-            // Reset scale to 1 after modifying width/height if we want to avoid scale drift
-            // But usually better to just store what fabric gives.
-            // For text, fontSize scales.
-
             if (obj.type === 'textbox') {
-                // @ts-ignore
-                updates.fontSize = (obj as fabric.Textbox).fontSize! * obj.scaleX!;
-                // @ts-ignore
-                updates.width = obj.width! * obj.scaleX!; // Textbox width is line width
-                // Reset scale so it doesn't compound
-                obj.scaleX = 1;
-                obj.scaleY = 1;
+                // For textboxes, scale changes font size and box width
+                const scaleX = obj.scaleX || 1;
+                const scaleY = obj.scaleY || 1;
+                const tb = obj as fabric.Textbox;
+
+                updates.width = tb.width! * scaleX;
+                updates.fontSize = tb.fontSize! * scaleY; // Use scaleY for font size to avoid distortion
+
+                // Reset scale to 1 to bake in the transformations
+                tb.set({
+                    width: updates.width,
+                    fontSize: updates.fontSize,
+                    scaleX: 1,
+                    scaleY: 1
+                });
+                // Re-calculate layout boundaries
+                tb.setCoords();
+            } else {
+                updates.width = obj.width! * (obj.scaleX || 1);
+                updates.height = obj.height! * (obj.scaleY || 1);
             }
 
             onUpdateRef.current?.(id, updates);
         });
 
         // Text Editing Events
+        canvas.on("text:changed", (e) => {
+            const obj = e.target;
+            if (obj && obj.type === "textbox") {
+                // @ts-ignore
+                const id = obj.id;
+                if (id && onUpdateRef.current) {
+                    onUpdateRef.current(id, { content: (obj as fabric.Textbox).text });
+                }
+            }
+        });
+
         canvas.on("text:editing:exited", (e) => {
             const obj = e.target;
             if (obj && obj.type === "textbox") {
                 // @ts-ignore - custom property
                 const id = obj.id;
                 if (id && onUpdateRef.current) {
-                    onUpdateRef.current(id, { content: (obj as fabric.Textbox).text });
+                    onUpdateRef.current(id, {
+                        content: (obj as fabric.Textbox).text,
+                        width: obj.width,
+                        height: obj.height
+                    });
                 }
             }
         });
@@ -349,9 +336,9 @@ export const FabricCanvas = ({
                 }
             } else {
                 // Update existing object
-                // Skip if currently being dragged/modified by user (to avoid jitter)
+                // Update existing object
+                // Don't update from React state if the user is actively manipulating it
                 if (canvas.getActiveObject() === obj) {
-                    pendingUpdatesRef.current.set(el.id, el);
                     return;
                 }
 
