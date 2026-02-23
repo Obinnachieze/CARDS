@@ -11,10 +11,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     X, Save, LayoutTemplate, FolderOpen,
     Trash2, ChevronLeft, Check, Plus, Trash,
-    CreditCard, Mail
+    CreditCard, Mail, Wand2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "./user-avatar";
+import { MagicWriterDialog } from "./magic-writer-dialog";
 
 interface SettingsSidebarProps {
     isOpen: boolean;
@@ -23,6 +24,7 @@ interface SettingsSidebarProps {
 }
 
 export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSidebarProps) => {
+    const [isProjectNameFocused, setIsProjectNameFocused] = useState(false);
     const {
         cards,
         setCards,
@@ -99,13 +101,29 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                             {!currentProjectId && (
                                                 <div className="space-y-2 pt-1">
                                                     <Label htmlFor="sidebar-project-name" className="text-purple-900 font-medium">Card Name</Label>
-                                                    <Input
-                                                        id="sidebar-project-name"
-                                                        placeholder="Enter card name..."
-                                                        value={projectName}
-                                                        onChange={(e) => setProjectName(e.target.value)}
-                                                        className="bg-white border-purple-200 focus:ring-purple-500 h-11 text-purple-900 font-medium"
-                                                    />
+                                                    <div className="relative group">
+                                                        <Input
+                                                            id="sidebar-project-name"
+                                                            placeholder="Enter card name..."
+                                                            value={projectName}
+                                                            onChange={(e) => setProjectName(e.target.value)}
+                                                            onFocus={() => setIsProjectNameFocused(true)}
+                                                            onBlur={() => {
+                                                                // Small delay to allow clicking the wand before it disappears
+                                                                setTimeout(() => setIsProjectNameFocused(false), 200);
+                                                            }}
+                                                            className="bg-white border-purple-200 focus:ring-purple-500 h-11 pr-12 text-purple-900 font-medium"
+                                                        />
+                                                        {isProjectNameFocused && (
+                                                            <div className="absolute right-2 top-1/2 -translate-y-1/2 animate-in fade-in slide-in-from-right-1 duration-200">
+                                                                <MagicWriterDialog
+                                                                    mode="rewrite"
+                                                                    initialText={projectName}
+                                                                    onInsert={(text: string) => setProjectName(text)}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
 

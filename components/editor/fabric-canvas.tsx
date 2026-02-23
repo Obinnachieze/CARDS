@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { EditorElement } from "./types";
+import { MagicWriterDialog } from "./magic-writer-dialog";
 
 const PENCIL_CURSOR = 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE3IDNsNCA0TDcuNSAyMC41IDIgMjJsMS41LTUuNXoiLz48cGF0aCBkPSJNMTUgNmw0IDQiLz48L3N2Zz4=") 0 24, auto';
 const ERASER_CURSOR = 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0ibTcgMTEgMiAyIDItMi0yIDJ6Ii8+PHBhdGggZD0iTTIwIDljLTIuMiAwLTQtMS44LTQtNHMtMS44LTQtNC00LTQgMS44LTQgNHMxLjggNCA0IDR6Ii8+PHBhdGggZD0iTTE4IDEzdjRjMCAxLjEtLjkgMi0yIDJ6Ii8+PC9zdmc+") 0 24, auto';
@@ -45,6 +46,7 @@ export const FabricCanvas = ({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
     const isInternalUpdate = useRef(false);
+    const [editingText, setEditingText] = useState<{ id: string; text: string; left: number; top: number; width: number } | null>(null);
 
     const onSelectRef = useRef(onSelect);
     const onUpdateRef = useRef(onUpdate);
@@ -142,31 +144,23 @@ export const FabricCanvas = ({
             onUpdateRef.current?.(id, updates);
         });
 
-        // Text Editing Events
-        canvas.on("text:changed", (e) => {
-            const obj = e.target;
-            if (obj && obj.type === "textbox") {
-                // @ts-ignore
-                const id = obj.id;
-                if (id && onUpdateRef.current) {
-                    onUpdateRef.current(id, { content: (obj as fabric.Textbox).text });
-                }
+        canvas.on("text:editing:entered", (e) => {
+            const obj = e.target as fabric.Textbox;
+            if (obj) {
+                setEditingText({
+                    // @ts-ignore
+                    id: obj.id,
+                    text: obj.text || "",
+                    left: obj.left || 0,
+                    top: obj.top || 0,
+                    width: (obj.width || 0) * (obj.scaleX || 1)
+                });
             }
         });
 
         canvas.on("text:editing:exited", (e) => {
-            const obj = e.target;
-            if (obj && obj.type === "textbox") {
-                // @ts-ignore - custom property
-                const id = obj.id;
-                if (id && onUpdateRef.current) {
-                    onUpdateRef.current(id, {
-                        content: (obj as fabric.Textbox).text,
-                        width: obj.width,
-                        height: obj.height
-                    });
-                }
-            }
+            // Small delay to allow clicking the wand before it's removed
+            setTimeout(() => setEditingText(null), 200);
         });
 
         // Hover Effects
@@ -568,5 +562,41 @@ export const FabricCanvas = ({
     }, [backgroundColor]);
 
 
-    return <canvas ref={canvasRef} />;
+    const handleMagicInsert = (text: string) => {
+        if (!editingText || !fabricCanvasRef.current) return;
+
+        const canvas = fabricCanvasRef.current;
+        const obj = canvas.getObjects().find(o => (o as any).id === editingText.id) as fabric.Textbox;
+
+        if (obj) {
+            obj.set("text", text);
+            canvas.renderAll();
+            onUpdateRef.current?.(editingText.id, { content: text });
+            // Keep editing mode if possible? Or exit? Usually exit is cleaner after AI rewrite.
+            obj.exitEditing();
+            setEditingText(null);
+        }
+    };
+
+    return (
+        <div className="relative w-full h-full">
+            <canvas ref={canvasRef} />
+            {editingText && (
+                <div
+                    className="absolute z-[100] pointer-events-auto"
+                    style={{
+                        left: (editingText.left + editingText.width) * zoom + 10,
+                        top: (editingText.top) * zoom,
+                        transform: 'translateY(-10px)'
+                    }}
+                >
+                    <MagicWriterDialog
+                        mode="rewrite"
+                        initialText={editingText.text}
+                        onInsert={handleMagicInsert}
+                    />
+                </div>
+            )}
+        </div>
+    );
 };

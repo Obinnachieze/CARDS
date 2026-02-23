@@ -12,16 +12,16 @@ import {
     Type, Image as ImageIcon, Smile, Shapes,
     Palette, LayoutTemplate, Pencil, Upload, PenTool, Highlighter, Eraser,
     MousePointer2, Move, ChevronLeft, Search, Trash2, AlignLeft, AlignCenter, AlignRight, Loader2,
-    FolderOpen, Save, Download, FilePlus, Star, Plus
+    FolderOpen, Save, Download, FilePlus, Star, Plus, Wand2, Sparkles
 } from "lucide-react";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { cn } from "@/lib/utils";
 import { fetchGoogleFonts, loadFont, GoogleFont } from "@/lib/google-fonts";
 import { ColorPicker, colors } from "./color-picker";
 import { EffectsSidebar } from "./effects-sidebar";
-import { Sparkles } from "lucide-react";
 import { MusicSidebar, MusicIcon } from "./music-sidebar";
 import { StickerSidebar } from "./sticker-sidebar";
+import { MagicWriterDialog } from "./magic-writer-dialog";
 
 const ShapeButton = ({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) => (
     <button

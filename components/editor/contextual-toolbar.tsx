@@ -79,10 +79,6 @@ export const ContextualToolbar = () => {
                                 className="w-full"
                             />
                         </div>
-                        <MagicWriterDialog
-                            initialText={selectedElement.content}
-                            onInsert={(text) => updateElement(selectedElement.id, { content: text })}
-                        />
                     </div>
                 )}
 

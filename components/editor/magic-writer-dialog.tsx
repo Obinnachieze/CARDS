@@ -11,17 +11,18 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Loader2, RefreshCw, Check } from "lucide-react";
+import { Wand2, Loader2, RefreshCw, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 interface MagicWriterDialogProps {
     onInsert: (text: string) => void;
     initialText?: string;
+    mode?: "generate" | "rewrite";
 }
 
-export function MagicWriterDialog({ onInsert, initialText = "" }: MagicWriterDialogProps) {
-    const [prompt, setPrompt] = useState("");
+export function MagicWriterDialog({ onInsert, initialText = "", mode = "generate" }: MagicWriterDialogProps) {
+    const [prompt, setPrompt] = useState(initialText);
     const [tone, setTone] = useState("fun and witty");
     const [generatedText, setGeneratedText] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +39,11 @@ export function MagicWriterDialog({ onInsert, initialText = "" }: MagicWriterDia
             const response = await fetch("/api/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt, tone }),
+                body: JSON.stringify({
+                    prompt: mode === "rewrite" ? prompt : prompt, // prompt acts as source text in rewrite mode
+                    tone,
+                    mode
+                }),
             });
 
             const data = await response.json();
@@ -71,26 +76,30 @@ export function MagicWriterDialog({ onInsert, initialText = "" }: MagicWriterDia
                     className="h-8 w-8 p-0 text-purple-400 hover:text-purple-300 hover:bg-purple-900/50"
                     title="AI Magic Writer"
                 >
-                    <Sparkles size={16} />
+                    <Wand2 size={16} />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-700">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-purple-400">
-                        <Sparkles size={20} />
-                        AI Magic Writer
+                        <Wand2 size={20} />
+                        {mode === "rewrite" ? "AI Smart Assistant" : "AI Magic Writer"}
                     </DialogTitle>
                     <DialogDescription className="text-gray-400">
-                        Describe what you want to say, and let AI write it for you.
+                        {mode === "rewrite"
+                            ? "Rewriting your message into a different tone."
+                            : "Describe what you want to say, and let AI write it for you."}
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="prompt">What's the occasion?</Label>
+                        <Label htmlFor="prompt">
+                            {mode === "rewrite" ? "Your Message" : "What's the occasion?"}
+                        </Label>
                         <Textarea
                             id="prompt"
-                            placeholder="e.g. A funny birthday wish for my brother who loves pizza..."
+                            placeholder={mode === "rewrite" ? "Your current text..." : "e.g. A funny birthday wish for my brother who loves pizza..."}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             className="bg-gray-800 border-gray-700 text-white min-h-[80px]"
@@ -109,6 +118,8 @@ export function MagicWriterDialog({ onInsert, initialText = "" }: MagicWriterDia
                                 <SelectItem value="professional and formal">Professional & Formal</SelectItem>
                                 <SelectItem value="short and punchy">Short & Punchy</SelectItem>
                                 <SelectItem value="poetic and rhyming">Poetic & Rhyming</SelectItem>
+                                <SelectItem value="sarcastic">Sarcastic</SelectItem>
+                                <SelectItem value="shakespearean">Shakespearean</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -134,10 +145,10 @@ export function MagicWriterDialog({ onInsert, initialText = "" }: MagicWriterDia
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Writing Magic...
+                                    {mode === "rewrite" ? "Rewriting..." : "Writing Magic..."}
                                 </>
                             ) : (
-                                "Generate"
+                                mode === "rewrite" ? "Rewrite Message" : "Generate"
                             )}
                         </Button>
                     ) : (
