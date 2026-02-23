@@ -219,7 +219,7 @@ export function TemplateMasonry() {
                             viewport={{ once: true }}
                             className="break-inside-avoid"
                         >
-                            <div className="group relative rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-black/50">
+                            <Link href={template.href} className="block group relative rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-black/50 cursor-pointer">
                                 <div className={cn("relative overflow-hidden", template.aspect)}>
                                     <div className={cn("w-full h-full flex flex-col items-center justify-center p-6 relative transition-transform duration-500 group-hover:scale-105", template.design.bg)}>
                                         <div className="absolute top-6 right-6 text-2xl md:text-4xl animate-bounce" style={{ animationDuration: '3s' }}>
@@ -251,15 +251,13 @@ export function TemplateMasonry() {
                                         </div>
 
                                         <div className="mt-4 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300">
-                                            <Link href={template.href}>
-                                                <Button size="sm" className="w-full bg-white text-black hover:bg-neutral-200 focus-visible:ring-4 focus-visible:ring-purple-500 rounded-lg gap-2 font-bold shadow-lg">
-                                                    Start with this <ExternalLink size={14} />
-                                                </Button>
-                                            </Link>
+                                            <span className="flex items-center justify-center w-full bg-white text-black group-hover:bg-neutral-200 rounded-lg gap-2 font-bold shadow-lg h-9 text-sm transition-colors">
+                                                Start with this <ExternalLink size={14} />
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>
