@@ -41,37 +41,49 @@ export const CardWrapper = ({
     // Audio Playback Logic
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
+    // Sync Audio Source
     React.useEffect(() => {
-        if (!audioSrc) return;
+        if (!audioSrc) {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+            return;
+        }
 
-        // Create audio element if it doesn't exist
         if (!audioRef.current) {
             audioRef.current = new Audio(audioSrc);
-            audioRef.current.loop = true; // Loop background music
+            audioRef.current.loop = true;
         } else if (audioRef.current.src !== audioSrc) {
-            // Update src if changed
+            const wasPlaying = !audioRef.current.paused;
             audioRef.current.src = audioSrc;
+            if (wasPlaying) audioRef.current.play().catch(() => { });
         }
+    }, [audioSrc]);
+
+    // Handle Play/Pause on Open
+    React.useEffect(() => {
+        if (!audioRef.current || !audioSrc) return;
 
         if (isOpen) {
-            const playPromise = audioRef.current.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Audio playback failed (autoplay policy?):", error);
-                });
-            }
+            audioRef.current.play().catch(error => {
+                console.log("Audio playback failed (autoplay policy?):", error);
+            });
         } else {
             audioRef.current.pause();
-            audioRef.current.currentTime = 0; // Reset to start
+            audioRef.current.currentTime = 0;
         }
+    }, [isOpen, audioSrc]);
 
+    // Cleanup on unmount
+    React.useEffect(() => {
         return () => {
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current = null;
             }
         };
-    }, [isOpen, audioSrc]);
+    }, []);
 
     // Dimensions
     const width = 300;

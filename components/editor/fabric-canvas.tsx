@@ -335,10 +335,18 @@ export const FabricCanvas = ({
                         img.set({
                             // @ts-ignore
                             id: el.id,
+                            // @ts-ignore
+                            musicPreviewUrl: el.musicPreviewUrl, // Persist metadata
                             left: el.x,
                             top: el.y,
                             angle: el.rotation,
                             selectable: !readOnly,
+                            // Custom styles for stickers
+                            borderColor: '#9333ea',
+                            cornerColor: 'white',
+                            cornerStrokeColor: '#9333ea',
+                            cornerStyle: 'circle',
+                            transparentCorners: false,
                         });
                         // Scale image proportionally
                         if (el.width && el.height && img.width && img.height) {
@@ -583,7 +591,7 @@ export const FabricCanvas = ({
             <canvas ref={canvasRef} />
             {editingText && (
                 <div
-                    className="absolute z-[100] pointer-events-auto"
+                    className="absolute z-100 pointer-events-auto"
                     style={{
                         left: (editingText.left + editingText.width) * zoom + 10,
                         top: (editingText.top) * zoom,

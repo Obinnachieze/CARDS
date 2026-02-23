@@ -301,7 +301,7 @@ export const Toolbar = () => {
                     "fixed bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-t-3xl md:rounded-3xl border border-white/20 md:border-zinc-200 sliding-panel",
                     // Mobile: Pops up from bottom. Desktop: Floats next to left sidebar
                     "bottom-14 max-h-[50vh]",
-                    "md:bottom-auto md:left-[90px] md:h-auto md:max-h-[calc(100vh-100px)]",
+                    "md:bottom-auto md:left-[90px] md:h-auto md:max-h-[min(800px,calc(100vh-100px))] md:min-h-[200px]",
                     activeTab && ["draw", "effects", "music", "text"].includes(activeTab)
                         ? "left-1/2 -translate-x-1/2 w-[300px] md:translate-x-0 md:w-[320px]"
                         : "left-4 right-4 md:right-auto md:w-[320px] lg:w-[400px]",

@@ -8,6 +8,7 @@ import { EditorElement } from "./types";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
 import { FloatingParticles } from "./floating-particles";
+import { Play, Pause, Music } from "lucide-react";
 
 interface PreviewModalProps {
     isOpen: boolean;
@@ -23,6 +24,22 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
     // Track card open state for celebrations
     const [previewIsOpen, setPreviewIsOpen] = useState(false);
     const [showFloating, setShowFloating] = useState(false);
+
+    const [playingPreview, setPlayingPreview] = useState<string | null>(null);
+    const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+    const togglePreview = (url: string) => {
+        if (playingPreview === url) {
+            audioRef.current?.pause();
+            setPlayingPreview(null);
+        } else {
+            setPlayingPreview(url);
+            if (audioRef.current) {
+                audioRef.current.src = url;
+                audioRef.current.play();
+            }
+        }
+    };
 
     // Fire celebrations when the card is opened in preview
     useEffect(() => {
@@ -93,7 +110,7 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                             fontFamily: el.fontFamily,
                             color: el.color,
                             transform: `rotate(${el.rotation}deg)`,
-                            zIndex: el.type === "image" ? 0 : 10
+                            zIndex: el.musicPreviewUrl ? 50 : (el.type === "image" ? 0 : 10)
                         }}
                     >
                         {el.type === "text" && (
@@ -103,12 +120,45 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                             <span style={{ fontSize: el.fontSize }}>{el.content}</span>
                         )}
                         {(el.type === "image" || el.type === "draw") && (
-                            <img
-                                src={el.content}
-                                alt="element"
-                                className="object-contain"
-                                style={{ width: el.width, height: el.height, mixBlendMode: el.mixBlendMode as any, filter: el.filter }}
-                            />
+                            <div
+                                className={cn(
+                                    "relative group",
+                                    el.musicPreviewUrl && "cursor-pointer"
+                                )}
+                                onClick={el.musicPreviewUrl ? (e) => {
+                                    e.stopPropagation();
+                                    togglePreview(el.musicPreviewUrl!);
+                                } : undefined}
+                            >
+                                <img
+                                    src={el.content}
+                                    alt="element"
+                                    className={cn(
+                                        "object-contain",
+                                        el.musicPreviewUrl && "rounded-lg shadow-lg ring-2 ring-transparent group-hover:ring-green-400 transition-all"
+                                    )}
+                                    style={{ width: el.width, height: el.height, mixBlendMode: el.mixBlendMode as any, filter: el.filter }}
+                                />
+                                {el.musicPreviewUrl && (
+                                    <div className={cn(
+                                        "absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg transition-opacity",
+                                        playingPreview === el.musicPreviewUrl ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                                    )}>
+                                        <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg border-2 border-white/20">
+                                            {playingPreview === el.musicPreviewUrl ? (
+                                                <Pause className="w-5 h-5 fill-current" />
+                                            ) : (
+                                                <Play className="w-5 h-5 fill-current ml-0.5" />
+                                            )}
+                                        </div>
+                                        {playingPreview === el.musicPreviewUrl && (
+                                            <div className="absolute -bottom-2 -right-2 bg-green-500 text-white p-1 rounded-full animate-bounce">
+                                                <Music className="w-3 h-3" />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         )}
                         {el.type === "line" && (
                             <div className="w-full flex items-center justify-center pointer-events-none" style={{ height: "100%" }}>
@@ -126,6 +176,7 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                         )}
                     </div>
                 ))}
+                <audio ref={audioRef} onEnded={() => setPlayingPreview(null)} hidden />
             </>
         );
     };
