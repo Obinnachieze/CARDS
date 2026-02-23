@@ -37,7 +37,8 @@ export async function GET(req: Request) {
     }
 
     try {
-        const session: any = await getServerSession();
+        const { authOptions } = await import("@/lib/auth");
+        const session: any = await getServerSession(authOptions);
         const token = session?.accessToken || await getAccessToken();
 
         const response = await fetch(
