@@ -35,11 +35,11 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
 
             if (width < 640) { // Mobile
                 if (cardMode === "foldable" && cardIsOpen) {
-                    setScale(0.35); // Fit 900px wide open card
+                    setScale(0.5); // Slightly larger for readability
                 } else if (cardMode === "foldable") {
-                    setScale(0.65); // Fit 450px wide closed card
+                    setScale(0.85); // Large closed card
                 } else {
-                    setScale(0.55); // Fit 600px wide standard card
+                    setScale(0.72); // Standard card
                 }
             } else if (width < 1024) { // Tablet
                 setScale(0.65);
@@ -70,6 +70,19 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
                 spread: 70,
                 origin: { y: 0.6 }
             });
+        } else if (activeCard.celebration === "fireworks") {
+            const duration = 3000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+            interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { clearInterval(interval); return; }
+                const particleCount = 30 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 350);
         } else if (activeCard.celebration === "floating-emoji") {
             setShowFloating(true);
             timeout = setTimeout(() => setShowFloating(false), 5000);
@@ -145,6 +158,8 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
         </div>
     );
 
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
     return (
         <div className="relative w-full h-screen bg-neutral-950 flex flex-col items-center justify-center overflow-hidden">
             {/* Background Decoration */}
@@ -173,7 +188,7 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
                 <div
                     className="transition-transform duration-500 ease-in-out"
                     style={{
-                        transform: `scale(${scale})`,
+                        transform: `scale(${scale}) ${isMobile && cardIsOpen && cardMode === 'foldable' ? 'translateX(-150px)' : ''}`,
                     }}
                 >
                     <CardWrapper

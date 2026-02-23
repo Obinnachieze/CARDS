@@ -341,8 +341,9 @@ export const EditorProvider = ({
                 is_public: true // Default to public for sharing
             });
         } catch (error: any) {
-            console.error("Failed to save to Supabase:", error.message || error);
-            throw error;
+            console.error("Supabase sync failed, but project saved locally:", error.message || error);
+            // We don't throw here so that the user can still get a local share link
+            // and continue their session.
         }
 
         // Redirect to project URL
