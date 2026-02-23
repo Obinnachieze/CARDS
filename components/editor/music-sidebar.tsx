@@ -6,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Music, Upload, Play, Pause, X, Mic, LogOut } from "lucide-react";
+import { Music, Upload, Mic, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SpotifySearch } from "./spotify-search";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 export const MusicIcon = Music;
 
@@ -30,26 +29,6 @@ export function MusicSidebar() {
     const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
 
     const [lastAdded, setLastAdded] = useState<string | null>(null);
-
-    const handleSpotifySelect = useCallback((track: any) => {
-        if (!activeCardId || !track.albumArt) return;
-
-        setLastAdded(track.name);
-        setTimeout(() => setLastAdded(null), 3000);
-
-        // 1. Add album art as a draggable sticker
-        addElement("image", track.albumArt, {
-            width: 150,
-            height: 150,
-            musicPreviewUrl: track.previewUrl,
-            spotifyTrackId: track.id, // Store ID for recovery
-            face: activeCard?.currentFace || "front"
-        });
-
-        if (track.previewUrl) {
-            setAudio(activeCardId, track.previewUrl, track.id); // Also pass ID to setAudio
-        }
-    }, [activeCardId, addElement, activeCard, setAudio]);
 
     const handleRemoveAudio = () => {
         if (activeCardId) {
@@ -167,62 +146,13 @@ export function MusicSidebar() {
                             <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
                                 <Music className="w-5 h-5 text-gray-300" />
                             </div>
-                            <p className="text-[10px] text-gray-400 font-medium italic leading-relaxed">No music attached yet.<br />Search Spotify or upload below.</p>
+                            <p className="text-[10px] text-gray-400 font-medium italic leading-relaxed">No music attached yet.<br />Upload or record audio below.</p>
                         </div>
                     )}
                 </div>
 
                 <div className="h-px bg-gray-100" />
 
-                {/* 2. Spotify Search Section */}
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="p-2 bg-green-100 rounded-lg text-green-600">
-                                <Music className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-900 text-sm">Spotify Music</h3>
-                                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
-                                    {session ? "Search your library" : "Login to pick songs"}
-                                </p>
-                            </div>
-                        </div>
-                        {session && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-gray-400 hover:text-red-500"
-                                onClick={() => signOut()}
-                                title="Disconnect Spotify"
-                            >
-                                <LogOut className="w-4 h-4" />
-                            </Button>
-                        )}
-                    </div>
-
-                    {!session ? (
-                        <Button
-                            onClick={() => signIn("spotify")}
-                            className="w-full bg-[#1DB954] hover:bg-[#1ed760] text-white font-bold rounded-xl py-6 shadow-lg shadow-green-500/20 flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" className="w-6 h-6" alt="Spotify" />
-                            Connect Spotify
-                        </Button>
-                    ) : (
-                        <>
-                            <SpotifySearch onSelect={handleSpotifySelect} />
-                            {lastAdded && (
-                                <div className="text-[10px] text-green-600 font-bold animate-in fade-in slide-in-from-top-1 duration-300 flex items-center gap-1">
-                                    <div className="w-1 h-1 bg-green-500 rounded-full" />
-                                    Added "{lastAdded}" to card!
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-
-                <div className="h-px bg-gray-100" />
 
                 {/* 3. Original Audio Section */}
                 <div className="space-y-4">

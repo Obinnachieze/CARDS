@@ -80,7 +80,7 @@ interface EditorContextType {
     removeWorkspaceProject: (index: number) => void;
 
     setCelebration: (cardId: string, type: "none" | "confetti" | "fireworks" | "floating-emoji", emoji?: string) => void;
-    setAudio: (cardId: string, src: string | undefined, trackId?: string) => void;
+    setAudio: (cardId: string, src: string | undefined) => void;
 
     activeTool: EditorTab | null;
     setActiveTool: (tool: EditorTab | null) => void;
@@ -718,10 +718,10 @@ export const EditorProvider = ({
         }));
     }, []);
 
-    const setAudio = useCallback((cardId: string, src: string | undefined, trackId?: string) => {
+    const setAudio = useCallback((cardId: string, src: string | undefined) => {
         setCards(prev => prev.map(card => {
             if (card.id === cardId) {
-                return { ...card, audioSrc: src, spotifyTrackId: trackId };
+                return { ...card, audioSrc: src };
             }
             return card;
         }));
