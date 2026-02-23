@@ -5,9 +5,14 @@ import { Resend } from "resend";
 // Vercel Cron jobs must use standard web Edge / Serverless functions
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
-
 export async function GET(req: Request) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey && process.env.NODE_ENV === "production") {
+        return NextResponse.json({ error: "Resend API key not configured" }, { status: 500 });
+    }
+
+    const resend = new Resend(apiKey || "placeholder");
+
     try {
         // Verify Cron authorization if Vercel header is present (optional security layer)
         const authHeader = req.headers.get('authorization');
