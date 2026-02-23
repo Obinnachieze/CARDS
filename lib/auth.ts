@@ -17,16 +17,18 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async jwt({ token, account }) {
+        async jwt({ token, account, profile }: any) {
             if (account) {
                 token.accessToken = account.access_token;
                 token.refreshToken = account.refresh_token;
                 token.expiresAt = account.expires_at;
+                token.country = profile?.country;
             }
             return token;
         },
         async session({ session, token }: any) {
             session.accessToken = token.accessToken;
+            session.country = token.country;
             session.error = token.error;
             return session;
         },

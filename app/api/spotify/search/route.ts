@@ -36,8 +36,9 @@ export async function GET(req: Request) {
         const { authOptions } = await import("@/lib/auth");
         const session: any = await getServerSession(authOptions);
         const token = session?.accessToken || await getAccessToken();
+        const market = session?.country || "US"; // Default to US if not found
 
-        let endpoint = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`;
+        let endpoint = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20&market=${market}`;
         let isLibrary = false;
 
         if (!query) {
@@ -45,7 +46,7 @@ export async function GET(req: Request) {
                 return NextResponse.json({ tracks: [] });
             }
             // Fetch user's saved tracks if no query provided
-            endpoint = `https://api.spotify.com/v1/me/tracks?limit=20`;
+            endpoint = `https://api.spotify.com/v1/me/tracks?limit=20&market=${market}`;
             isLibrary = true;
         }
 
@@ -63,28 +64,49 @@ export async function GET(req: Request) {
 
         const data = await response.json();
 
-        // Saved tracks (me/tracks) has a different structure than search (items are wrapped in an object with added_at)
+        // Saved tracks (me/tracks) has a different structure than search
         const rawTracks = isLibrary ? data.items?.map((item: any) => item.track) : data.tracks?.items;
 
         if (!rawTracks) {
-            console.error("[Spotify API] Unexpected response format (missing tracks):", data);
-            return NextResponse.json({ error: "Unexpected response from Spotify" }, { status: 502 });
+            return NextResponse.json({ tracks: [] });
         }
 
-        const tracks = rawTracks.map((track: any) => {
+        const clientToken = await getAccessToken();
+
+        const tracks = await Promise.all(rawTracks.map(async (item: any) => {
+            const track = item.track || item;
             if (!track) return null;
+
+            let previewUrl = track.preview_url;
+
+            // FALLBACK: If preview is missing, try fetching specifically with market
+            if (!previewUrl && clientToken) {
+                try {
+                    const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${track.id}?market=${market}`, {
+                        headers: { Authorization: `Bearer ${clientToken}` }
+                    });
+                    if (trackRes.ok) {
+                        const trackData = await trackRes.json();
+                        previewUrl = trackData.preview_url;
+                    }
+                } catch (e) {
+                    console.error("Fallback track fetch failed:", e);
+                }
+            }
+
             return {
                 id: track.id,
                 name: track.name,
                 artist: track.artists?.map((a: any) => a.name).join(", ") || "Unknown Artist",
                 albumArt: track.album?.images?.[0]?.url || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
-                previewUrl: track.preview_url,
-                hasPreview: !!track.preview_url,
+                previewUrl: previewUrl,
+                hasPreview: !!previewUrl,
                 externalUrl: track.external_urls?.spotify,
             };
-        }).filter(Boolean);
+        }));
 
-        return NextResponse.json({ tracks });
+        const filteredTracks = tracks.filter(Boolean);
+        return NextResponse.json({ tracks: filteredTracks });
     } catch (error: any) {
         console.error("Spotify Search Error:", error);
         return NextResponse.json({
