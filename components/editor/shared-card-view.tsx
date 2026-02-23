@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Copy, Plus } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { TiltContainer } from "@/components/ui/tilt-container";
 
 interface SharedCardViewProps {
     onEdit: () => void;
@@ -165,11 +166,9 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
             )}
 
             {/* Card Container */}
-            <div
+            <TiltContainer
                 className="relative z-10 w-full max-w-4xl h-[60vh] sm:h-[70vh] flex items-center justify-center transition-transform duration-300"
-                style={{
-                    perspective: "2000px" // Ensure 3D perspective is active
-                }}
+                maxRotation={12}
             >
                 <div
                     className="transition-transform duration-500 ease-in-out"
@@ -189,7 +188,7 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
                         onOpenChange={setCardIsOpen}
                     />
                 </div>
-            </div>
+            </TiltContainer>
 
             {/* Footer Actions */}
             <motion.div
