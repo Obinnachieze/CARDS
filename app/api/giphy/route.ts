@@ -8,11 +8,14 @@ export async function GET(req: Request) {
     const offset = searchParams.get("offset") || "0";
     const limit = searchParams.get("limit") || "20";
 
-    const apiKey = process.env.NEXT_PUBLIC_GIPHY_API_KEY;
+    const apiKey = process.env.GIPHY_API_KEY || process.env.NEXT_PUBLIC_GIPHY_API_KEY;
 
     if (!apiKey) {
-        console.error("[Giphy API] API key missing from environment");
-        return NextResponse.json({ error: "Giphy API key not configured on server" }, { status: 500 });
+        console.error("[Giphy API] API key missing from environment (checked GIPHY_API_KEY and NEXT_PUBLIC_GIPHY_API_KEY)");
+        return NextResponse.json({
+            error: "Giphy API key not configured on server",
+            action: "Please add GIPHY_API_KEY to your deployment environment variables (e.g., Netlify settings)."
+        }, { status: 500 });
     }
 
     try {

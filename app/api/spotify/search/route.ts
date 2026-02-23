@@ -6,26 +6,32 @@ const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
 async function getAccessToken() {
     if (!CLIENT_ID || !CLIENT_SECRET) {
-        throw new Error("Spotify credentials missing from environment");
+        console.error("[Spotify API] Credentials missing (SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET)");
+        throw new Error("Spotify credentials missing on server. Please add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to your deployment environment variables.");
     }
 
-    const response = await fetch("https://accounts.spotify.com/api/token", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64")}`,
-        },
-        body: "grant_type=client_credentials",
-    });
+    try {
+        const response = await fetch("https://accounts.spotify.com/api/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64")}`,
+            },
+            body: "grant_type=client_credentials",
+        });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[Spotify Auth] Failed to get access token (${response.status}):`, errorText);
-        throw new Error(`Spotify auth failed: ${response.status}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`[Spotify Auth] Failed to get access token (${response.status}):`, errorText);
+            throw new Error(`Spotify auth failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.access_token;
+    } catch (error: any) {
+        console.error("[Spotify Auth] Error getting client token:", error.message);
+        throw error;
     }
-
-    const data = await response.json();
-    return data.access_token;
 }
 
 export async function GET(req: Request) {
