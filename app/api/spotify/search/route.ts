@@ -36,62 +36,49 @@ export async function GET(req: Request) {
         const { authOptions } = await import("@/lib/auth");
         const session: any = await getServerSession(authOptions);
         const token = session?.accessToken || await getAccessToken();
-        const market = session?.country || "US"; // Default to US if not found
 
-        let endpoint = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20&market=${market}`;
-        let isLibrary = false;
-
-        if (!query) {
-            if (!session) {
-                return NextResponse.json({ tracks: [] });
-            }
-            // Fetch user's saved tracks if no query provided
-            endpoint = `https://api.spotify.com/v1/me/tracks?limit=20&market=${market}`;
-            isLibrary = true;
-        }
+        // Remove market for testing if it's causing the 400
+        let endpoint = query
+            ? `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`
+            : `https://api.spotify.com/v1/me/tracks?limit=20`;
 
         const response = await fetch(endpoint, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`[Spotify API] Request failed (${endpoint}) with status ${response.status}:`, errorText);
-            return NextResponse.json({ error: `Spotify API error: ${response.status}` }, { status: response.status });
+            console.error(`[Spotify API Error] Status: ${response.status}, URL: ${endpoint}, Body: ${errorText}`);
+            return NextResponse.json({ error: `Spotify API error: ${response.status}`, details: errorText }, { status: response.status });
         }
 
         const data = await response.json();
-
-        // Saved tracks (me/tracks) has a different structure than search
-        const rawTracks = isLibrary ? data.items?.map((item: any) => item.track) : data.tracks?.items;
+        const rawTracks = query ? data.tracks?.items : data.items?.map((item: any) => item.track);
 
         if (!rawTracks) {
             return NextResponse.json({ tracks: [] });
         }
 
+        // Fetch client token once for fallback
         const clientToken = await getAccessToken();
 
-        const tracks = await Promise.all(rawTracks.map(async (item: any) => {
-            const track = item.track || item;
+        const tracks = await Promise.all(rawTracks.slice(0, 15).map(async (track: any) => {
             if (!track) return null;
 
             let previewUrl = track.preview_url;
 
-            // FALLBACK: If preview is missing, try fetching specifically with market
+            // FALLBACK logic: Only if missing and we have a valid client token
             if (!previewUrl && clientToken) {
                 try {
-                    const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${track.id}?market=${market}`, {
+                    // Try without market first for widest availability
+                    const trackRes = await fetch(`https://api.spotify.com/v1/tracks/${track.id}`, {
                         headers: { Authorization: `Bearer ${clientToken}` }
                     });
                     if (trackRes.ok) {
                         const trackData = await trackRes.json();
                         previewUrl = trackData.preview_url;
                     }
-                } catch (e) {
-                    console.error("Fallback track fetch failed:", e);
-                }
+                } catch (e) { }
             }
 
             return {
@@ -105,13 +92,9 @@ export async function GET(req: Request) {
             };
         }));
 
-        const filteredTracks = tracks.filter(Boolean);
-        return NextResponse.json({ tracks: filteredTracks });
+        return NextResponse.json({ tracks: tracks.filter(Boolean) });
     } catch (error: any) {
-        console.error("Spotify Search Error:", error);
-        return NextResponse.json({
-            error: "Failed to search Spotify",
-            details: error.message
-        }, { status: 500 });
+        console.error("Spotify API Catch Error:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
