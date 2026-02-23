@@ -380,10 +380,19 @@ export const EditorProvider = ({
             if (error) throw error;
             console.log("Auto-saved to cloud");
         } catch (error: any) {
-            console.error("Failed to save to Supabase (Auto-save):", error.message || JSON.stringify(error));
+            if (error.message?.includes('row-level security') || error.code === '42501') {
+                console.log("Auto-save: RLS violation (project owned by another user). Forking automatically...");
+                try {
+                    await saveProjectAs(`${currentName} (Remix)`);
+                } catch (forkErr) {
+                    console.error("Failed to automatically fork project:", forkErr);
+                }
+            } else {
+                console.error("Failed to save to Supabase (Auto-save):", error.message || JSON.stringify(error));
+            }
         }
         return currentProjectId;
-    }, [cards, cardMode, projects, currentProjectId, user, projectName]);
+    }, [cards, cardMode, projects, currentProjectId, user, projectName, saveProjectAs]);
 
     // Auto-save logic
     useEffect(() => {
