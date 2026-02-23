@@ -30,14 +30,14 @@ async function getAccessToken() {
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get("query") || searchParams.get("q") || "";
+    const query = searchParams.get("q") || searchParams.get("query") || "";
 
     try {
         const { authOptions } = await import("@/lib/auth");
         const session: any = await getServerSession(authOptions);
         const token = session?.accessToken || await getAccessToken();
 
-        // Remove market for testing if it's causing the 400
+        // Use 'q' explicitly for search, fall back to library
         let endpoint = query
             ? `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`
             : `https://api.spotify.com/v1/me/tracks?limit=20`;
@@ -48,8 +48,17 @@ export async function GET(req: Request) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`[Spotify API Error] Status: ${response.status}, URL: ${endpoint}, Body: ${errorText}`);
-            return NextResponse.json({ error: `Spotify API error: ${response.status}`, details: errorText }, { status: response.status });
+            let spotifyMessage = errorText;
+            try {
+                const parsed = JSON.parse(errorText);
+                spotifyMessage = parsed.error?.message || errorText;
+            } catch (e) { }
+
+            console.error(`[Spotify API Error] Status: ${response.status}, Body: ${errorText}`);
+            return NextResponse.json({
+                error: `Spotify API error: ${response.status}`,
+                spotifyError: spotifyMessage
+            }, { status: response.status });
         }
 
         const data = await response.json();

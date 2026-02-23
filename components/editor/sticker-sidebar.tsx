@@ -58,7 +58,15 @@ export const StickerSidebar = () => {
             }
         } catch (err: any) {
             if (err.name !== 'AbortError') {
-                setError("Connection error");
+                console.error("Giphy Fetch Error:", err);
+                // Handle different error types
+                if (err.message.includes("configured")) {
+                    setError("GIPHY API key missing on server");
+                } else if (err.message.includes("limit")) {
+                    setError("Too many requests. Please try again later.");
+                } else {
+                    setError("Connection error. Please try again.");
+                }
             }
         } finally {
             if (!signal?.aborted) {
