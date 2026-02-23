@@ -5,6 +5,7 @@ const spotifyScopes = [
     "user-read-email",
     "user-top-read",
     "user-read-private",
+    "user-library-read",
 ].join(" ");
 
 export const authOptions: NextAuthOptions = {

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Music, Play, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useDebounce from "@/hooks/use-debounce";
+import { useSession } from "next-auth/react";
 
 interface Track {
     id: string;
@@ -20,18 +21,28 @@ interface SpotifySearchProps {
 }
 
 export function SpotifySearch({ onSelect }: SpotifySearchProps) {
+    const { data: session } = useSession();
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Track[]>([]);
     const [loading, setLoading] = useState(false);
     const debouncedQuery = useDebounce(query, 500);
 
+    // Fetch initial library on mount if logged in
+    useEffect(() => {
+        if (session && !query) {
+            handleSearch("");
+        }
+    }, [session]);
+
     useEffect(() => {
         if (debouncedQuery.trim().length > 2) {
             handleSearch(debouncedQuery);
+        } else if (!debouncedQuery.trim() && session) {
+            handleSearch(""); // Reload library if query cleared
         } else {
             setResults([]);
         }
-    }, [debouncedQuery]);
+    }, [debouncedQuery, session]);
 
     const handleSearch = async (q: string) => {
         setLoading(true);
@@ -51,14 +62,21 @@ export function SpotifySearch({ onSelect }: SpotifySearchProps) {
     return (
         <div className="space-y-4">
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                 <Input
-                    placeholder="Search for a song..."
+                    placeholder="Search Spotify..."
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="pl-10 bg-white border-purple-100"
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                    className="pl-9 bg-neutral-900/50 border-neutral-800 text-white placeholder:text-neutral-500 focus:ring-purple-500/20"
                 />
             </div>
+
+            {results.length > 0 && !query && session && (
+                <div className="flex items-center gap-2 px-1 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                    <Music className="w-3 h-3" />
+                    Your Library
+                </div>
+            )}
 
             <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                 {loading ? (
@@ -66,7 +84,7 @@ export function SpotifySearch({ onSelect }: SpotifySearchProps) {
                         <Music className="w-6 h-6 animate-bounce" />
                     </div>
                 ) : results.length > 0 ? (
-                    results.map((track) => (
+                    results.map((track: Track) => (
                         <button
                             key={track.id}
                             onClick={() => track.hasPreview && onSelect(track)}

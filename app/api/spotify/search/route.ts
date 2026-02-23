@@ -32,38 +32,46 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query") || searchParams.get("q") || "";
 
-    if (!query) {
-        return NextResponse.json({ tracks: [] });
-    }
-
     try {
         const { authOptions } = await import("@/lib/auth");
         const session: any = await getServerSession(authOptions);
         const token = session?.accessToken || await getAccessToken();
 
-        const response = await fetch(
-            `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+        let endpoint = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`;
+        let isLibrary = false;
+
+        if (!query) {
+            if (!session) {
+                return NextResponse.json({ tracks: [] });
             }
-        );
+            // Fetch user's saved tracks if no query provided
+            endpoint = `https://api.spotify.com/v1/me/tracks?limit=20`;
+            isLibrary = true;
+        }
+
+        const response = await fetch(endpoint, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`[Spotify API] Search failed with status ${response.status}:`, errorText);
+            console.error(`[Spotify API] Request failed (${endpoint}) with status ${response.status}:`, errorText);
             return NextResponse.json({ error: `Spotify API error: ${response.status}` }, { status: response.status });
         }
 
         const data = await response.json();
 
-        if (!data.tracks || !data.tracks.items) {
+        // Saved tracks (me/tracks) has a different structure than search (items are wrapped in an object with added_at)
+        const rawTracks = isLibrary ? data.items?.map((item: any) => item.track) : data.tracks?.items;
+
+        if (!rawTracks) {
             console.error("[Spotify API] Unexpected response format (missing tracks):", data);
             return NextResponse.json({ error: "Unexpected response from Spotify" }, { status: 502 });
         }
 
-        const tracks = data.tracks.items.map((track: any) => {
+        const tracks = rawTracks.map((track: any) => {
             if (!track) return null;
             return {
                 id: track.id,
