@@ -25,6 +25,8 @@ export interface EditorElement {
     shapeType?: "rect" | "circle" | "triangle" | "star" | "pentagon" | "hexagon" | "octagon" | "diamond" | "star-4" | "star-8" | "heart" | "arrow-right" | "arrow-left" | "cloud" | "triangle-right"; // For shapes
     lineStyle?: "solid" | "dashed" | "dotted"; // For lines
     filter?: string; // CSS filter (grayscale, sepia, etc.)
+    musicPreviewUrl?: string; // For music elements
+    spotifyId?: string; // For music elements
 }
 
 export interface CardTemplate {
