@@ -146,9 +146,8 @@ const getTemplate = (type: string) => {
             template.initialCardMode = "envelope";
             template.initialBackgroundColor = "#f5f5f5"; // warm gray
             template.initialElements = [
-                { id: id(), type: "text", content: "To: John Doe", x: 200, y: 300, fontSize: 24, rotation: 0, color: "#000000", face: "front", fontFamily: "Courier New" },
-                { id: id(), type: "text", content: "\n1234 Maple Ave\nSpringfield, IL 62704", x: 200, y: 340, fontSize: 18, rotation: 0, color: "#000000", face: "front", fontFamily: "Courier New" },
-                { id: id(), type: "emoji", content: "🛑", x: 400, y: 50, fontSize: 40, rotation: 0, face: "front" }, // Stamp placeholder
+                { id: id(), type: "text", content: "Happy Birthday!", x: 100, y: 150, fontSize: 32, rotation: 0, color: "#000000", face: "inside-right", fontFamily: "Inter" },
+                { id: id(), type: "emoji", content: "🎉", x: 200, y: 50, fontSize: 60, rotation: 0, face: "inside-right" },
             ];
             break;
         case "postcard":
