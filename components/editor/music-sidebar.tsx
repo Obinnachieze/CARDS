@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Music, Upload, Mic, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSession, signOut } from "next-auth/react";
 
 export const MusicIcon = Music;
 
@@ -16,8 +15,6 @@ export function MusicSidebar() {
     const { cards, activeCardId, setAudio, addElement } = useEditor();
     const activeCard = cards.find((c) => c.id === activeCardId);
     const currentAudio = activeCard?.audioSrc;
-
-    const { data: session } = useSession();
 
     // Recording State
     const [isRecording, setIsRecording] = useState(false);

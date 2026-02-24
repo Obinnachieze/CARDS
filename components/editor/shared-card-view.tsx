@@ -100,12 +100,6 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
     const getElements = (face: "front" | "inside-left" | "inside-right" | "back") =>
         activeCard.elements.filter(el => el.face === face);
 
-    if (!activeCard) return null;
-
-    // Filter elements logic
-    const getElements = (face: "front" | "inside-left" | "inside-right" | "back") =>
-        activeCard.elements.filter(el => el.face === face);
-
     // Render elements logic (simplified)
     const renderPreviewElements = (faceElements: EditorElement[]) => {
         return (
