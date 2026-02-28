@@ -2,13 +2,14 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Copy, Share2, Globe, AlertCircle, Save, Loader2, CalendarIcon, Send } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Download, Copy, Share2, Globe, AlertCircle, Save, Loader2, CalendarIcon, Send } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEditor } from "./editor-context";
 import { useParams } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -147,6 +148,41 @@ export function ShareDialog() {
         }
     };
 
+    const handleDownloadQRCode = () => {
+        const svg = document.getElementById("share-qr-code");
+        if (!svg) return;
+
+        // Serialize the SVG to a string
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+
+        // 1024x1024 for high quality
+        canvas.width = 1024;
+        canvas.height = 1024;
+
+        img.onload = () => {
+            if (ctx) {
+                // Background
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // Get PNG data URL
+                const pngFile = canvas.toDataURL("image/png");
+
+                // Trigger download
+                const downloadLink = document.createElement("a");
+                downloadLink.download = `vibepost-qr-${currentProjectId || 'card'}.png`;
+                downloadLink.href = `${pngFile}`;
+                downloadLink.click();
+            }
+        };
+
+        img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    };
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -230,6 +266,36 @@ export function ShareDialog() {
                                         )}
                                     </Button>
                                 </div>
+
+                                {/* QR Code Display */}
+                                <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col items-center space-y-4">
+                                    <div className="text-center">
+                                        <h4 className="text-sm font-semibold text-gray-900">Scan to View</h4>
+                                        <p className="text-xs text-gray-500 mt-1">Perfect for printing or sharing on screens</p>
+                                    </div>
+
+                                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-center">
+                                        <QRCodeSVG
+                                            id="share-qr-code"
+                                            value={shareUrl}
+                                            size={160}
+                                            level="H"
+                                            includeMargin={true}
+                                            className="rounded-md"
+                                        />
+                                    </div>
+
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="w-full max-w-[200px] border-gray-300 gap-2"
+                                        onClick={handleDownloadQRCode}
+                                    >
+                                        <Download size={16} />
+                                        Download QR Code
+                                    </Button>
+                                </div>
+
                                 <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
                                     <div className="flex items-center gap-2 text-sm text-gray-500">
                                         <Globe size={14} />
