@@ -3,14 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-async function getFirstOrg() {
+import { redirect } from "next/navigation";
+
+// Get the user's actual organization
+async function getUserOrg() {
     const supabase = await createClient();
-    const { data } = await supabase.from("organizations").select("id, name, settings").limit(1).single();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/login?callbackUrl=/dashboard/settings");
+    const { data } = await supabase.from("organizations").select("id, name, settings").eq("owner_id", user.id).single();
+    if (!data) redirect("/onboarding");
     return data;
 }
 
 export default async function SettingsPage() {
-    const org = await getFirstOrg();
+    const org = await getUserOrg();
 
     if (!org) {
         return (

@@ -3,17 +3,21 @@ import { CsvImporter } from "@/components/dashboard/csv-importer";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, Copy } from "lucide-react";
 
-// For demo purposes, we will pick the first organization
-// In a real app, this would be tied to the logged-in user's active org.
-async function getFirstOrg() {
+import { redirect } from "next/navigation";
+
+// Get the user's actual organization
+async function getUserOrg() {
     const supabase = await createClient();
-    const { data } = await supabase.from("organizations").select("id, name").limit(1).single();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/login?callbackUrl=/dashboard/members");
+    const { data } = await supabase.from("organizations").select("id, name").eq("owner_id", user.id).single();
+    if (!data) redirect("/onboarding");
     return data;
 }
 
 export default async function MembersPage() {
     const supabase = await createClient();
-    const org = await getFirstOrg();
+    const org = await getUserOrg();
 
     if (!org) {
         return (

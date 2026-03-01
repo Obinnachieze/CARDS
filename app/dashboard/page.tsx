@@ -3,8 +3,22 @@ import { Users, Mail, CheckCircle2, MoreVertical, Play, Heart, ChevronLeft, Chev
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { redirect } from "next/navigation";
+
+async function getUserOrg() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login?callbackUrl=/dashboard");
+  const { data } = await supabase.from("organizations").select("*").eq("owner_id", user.id).single();
+  if (!data) redirect("/onboarding");
+  return { org: data, user };
+}
+
 // Mock data generator for the overview visual since we just need the layout looking perfect
 export default async function DashboardOverviewPage() {
+  const { org, user } = await getUserOrg();
+  const userName = user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || 'Admin';
+
   return (
     <div className="flex flex-col xl:flex-row gap-8 w-full">
       {/* Left Column (Main Content) */}
@@ -20,8 +34,9 @@ export default async function DashboardOverviewPage() {
           </div>
 
           <div className="relative z-10 max-w-lg space-y-4">
-            <div className="text-purple-100 font-medium tracking-wider text-sm">
-              AUTOMATED SYSTEM
+            <div className="text-purple-100 font-bold tracking-wider text-sm uppercase flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+              {org.name} WORKSPACE
             </div>
             <h1 className="text-4xl font-bold text-white leading-tight">
               Streamline Birthdays with Professional Automated Cards
@@ -268,7 +283,7 @@ export default async function DashboardOverviewPage() {
               </Avatar>
             </div>
 
-            <h3 className="text-lg font-bold text-white mb-1">Good Morning Jason 🔥</h3>
+            <h3 className="text-lg font-bold text-white mb-1">Good Morning, {userName.split(' ')[0]} 👋</h3>
             <p className="text-xs text-zinc-500 text-center px-4 mb-6 leading-relaxed">
               Continue your deliveries to achieve your month target!
             </p>

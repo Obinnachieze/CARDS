@@ -3,15 +3,21 @@ import { format } from "date-fns";
 import { CheckCircle2, Clock, XCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-async function getFirstOrg() {
+import { redirect } from "next/navigation";
+
+// Get the user's actual organization
+async function getUserOrg() {
     const supabase = await createClient();
-    const { data } = await supabase.from("organizations").select("id, name").limit(1).single();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/login?callbackUrl=/dashboard/history");
+    const { data } = await supabase.from("organizations").select("id, name").eq("owner_id", user.id).single();
+    if (!data) redirect("/onboarding");
     return data;
 }
 
 export default async function DeliveryHistoryPage() {
     const supabase = await createClient();
-    const org = await getFirstOrg();
+    const org = await getUserOrg();
 
     if (!org) {
         return (
@@ -74,8 +80,8 @@ export default async function DeliveryHistoryPage() {
                                             {log.status === "pending" && <Clock className="w-4 h-4 text-yellow-500" />}
                                             {log.status === "failed" && <XCircle className="w-4 h-4 text-red-500" />}
                                             <span className={`capitalize ${log.status === "sent" ? "text-green-600 dark:text-green-400" :
-                                                    log.status === "failed" ? "text-red-600 dark:text-red-400" :
-                                                        "text-yellow-600 dark:text-yellow-400"
+                                                log.status === "failed" ? "text-red-600 dark:text-red-400" :
+                                                    "text-yellow-600 dark:text-yellow-400"
                                                 }`}>
                                                 {log.status}
                                             </span>
