@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { format } from "date-fns";
 import { CheckCircle2, Clock, XCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,9 @@ async function getUserOrg() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login?callbackUrl=/dashboard/history");
-    const { data } = await supabase.from("organizations").select("id, name").eq("owner_id", user.id).single();
+
+    const supabaseAdmin = await createAdminClient();
+    const { data } = await supabaseAdmin.from("organizations").select("id, name").eq("owner_id", user.id).single();
     if (!data) redirect("/onboarding");
     return data;
 }
@@ -28,7 +30,8 @@ export default async function DeliveryHistoryPage() {
         );
     }
 
-    const { data: logs } = await supabase
+    const supabaseAdmin = await createAdminClient();
+    const { data: logs } = await supabaseAdmin
         .from("delivery_logs")
         .select(`
       id, status, scheduled_for, sent_at, error_message, retry_count,

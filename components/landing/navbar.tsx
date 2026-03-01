@@ -64,7 +64,7 @@ export function Navbar({ className }: { className?: string }) {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center space-x-1">
+                    <div className="hidden md:flex items-center gap-6">
                         {navItems.map((item, idx) => (
                             <Link
                                 key={item.name}
@@ -177,7 +177,7 @@ export function Navbar({ className }: { className?: string }) {
                                 <Link
                                     key={item.name}
                                     href={item.link}
-                                    className="block px-4 py-3 text-base font-medium text-neutral-300 hover:text-white hover:bg-white/5 rounded-lg"
+                                    className="block px-4 py-3 text-base font-medium text-neutral-300 hover:text-white hover:bg-white/5 rounded-lg mb-2"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     {item.name}

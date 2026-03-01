@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { CsvImporter } from "@/components/dashboard/csv-importer";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, Copy } from "lucide-react";
@@ -10,7 +10,9 @@ async function getUserOrg() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login?callbackUrl=/dashboard/members");
-    const { data } = await supabase.from("organizations").select("id, name").eq("owner_id", user.id).single();
+
+    const supabaseAdmin = await createAdminClient();
+    const { data } = await supabaseAdmin.from("organizations").select("id, name").eq("owner_id", user.id).single();
     if (!data) redirect("/onboarding");
     return data;
 }
@@ -28,7 +30,8 @@ export default async function MembersPage() {
         );
     }
 
-    const { data: members } = await supabase
+    const supabaseAdmin = await createAdminClient();
+    const { data: members } = await supabaseAdmin
         .from("members")
         .select("*")
         .eq("org_id", org.id)

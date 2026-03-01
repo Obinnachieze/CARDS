@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Users, Mail, CheckCircle2, MoreVertical, Play, Heart, ChevronLeft, ChevronRight, Plus, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,7 +9,9 @@ async function getUserOrg() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?callbackUrl=/dashboard");
-  const { data } = await supabase.from("organizations").select("*").eq("owner_id", user.id).single();
+
+  const supabaseAdmin = await createAdminClient();
+  const { data } = await supabaseAdmin.from("organizations").select("*").eq("owner_id", user.id).single();
   if (!data) redirect("/onboarding");
   return { org: data, user };
 }
