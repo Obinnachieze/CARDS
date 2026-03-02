@@ -1,0 +1,66 @@
+{
+  "data": [
+    {
+      "id": "6a988c2e-7daa-4838-b996-6fe80b701851",
+      "name": "AutoCards Demo Org",
+      "slug": "autocards-demo-org",
+      "owner_id": null,
+      "plan": "free",
+      "settings": {
+        "ai_prompt_addition": "Keep it professional."
+      },
+      "created_at": "2026-03-01T12:55:44.802502+00:00"
+    },
+    {
+      "id": "2b9ad58c-3a28-4710-840e-e60780c9319b",
+      "name": "wisdom og",
+      "slug": "wisdom-og",
+      "owner_id": "ee1aff81-b8d2-4fe0-a386-6d7317ccb02b",
+      "plan": "free",
+      "settings": {
+        "ai_prompt_addition": "Keep it professional."
+      },
+      "created_at": "2026-03-01T20:56:56.004924+00:00"
+    },
+    {
+      "id": "5e157779-c2fb-4fc5-9ddf-ac3d48d2c73b",
+      "name": "wisdom and o",
+      "slug": "wisdom-and-o",
+      "owner_id": "ee1aff81-b8d2-4fe0-a386-6d7317ccb02b",
+      "plan": "free",
+      "settings": {
+        "timezone": "Africa/Lagos",
+        "contact_email": "wisdomchieze0@gmail.com",
+        "ai_prompt_addition": "Keep it professional."
+      },
+      "created_at": "2026-03-02T08:24:14.378342+00:00"
+    },
+    {
+      "id": "9fa3e9cc-2b0b-40c8-b44a-274a188183db",
+      "name": "wisdom and okau",
+      "slug": "wisdom-and-okau",
+      "owner_id": "ee1aff81-b8d2-4fe0-a386-6d7317ccb02b",
+      "plan": "free",
+      "settings": {
+        "timezone": "Africa/Lagos",
+        "contact_email": "wisdomchieze0@gmail.com",
+        "ai_prompt_addition": "Keep it professional."
+      },
+      "created_at": "2026-03-02T08:27:43.235675+00:00"
+    },
+    {
+      "id": "9892f2a6-870b-4560-9180-4c1d95de0fb2",
+      "name": "wisdom and okauj",
+      "slug": "wisdom-and-okauj",
+      "owner_id": "ee1aff81-b8d2-4fe0-a386-6d7317ccb02b",
+      "plan": "free",
+      "settings": {
+        "timezone": "Africa/Lagos",
+        "contact_email": "wisdomchieze0@gmail.com",
+        "ai_prompt_addition": "Keep it professional."
+      },
+      "created_at": "2026-03-02T10:47:37.708444+00:00"
+    }
+  ],
+  "error": null
+}

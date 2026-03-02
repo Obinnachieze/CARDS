@@ -5,14 +5,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 async function getUserOrg() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?callbackUrl=/dashboard");
 
   const supabaseAdmin = await createAdminClient();
-  const { data } = await supabaseAdmin.from("organizations").select("*").eq("owner_id", user.id).single();
-  if (!data) redirect("/onboarding");
+  const { data, error } = await supabaseAdmin
+    .from("organizations")
+    .select("*")
+    .eq("owner_id", user.id)
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    console.error("Dashboard org fetch error:", error);
+    redirect("/onboarding");
+  }
   return { org: data, user };
 }
 
