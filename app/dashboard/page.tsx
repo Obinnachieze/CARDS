@@ -32,6 +32,21 @@ export default async function DashboardOverviewPage() {
   const { org, user } = await getUserOrg();
   const userName = user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || 'Admin';
 
+  // Calculate greeting based on org timezone (default to UTC if not set)
+  const timeZone = org.timezone || 'UTC';
+  const hour = parseInt(new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    hour12: false,
+    timeZone: timeZone
+  }).format(new Date()), 10);
+
+  let greeting = 'Good Evening';
+  if (hour >= 5 && hour < 12) {
+    greeting = 'Good Morning';
+  } else if (hour >= 12 && hour < 17) {
+    greeting = 'Good Afternoon';
+  }
+
   return (
     <div className="flex flex-col xl:flex-row gap-8 w-full">
       {/* Left Column (Main Content) */}
@@ -298,7 +313,7 @@ export default async function DashboardOverviewPage() {
               </Avatar>
             </div>
 
-            <h3 className="text-lg font-bold text-white mb-1">Good Morning, {userName.split(' ')[0]} 👋</h3>
+            <h3 className="text-lg font-bold text-white mb-1">{greeting}, {userName.split(' ')[0]} 👋</h3>
             <p className="text-xs text-zinc-500 text-center px-4 mb-6 leading-relaxed">
               Continue your deliveries to achieve your month target!
             </p>
