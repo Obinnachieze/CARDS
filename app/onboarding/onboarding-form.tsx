@@ -229,7 +229,7 @@ export function OnboardingForm() {
                                     transition={{ type: "spring", duration: 0.8 }}
                                     className="mx-auto w-10 h-10 rounded-full border border-white/10 flex items-center justify-center relative overflow-hidden bg-white/5"
                                 >
-                                    <span className="text-xl">🚀</span>
+                                    <img src="/logo.png" alt="Vibe Post Logo" className="w-10 h-10 rounded-full" />
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50 pointer-events-none" />
                                 </motion.div>
 

@@ -34,6 +34,10 @@ export function Header() {
             href: '/',
         },
         {
+            label: 'For Business',
+            href: '/onboarding',
+        },
+        {
             label: 'Gallery',
             href: '#gallery',
         },
