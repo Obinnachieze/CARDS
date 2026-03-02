@@ -1,7 +1,7 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Users, Mail, CheckCircle2, MoreVertical, Play, Heart, ChevronLeft, ChevronRight, Plus, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import { redirect } from "next/navigation";
 
@@ -141,7 +141,7 @@ export default async function DashboardOverviewPage() {
                 <p className="text-sm text-zinc-500 mt-1 line-clamp-2">Head of Product Design, bringing creative vision strictly executed.</p>
                 <div className="flex items-center gap-2 mt-4">
                   <Avatar className="h-6 w-6 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=sarah" />
+                    <AvatarFallback className="bg-purple-900 text-purple-200 text-[10px]">SJ</AvatarFallback>
                   </Avatar>
                   <span className="text-xs text-zinc-400">Design Team</span>
                 </div>
@@ -164,7 +164,7 @@ export default async function DashboardOverviewPage() {
                 <p className="text-sm text-zinc-500 mt-1 line-clamp-2">Senior Frontend Engineer optimizing our web experience.</p>
                 <div className="flex items-center gap-2 mt-4">
                   <Avatar className="h-6 w-6 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=michael" />
+                    <AvatarFallback className="bg-emerald-900 text-emerald-200 text-[10px]">MC</AvatarFallback>
                   </Avatar>
                   <span className="text-xs text-zinc-400">Engineering</span>
                 </div>
@@ -187,7 +187,7 @@ export default async function DashboardOverviewPage() {
                 <p className="text-sm text-zinc-500 mt-1 line-clamp-2">Marketing Lead and brand strategist for Q4 campaigns.</p>
                 <div className="flex items-center gap-2 mt-4">
                   <Avatar className="h-6 w-6 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=elena" />
+                    <AvatarFallback className="bg-blue-900 text-blue-200 text-[10px]">ER</AvatarFallback>
                   </Avatar>
                   <span className="text-xs text-zinc-400">Marketing</span>
                 </div>
@@ -216,7 +216,7 @@ export default async function DashboardOverviewPage() {
               <div className="grid grid-cols-12 items-center p-4 hover:bg-white/5 transition-colors">
                 <div className="col-span-5 flex items-center gap-3">
                   <Avatar className="h-10 w-10 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=1" />
+                    <AvatarFallback className="bg-purple-900 text-purple-200">PS</AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="text-sm font-semibold text-zinc-200">Padhang Satrio</p>
@@ -242,7 +242,7 @@ export default async function DashboardOverviewPage() {
               <div className="grid grid-cols-12 items-center p-4 hover:bg-white/5 transition-colors">
                 <div className="col-span-5 flex items-center gap-3">
                   <Avatar className="h-10 w-10 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=2" />
+                    <AvatarFallback className="bg-blue-900 text-blue-200">LS</AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="text-sm font-semibold text-zinc-200">Leonardo Samsul</p>
@@ -292,7 +292,9 @@ export default async function DashboardOverviewPage() {
               </div>
 
               <Avatar className="w-20 h-20 border-4 border-[#130b1c]">
-                <AvatarImage src="https://i.pravatar.cc/150?u=admin_avatar" />
+                <AvatarFallback className="bg-purple-900 text-purple-200 text-2xl">
+                  {userName ? userName[0].toUpperCase() : 'U'}
+                </AvatarFallback>
               </Avatar>
             </div>
 
@@ -343,7 +345,7 @@ export default async function DashboardOverviewPage() {
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Avatar className="w-10 h-10 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=mentor1" />
+                    <AvatarFallback className="bg-purple-900 text-purple-200">PS</AvatarFallback>
                   </Avatar>
                   <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
                     <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>
@@ -364,7 +366,7 @@ export default async function DashboardOverviewPage() {
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Avatar className="w-10 h-10 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=mentor2" />
+                    <AvatarFallback className="bg-blue-900 text-blue-200">ZH</AvatarFallback>
                   </Avatar>
                   <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
                     <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>
@@ -385,7 +387,7 @@ export default async function DashboardOverviewPage() {
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <Avatar className="w-10 h-10 border border-white/10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=mentor3" />
+                    <AvatarFallback className="bg-purple-900 text-purple-200">LS</AvatarFallback>
                   </Avatar>
                   <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
                     <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>

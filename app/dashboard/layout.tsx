@@ -1,11 +1,12 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { usePathname } from "next/navigation";
 import { Users, History, Settings, LogOut, Gift, Search, Bell, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -16,17 +17,30 @@ const navItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const [userInitials, setUserInitials] = useState("U");
+    const [userName, setUserName] = useState("User");
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const name = user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || 'User';
+                setUserName(name);
+                setUserInitials(name[0].toUpperCase());
+            }
+        };
+        fetchUser();
+    }, []);
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-500/30">
             {/* Sidebar background is a solid dark color to stand out from the gradient body slightly */}
             <aside className="w-[280px] bg-[#0c0c0e] border-r border-white/10 hidden lg:flex flex-col">
                 <div className="h-20 flex items-center px-8">
-                    <div className="flex items-center gap-3">
-                        <div className="custom-gradient-bg p-2 rounded-xl shadow-lg shadow-purple-900/20">
-                            <Gift className="w-5 h-5 text-white" />
-                        </div>
-                        <span className="font-bold text-xl tracking-tight text-white">AutoCards</span>
+                    <div className="flex items-center gap-2 group">
+                        <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
+                        <span className="font-bold text-xl tracking-tight text-white">VibePost</span>
                     </div>
                 </div>
 
@@ -77,10 +91,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* Top Header */}
                 <header className="h-20 flex items-center justify-between px-8 lg:px-10 z-10">
                     {/* Mobile brand (hidden on desktop) */}
-                    <div className="flex lg:hidden items-center gap-3">
-                        <div className="bg-purple-600 p-2 rounded-xl">
-                            <Gift className="w-5 h-5 text-white" />
-                        </div>
+                    <div className="flex lg:hidden items-center gap-2 group">
+                        <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
                     </div>
 
                     <div className="flex-1 max-w-xl hidden md:flex items-center">
@@ -101,11 +113,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                         <div className="flex items-center gap-3 pl-2 border-l border-white/10">
                             <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-purple-500/20">
-                                <AvatarImage src="https://github.com/shadcn.png" />
-                                <AvatarFallback className="bg-purple-900 text-purple-200">AD</AvatarFallback>
+                                <AvatarFallback className="bg-purple-900 text-purple-200">{userInitials}</AvatarFallback>
                             </Avatar>
                             <div className="hidden sm:block">
-                                <p className="text-sm font-medium text-zinc-200">Admin User</p>
+                                <p className="text-sm font-medium text-zinc-200">{userName}</p>
                                 <p className="text-xs text-zinc-500">Organization Owner</p>
                             </div>
                         </div>

@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { CsvImporter } from "@/components/dashboard/csv-importer";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, Mail, Copy } from "lucide-react";
 
 import { redirect } from "next/navigation";
@@ -95,16 +96,27 @@ export default async function MembersPage() {
                                     </td>
                                 </tr>
                             ) : (
-                                members?.map((member) => (
-                                    <tr key={member.id} className="hover:bg-muted/30">
-                                        <td className="px-4 py-3 font-medium">{member.full_name}</td>
-                                        <td className="px-4 py-3 text-muted-foreground">{member.email}</td>
-                                        <td className="px-4 py-3 text-muted-foreground">{member.role_title || "-"}</td>
-                                        <td className="px-4 py-3">
-                                            {member.birth_month}/{member.birth_day}
-                                        </td>
-                                    </tr>
-                                ))
+                                members?.map((member) => {
+                                    const initials = member.full_name
+                                        ? member.full_name.split(" ").map((n: string) => n[0]).join("").toUpperCase().substring(0, 2)
+                                        : member.email[0].toUpperCase();
+
+                                    return (
+                                        <tr key={member.id} className="hover:bg-muted/30">
+                                            <td className="px-4 py-3 font-medium flex items-center gap-3">
+                                                <Avatar className="h-8 w-8 border border-white/10">
+                                                    <AvatarFallback className="bg-purple-900 text-purple-200 text-xs">{initials}</AvatarFallback>
+                                                </Avatar>
+                                                {member.full_name}
+                                            </td>
+                                            <td className="px-4 py-3 text-muted-foreground">{member.email}</td>
+                                            <td className="px-4 py-3 text-muted-foreground">{member.role_title || "-"}</td>
+                                            <td className="px-4 py-3">
+                                                {member.birth_month}/{member.birth_day}
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
