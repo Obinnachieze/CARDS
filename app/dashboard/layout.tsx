@@ -7,6 +7,7 @@ import { Users, History, Settings, LogOut, Gift, Search, Bell, LayoutDashboard }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NotificationModal } from "@/components/dashboard/notification-modal";
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -106,10 +107,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
 
                     <div className="flex items-center gap-6 ml-auto pl-4">
-                        <button className="relative p-2 text-zinc-400 hover:text-zinc-200 transition-colors bg-white/5 rounded-full h-10 w-10 flex items-center justify-center border border-white/5 hover:bg-white/10">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-purple-500 rounded-full ring-2 ring-[#0c0c0e]" />
-                        </button>
+                        <NotificationModal />
 
                         <div className="flex items-center gap-3 pl-2 border-l border-white/10">
                             <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-purple-500/20">
