@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationModal } from "@/components/dashboard/notification-modal";
+import { Sidebar, SidebarBody, useSidebar } from "@/components/ui/sidebar";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -15,6 +18,81 @@ const navItems = [
     { name: "Delivery History", href: "/dashboard/history", icon: History },
     { name: "Template Settings", href: "/dashboard/settings", icon: Settings },
 ];
+
+const DashboardSidebarContent = ({ navItems, pathname }: any) => {
+    const { open, animate } = useSidebar();
+
+    return (
+        <SidebarBody className="bg-[#0c0c0e] border-r border-white/10 p-0 justify-between h-full w-full">
+            <div className="flex flex-col flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar w-full">
+                <div className={cn("h-20 flex items-center transition-all min-h-20", open ? "px-8" : "px-0 justify-center")}>
+                    <div className="flex items-center gap-2 group whitespace-nowrap overflow-hidden">
+                        <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full flex-shrink-0" />
+                        <motion.span
+                            animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }}
+                            className="font-bold text-xl tracking-tight text-white"
+                        >
+                            VibePost
+                        </motion.span>
+                    </div>
+                </div>
+
+                <div className={cn("py-4 text-xs font-semibold text-zinc-500 tracking-wider transition-all whitespace-nowrap overflow-hidden", open ? "px-6 block" : "px-0 text-center text-[10px] hidden")}>
+                    OVERVIEW
+                </div>
+
+                <nav className={cn("flex-1 space-y-1 transition-all mt-2", open ? "px-4" : "px-4")}>
+                    {navItems.map((item: any) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + "/"));
+
+                        return (
+                            <Link key={item.name} href={item.href} className="block w-full">
+                                <Button
+                                    variant="ghost"
+                                    className={cn(`relative w-full h-12 rounded-xl transition-all flex items-center overflow-hidden`, isActive
+                                        ? "bg-purple-500/10 text-purple-400 font-medium hover:bg-purple-500/20 hover:text-purple-300"
+                                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 font-normal",
+                                        open ? "justify-start px-4" : "justify-center px-0"
+                                    )}
+                                >
+                                    <div className="flex items-center justify-center w-5 h-5 flex-shrink-0 z-10">
+                                        <Icon className={cn("w-5 h-5", isActive ? "text-purple-400" : "text-zinc-500")} />
+                                    </div>
+                                    <motion.span
+                                        animate={{
+                                            opacity: animate ? (open ? 1 : 0) : 1,
+                                            x: animate ? (open ? 0 : -20) : 0,
+                                            display: animate ? (open ? "inline-block" : "none") : "inline-block",
+                                        }}
+                                        transition={{ duration: 0.2 }}
+                                        className={cn("whitespace-nowrap absolute left-12")}
+                                    >
+                                        {item.name}
+                                    </motion.span>
+                                </Button>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
+
+            <div className={cn("mt-auto transition-all", open ? "p-6" : "p-4 flex flex-col items-center")}>
+                <div className={cn("text-xs font-semibold text-zinc-500 tracking-wider mb-4 whitespace-nowrap overflow-hidden", open ? "block" : "hidden")}>
+                    SETTINGS
+                </div>
+                <Link href="/" className="w-full block">
+                    <Button variant="ghost" className={cn(`w-full h-12 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors ${open ? "justify-start px-4" : "justify-center px-0"}`)}>
+                        <LogOut className={cn("w-5 h-5 flex-shrink-0 group-hover:text-rose-400", open ? "mr-4 text-zinc-500" : "mr-0 text-zinc-500")} />
+                        <motion.span animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }} className="whitespace-nowrap">
+                            Logout
+                        </motion.span>
+                    </Button>
+                </Link>
+            </div>
+        </SidebarBody>
+    );
+};
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -36,53 +114,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-500/30">
-            {/* Sidebar background is a solid dark color to stand out from the gradient body slightly */}
-            <aside className="w-[280px] bg-[#0c0c0e] border-r border-white/10 hidden lg:flex flex-col">
-                <div className="h-20 flex items-center px-8">
-                    <div className="flex items-center gap-2 group">
-                        <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
-                        <span className="font-bold text-xl tracking-tight text-white">VibePost</span>
-                    </div>
-                </div>
-
-                <div className="px-6 py-4 text-xs font-semibold text-zinc-500 tracking-wider">
-                    OVERVIEW
-                </div>
-
-                <nav className="flex-1 px-4 space-y-1">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + "/"));
-
-                        return (
-                            <Link key={item.name} href={item.href}>
-                                <Button
-                                    variant="ghost"
-                                    className={`w-full justify-start h-12 rounded-xl transition-all ${isActive
-                                        ? "bg-purple-500/10 text-purple-400 font-medium hover:bg-purple-500/20 hover:text-purple-300"
-                                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 font-normal"
-                                        }`}
-                                >
-                                    <Icon className={`w-5 h-5 mr-4 ${isActive ? "text-purple-400" : "text-zinc-500"}`} />
-                                    {item.name}
-                                </Button>
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="p-6 mt-auto">
-                    <div className="text-xs font-semibold text-zinc-500 tracking-wider mb-4">
-                        SETTINGS
-                    </div>
-                    <Link href="/">
-                        <Button variant="ghost" className="w-full justify-start h-12 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
-                            <LogOut className="w-5 h-5 mr-4 text-zinc-500 group-hover:text-rose-400" />
-                            Logout
-                        </Button>
-                    </Link>
-                </div>
-            </aside>
+            <Sidebar>
+                <DashboardSidebarContent navItems={navItems} pathname={pathname} />
+            </Sidebar>
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col relative overflow-hidden bg-gradient-to-br from-[#09090b] via-[#130b1c] to-[#09090b]">
