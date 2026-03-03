@@ -17,7 +17,11 @@ async function getUserOrg() {
     return data;
 }
 
-export default async function DeliveryHistoryPage() {
+export default async function DeliveryHistoryPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
     const supabase = await createClient();
     const org = await getUserOrg();
 
@@ -30,15 +34,24 @@ export default async function DeliveryHistoryPage() {
         );
     }
 
+    const { q } = await searchParams;
+    const searchQuery = typeof q === 'string' ? q : '';
+
     const supabaseAdmin = await createAdminClient();
-    const { data: logs } = await supabaseAdmin
+    let query = supabaseAdmin
         .from("delivery_logs")
         .select(`
       id, status, scheduled_for, sent_at, error_message, retry_count,
-      members ( full_name, email )
+      members!inner ( full_name, email )
     `)
         .eq("org_id", org.id)
         .order("scheduled_for", { ascending: false });
+
+    if (searchQuery) {
+        query = query.or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`, { foreignTable: 'members' });
+    }
+
+    const { data: logs } = await query;
 
     return (
         <div className="space-y-8">

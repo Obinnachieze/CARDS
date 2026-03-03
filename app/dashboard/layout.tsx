@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationModal } from "@/components/dashboard/notification-modal";
+import { DashboardSearch } from "@/components/dashboard/dashboard-search";
 import { Sidebar, SidebarBody, useSidebar, SidebarMobileTrigger } from "@/components/ui/sidebar";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Suspense } from "react";
 
 const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -138,13 +140,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </div>
 
                         <div className="flex-1 max-w-xl hidden md:flex items-center">
-                            <div className="relative w-full">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                                <Input
-                                    placeholder="Search members or logs..."
-                                    className="w-full pl-11 h-12 bg-white/5 border-white/10 rounded-full text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50"
-                                />
-                            </div>
+                            <Suspense fallback={<div className="flex-1 max-w-xl hidden md:flex" />}>
+                                <DashboardSearch />
+                            </Suspense>
                         </div>
 
                         <div className="flex items-center gap-6 ml-auto pl-4">

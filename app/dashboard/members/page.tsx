@@ -18,7 +18,11 @@ async function getUserOrg() {
     return data;
 }
 
-export default async function MembersPage() {
+export default async function MembersPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
     const supabase = await createClient();
     const org = await getUserOrg();
 
@@ -31,12 +35,21 @@ export default async function MembersPage() {
         );
     }
 
+    const { q } = await searchParams;
+    const searchQuery = typeof q === 'string' ? q : '';
+
     const supabaseAdmin = await createAdminClient();
-    const { data: members } = await supabaseAdmin
+    let query = supabaseAdmin
         .from("members")
         .select("*")
         .eq("org_id", org.id)
         .order("created_at", { ascending: false });
+
+    if (searchQuery) {
+        query = query.or(`full_name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`);
+    }
+
+    const { data: members } = await query;
 
     return (
         <div className="space-y-8">
