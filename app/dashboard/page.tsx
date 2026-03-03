@@ -2,6 +2,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Users, Mail, CheckCircle2, MoreVertical, Play, Heart, ChevronLeft, ChevronRight, Plus, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DeliveryChart } from "@/components/dashboard/delivery-chart";
 
 import { redirect } from "next/navigation";
 
@@ -40,10 +41,84 @@ export default async function DashboardOverviewPage() {
     timeZone: timeZone
   }).format(new Date()), 10);
 
+  // Check for upcoming birthdays
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const thirtyDaysFromNow = new Date(today);
+  thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+  const supabaseAdmin = await createAdminClient();
+  const [
+    { count: membersCount },
+    { count: cardsSent },
+    { data: allMembers },
+    { data: recentMembers },
+    { data: recentDeliveries }
+  ] = await Promise.all([
+    supabaseAdmin.from("members").select('*', { count: 'exact', head: true }).eq("org_id", org.id),
+    supabaseAdmin.from("delivery_logs").select('*', { count: 'exact', head: true }).eq("org_id", org.id).eq("status", "sent"),
+    supabaseAdmin.from("members").select("birth_month, birth_day").eq("org_id", org.id),
+    supabaseAdmin.from("members").select("id, full_name, email, department, role_title, birth_month, birth_day, created_at").eq("org_id", org.id).order("created_at", { ascending: false }).limit(3),
+    supabaseAdmin.from("delivery_logs").select("id, sent_at").eq("org_id", org.id).eq("status", "sent").order("sent_at", { ascending: false }).limit(100)
+  ]);
+
+  let upcomingCount = 0;
+  if (allMembers) {
+    allMembers.forEach(member => {
+      if (member.birth_month && member.birth_day) {
+        // Try current year
+        let bday = new Date(today.getFullYear(), member.birth_month - 1, member.birth_day);
+
+        // If it already passed this year, look at next year
+        if (bday < today) {
+          bday = new Date(today.getFullYear() + 1, member.birth_month - 1, member.birth_day);
+        }
+
+        if (bday >= today && bday <= thirtyDaysFromNow) {
+          upcomingCount++;
+        }
+      }
+    });
+  }
+
+  // Active templates mock
+  const activeTemplates = 1;
+
+  // Generate basic chart data dynamically based on current month
+  const currentMonthDate = new Date();
+  const monthName = currentMonthDate.toLocaleString('default', { month: 'short' });
+  const chartData = [
+    { name: `1-10 ${monthName}`, deliveries: 0 },
+    { name: `11-20 ${monthName}`, deliveries: 0 },
+    { name: `21-31 ${monthName}`, deliveries: 0 },
+  ];
+
+  if (recentDeliveries) {
+    recentDeliveries.forEach(log => {
+      if (log.sent_at) {
+        const d = new Date(log.sent_at);
+        if (d.getMonth() === currentMonthDate.getMonth() && d.getFullYear() === currentMonthDate.getFullYear()) {
+          if (d.getDate() <= 10) chartData[0].deliveries++;
+          else if (d.getDate() <= 20) chartData[1].deliveries++;
+          else chartData[2].deliveries++;
+        }
+      }
+    });
+  }
+
+  // Find Team Leaders (Admin or Manager roles, or fallback to the oldest members)
+  let teamLeaders: any[] = [];
+  if (recentMembers && recentMembers.length > 0) {
+    teamLeaders = recentMembers.filter((m: any) => m.role_title?.toLowerCase().includes("admin") || m.role_title?.toLowerCase().includes("manager")).slice(0, 3);
+    if (teamLeaders.length === 0) {
+      teamLeaders = [...recentMembers].reverse().slice(0, 3); // Fallback to oldest members
+    }
+  }
+
   let greeting = 'Good Evening';
   if (hour >= 5 && hour < 12) {
     greeting = 'Good Morning';
-  } else if (hour >= 12 && hour < 17) {
+  } else if (hour >= 12 && hour < 18) {
     greeting = 'Good Afternoon';
   }
 
@@ -80,7 +155,7 @@ export default async function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Small Progress Pills (like the design's "2/8 watched" etc.) */}
+        {/* Small Progress Pills */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Pill 1 */}
           <div className="flex items-center gap-4 bg-white/5 border border-white/5 rounded-2xl p-4 shadow-sm">
@@ -89,7 +164,7 @@ export default async function DashboardOverviewPage() {
             </div>
             <div className="flex-1">
               <div className="text-xs text-zinc-500 flex justify-between">
-                <span>145 / 200</span>
+                <span>{membersCount || 0} Total</span>
                 <MoreVertical className="w-4 h-4" />
               </div>
               <div className="font-semibold text-zinc-200 mt-1">Active Members</div>
@@ -103,7 +178,7 @@ export default async function DashboardOverviewPage() {
             </div>
             <div className="flex-1">
               <div className="text-xs text-zinc-500 flex justify-between">
-                <span>24 this month</span>
+                <span>{cardsSent || 0} Deliveries</span>
                 <MoreVertical className="w-4 h-4" />
               </div>
               <div className="font-semibold text-zinc-200 mt-1">Cards Sent</div>
@@ -117,10 +192,10 @@ export default async function DashboardOverviewPage() {
             </div>
             <div className="flex-1">
               <div className="text-xs text-zinc-500 flex justify-between">
-                <span>98% delivery rate</span>
+                <span>{upcomingCount} Upcoming</span>
                 <MoreVertical className="w-4 h-4" />
               </div>
-              <div className="font-semibold text-zinc-200 mt-1">Success Rate</div>
+              <div className="font-semibold text-zinc-200 mt-1">Next 30 Days</div>
             </div>
           </div>
         </div>
@@ -220,64 +295,49 @@ export default async function DashboardOverviewPage() {
 
           <div className="w-full">
             <div className="grid grid-cols-12 text-xs font-semibold text-zinc-500 tracking-wider mb-2 px-4 uppercase">
-              <div className="col-span-5">Member</div>
-              <div className="col-span-3">Department</div>
-              <div className="col-span-3">Birthday</div>
+              <div className="col-span-12 md:col-span-5">Member</div>
+              <div className="hidden md:block col-span-3">Department</div>
+              <div className="hidden md:block col-span-3">Birthday</div>
               <div className="col-span-1 text-right">Action</div>
             </div>
 
             <div className="bg-white/5 rounded-2xl border border-white/5 divide-y divide-white/5 overflow-hidden">
-              {/* Row 1 */}
-              <div className="grid grid-cols-12 items-center p-4 hover:bg-white/5 transition-colors">
-                <div className="col-span-5 flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border border-white/10">
-                    <AvatarFallback className="bg-purple-900 text-purple-200">PS</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-200">Padhang Satrio</p>
-                    <p className="text-xs text-zinc-500">2/16/2004</p>
-                  </div>
-                </div>
-                <div className="col-span-3">
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                    UI/UX DESIGN
-                  </span>
-                </div>
-                <div className="col-span-3 text-sm text-zinc-400 truncate pr-4">
-                  Software Engineer creating awesome interfaces
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <button className="p-2 border border-white/10 rounded-full hover:bg-white/10 text-zinc-400 transition-colors">
-                    <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+              {!recentMembers || recentMembers.length === 0 ? (
+                <div className="p-8 text-center text-zinc-500 text-sm">No members added yet.</div>
+              ) : (
+                recentMembers.map((member: any) => {
+                  const initials = member.full_name
+                    ? member.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+                    : member.email?.substring(0, 2).toUpperCase() || 'U';
 
-              {/* Row 2 */}
-              <div className="grid grid-cols-12 items-center p-4 hover:bg-white/5 transition-colors">
-                <div className="col-span-5 flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border border-white/10">
-                    <AvatarFallback className="bg-blue-900 text-blue-200">LS</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-200">Leonardo Samsul</p>
-                    <p className="text-xs text-zinc-500">8/22/1995</p>
-                  </div>
-                </div>
-                <div className="col-span-3">
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                    FRONT END
-                  </span>
-                </div>
-                <div className="col-span-3 text-sm text-zinc-400 truncate pr-4">
-                  React developer maintaining core infrastructure
-                </div>
-                <div className="col-span-1 flex justify-end">
-                  <button className="p-2 border border-white/10 rounded-full hover:bg-white/10 text-zinc-400 transition-colors">
-                    <ArrowUpRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+                  return (
+                    <div key={member.id} className="grid grid-cols-12 items-center p-4 hover:bg-white/5 transition-colors">
+                      <div className="col-span-11 md:col-span-5 flex items-center gap-3">
+                        <Avatar className="h-10 w-10 border border-white/10">
+                          <AvatarFallback className="bg-purple-900 text-purple-200">{initials}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-semibold text-zinc-200 truncate pr-2 max-w-[120px] md:max-w-[180px]">{member.full_name || member.email}</p>
+                          <p className="text-xs text-zinc-500 truncate">{member.role_title || "Member"}</p>
+                        </div>
+                      </div>
+                      <div className="hidden md:block col-span-3">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase">
+                          {member.department || "General"}
+                        </span>
+                      </div>
+                      <div className="hidden md:block col-span-3 text-sm text-zinc-400 truncate pr-4">
+                        {member.birth_month && member.birth_day ? `${member.birth_month}/${member.birth_day}` : "Not set"}
+                      </div>
+                      <div className="col-span-1 flex justify-end">
+                        <button className="p-2 border border-white/10 rounded-full hover:bg-white/10 text-zinc-400 transition-colors">
+                          <ArrowUpRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         </div>
@@ -318,30 +378,9 @@ export default async function DashboardOverviewPage() {
               Continue your deliveries to achieve your month target!
             </p>
 
-            {/* Bar Chart Mockup matching the design */}
-            <div className="w-full bg-[#1c142c]/50 border border-purple-500/10 rounded-2xl pt-6 pb-4 px-4 relative mt-2">
-              {/* Chart grid lines */}
-              <div className="absolute inset-x-4 top-[20%] border-t border-dashed border-white/5" />
-              <div className="absolute inset-x-4 top-[50%] border-t border-dashed border-white/5" />
-              <div className="absolute inset-x-4 top-[80%] border-t border-dashed border-white/5" />
-
-              <div className="absolute left-1 top-[10%] text-[8px] text-zinc-600">60</div>
-              <div className="absolute left-1 top-[40%] text-[8px] text-zinc-600">40</div>
-              <div className="absolute left-1 top-[70%] text-[8px] text-zinc-600">20</div>
-
-              <div className="flex items-end justify-between h-20 px-4 z-10 relative">
-                {/* Bars */}
-                <div className="w-8 bg-purple-400/20 rounded-md h-[30%]" />
-                <div className="w-8 bg-purple-500 rounded-md h-[50%]" />
-                <div className="w-8 bg-purple-400/20 rounded-md h-[20%]" />
-                <div className="w-8 bg-purple-500 rounded-md h-[90%] shadow-[0_0_15px_rgba(139,92,246,0.5)]" />
-                <div className="w-8 bg-purple-400/20 rounded-md h-[35%]" />
-              </div>
-              <div className="flex justify-between mt-3 text-[9px] font-medium text-zinc-500 px-2 uppercase tracking-wider">
-                <span>1-10 Aug</span>
-                <span>11-20 Aug</span>
-                <span>21-30 Aug</span>
-              </div>
+            {/* Bar Chart Real Data implementation */}
+            <div className="w-full bg-[#1c142c]/50 border border-purple-500/10 rounded-2xl pt-6 pb-2 px-4 relative mt-2 h-40">
+              <DeliveryChart data={chartData} />
             </div>
           </div>
         </div>
@@ -356,68 +395,38 @@ export default async function DashboardOverviewPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-2 border-b border-white/5 border-dashed">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-10 h-10 border border-white/10">
-                    <AvatarFallback className="bg-purple-900 text-purple-200">PS</AvatarFallback>
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
-                    <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-zinc-200">Padhang Satrio</p>
-                  <p className="text-xs text-zinc-500">Admin</p>
-                </div>
-              </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 border border-white/10 rounded-full text-xs font-medium text-zinc-300 hover:bg-white/5 transition-colors">
-                <Users className="w-3 h-3" />
-                Follow
-              </button>
-            </div>
+            {!teamLeaders || teamLeaders.length === 0 ? (
+              <div className="py-4 text-center text-zinc-500 text-sm">No leaders assigned.</div>
+            ) : (
+              teamLeaders.map((leader: any) => {
+                const initials = leader.full_name
+                  ? leader.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+                  : leader.email?.substring(0, 2).toUpperCase() || 'U';
 
-            <div className="flex items-center justify-between py-2 border-b border-white/5 border-dashed">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-10 h-10 border border-white/10">
-                    <AvatarFallback className="bg-blue-900 text-blue-200">ZH</AvatarFallback>
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
-                    <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>
+                return (
+                  <div key={leader.id} className="flex items-center justify-between py-2 border-b border-white/5 border-dashed last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Avatar className="w-10 h-10 border border-white/10">
+                          <AvatarFallback className="bg-purple-900 text-purple-200">{initials}</AvatarFallback>
+                        </Avatar>
+                        <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
+                          <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>
+                        </div>
+                      </div>
+                      <div className="truncate max-w-[120px]">
+                        <p className="text-sm font-semibold text-zinc-200 truncate">{leader.full_name || leader.email?.split('@')[0]}</p>
+                        <p className="text-xs text-zinc-500 truncate">{leader.role_title || "Manager"}</p>
+                      </div>
+                    </div>
+                    <button className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 border border-white/10 rounded-full text-[10px] font-medium text-zinc-300 hover:bg-white/5 transition-colors">
+                      <Users className="w-3 h-3" />
+                      Follow
+                    </button>
                   </div>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-zinc-200">Zakir Horizontal</p>
-                  <p className="text-xs text-zinc-500">Operations</p>
-                </div>
-              </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 border border-white/10 rounded-full text-xs font-medium text-zinc-300 hover:bg-white/5 transition-colors">
-                <Users className="w-3 h-3" />
-                Follow
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between py-2 border-b border-white/5 border-dashed">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="w-10 h-10 border border-white/10">
-                    <AvatarFallback className="bg-purple-900 text-purple-200">LS</AvatarFallback>
-                  </Avatar>
-                  <div className="absolute bottom-0 right-0 bg-[#130b1c] rounded-full p-0.5 border border-white/10">
-                    <div className="bg-zinc-200 rounded-full w-2.5 h-2.5 text-[8px] flex items-center justify-center text-zinc-900 font-bold">+</div>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-zinc-200">Leonardo Samsul</p>
-                  <p className="text-xs text-zinc-500">Manager</p>
-                </div>
-              </div>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 border border-white/10 rounded-full text-xs font-medium text-zinc-300 hover:bg-white/5 transition-colors">
-                <Users className="w-3 h-3" />
-                Follow
-              </button>
-            </div>
+                );
+              })
+            )}
           </div>
 
           <Button className="w-full mt-4 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/20 font-medium rounded-xl h-12 transition-all">
