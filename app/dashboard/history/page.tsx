@@ -12,7 +12,7 @@ async function getUserOrg() {
     if (!user) redirect("/login?callbackUrl=/dashboard/history");
 
     const supabaseAdmin = await createAdminClient();
-    const { data } = await supabaseAdmin.from("organizations").select("id, name").eq("owner_id", user.id).single();
+    const { data } = await supabaseAdmin.from("organizations").select("id, name").eq("owner_id", user.id).limit(1).single();
     if (!data) redirect("/onboarding");
     return data;
 }

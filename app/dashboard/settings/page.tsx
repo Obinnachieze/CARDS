@@ -12,7 +12,7 @@ async function getUserOrg() {
     if (!user) redirect("/login?callbackUrl=/dashboard/settings");
 
     const supabaseAdmin = await createAdminClient();
-    const { data } = await supabaseAdmin.from("organizations").select("id, name, settings").eq("owner_id", user.id).single();
+    const { data } = await supabaseAdmin.from("organizations").select("id, name, settings").eq("owner_id", user.id).limit(1).single();
     if (!data) redirect("/onboarding");
     return data;
 }
@@ -40,7 +40,7 @@ export default async function SettingsPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
                 <section className="space-y-4">
-                    <div className="p-6 border rounded-lg bg-white dark:bg-zinc-900 shadow-sm space-y-4">
+                    <div className="p-6 border border-white/10 rounded-xl bg-white/5 shadow-sm space-y-4">
                         <h2 className="text-xl font-semibold">Active Template</h2>
                         <p className="text-sm text-muted-foreground">
                             Define the default JSON canvas template used when generating standard birthday cards.
@@ -51,7 +51,7 @@ export default async function SettingsPage() {
                             <Label htmlFor="template-json">Canvas JSON Definition</Label>
                             <Textarea
                                 id="template-json"
-                                className="font-mono text-xs h-64"
+                                className="font-mono text-xs h-64 bg-black/20 border-white/10 text-zinc-300 placeholder:text-zinc-600 focus-visible:ring-purple-500/50"
                                 defaultValue={JSON.stringify({
                                     layers: [
                                         { type: 'text', id: 'greeting', content: 'Happy Birthday, {{member.full_name}}!' },
@@ -63,12 +63,12 @@ export default async function SettingsPage() {
                             />
                         </div>
 
-                        <Button className="w-full">Save Default Template</Button>
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">Save Default Template</Button>
                     </div>
                 </section>
 
                 <section className="space-y-4">
-                    <div className="p-6 border rounded-lg bg-primary/5 shadow-sm space-y-4">
+                    <div className="p-6 border border-purple-500/20 rounded-xl bg-purple-500/5 shadow-sm space-y-4">
                         <h2 className="text-xl font-semibold">AI Assistant Settings</h2>
                         <p className="text-sm text-muted-foreground">
                             Configure how the Groq LLM generates your personalized birthday messages.
@@ -77,12 +77,12 @@ export default async function SettingsPage() {
                         <div className="space-y-2">
                             <Label>System Prompt Additions</Label>
                             <Textarea
-                                className="text-sm min-h-[100px]"
+                                className="text-sm min-h-[100px] bg-black/20 border-white/10 text-zinc-300 placeholder:text-zinc-600 focus-visible:ring-purple-500/50"
                                 placeholder="e.g. Always mention that there is cake in the breakroom."
                                 defaultValue={org.settings?.ai_prompt_addition || ""}
                             />
                         </div>
-                        <Button variant="outline" className="w-full">Update AI Settings</Button>
+                        <Button variant="outline" className="w-full border-purple-500/30 text-purple-400 hover:bg-purple-500/10 hover:text-purple-300 bg-transparent">Update AI Settings</Button>
                     </div>
                 </section>
             </div>
