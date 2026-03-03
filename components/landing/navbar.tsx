@@ -21,23 +21,46 @@ export function Navbar({ className }: { className?: string }) {
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState<User | null>(null);
+    const [hasOrg, setHasOrg] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const supabase = createClient();
 
     React.useEffect(() => {
         setMounted(true);
+        const checkUserAndOrg = async (currentUser: User | null) => {
+            setUser(currentUser);
+            if (currentUser) {
+                const { data: org } = await supabase
+                    .from('organizations')
+                    .select('id')
+                    .eq('owner_id', currentUser.id)
+                    .maybeSingle();
+                setHasOrg(!!org);
+            } else {
+                setHasOrg(false);
+            }
+        };
+
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
+            checkUserAndOrg(user);
         };
         getUser();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
+            checkUserAndOrg(session?.user ?? null);
         });
 
         return () => subscription.unsubscribe();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const dynamicNavItems = navItems.map(item => {
+        if (item.name === 'For Business' && user && hasOrg) {
+            return { name: 'Dashboard', link: '/dashboard' };
+        }
+        return item;
+    });
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -65,7 +88,7 @@ export function Navbar({ className }: { className?: string }) {
 
                     {/* Desktop Nav */}
                     <div className="hidden md:flex items-center gap-6">
-                        {navItems.map((item, idx) => (
+                        {dynamicNavItems.map((item, idx) => (
                             <Link
                                 key={item.name}
                                 href={item.link}
@@ -173,7 +196,7 @@ export function Navbar({ className }: { className?: string }) {
                         className="md:hidden border-t border-white/15 overflow-hidden"
                     >
                         <div className="px-4 py-4 space-y-2">
-                            {navItems.map((item) => (
+                            {dynamicNavItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.link}

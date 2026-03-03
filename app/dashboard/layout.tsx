@@ -26,7 +26,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
         <SidebarBody className="bg-[#0c0c0e] border-r border-white/10 p-0 justify-between h-full w-full">
             <div className="flex flex-col flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar w-full">
                 <div className={cn("h-20 flex items-center transition-all min-h-20", open ? "px-8" : "px-0 justify-center")}>
-                    <div className="flex items-center gap-2 group whitespace-nowrap overflow-hidden">
+                    <Link href="/" className="flex items-center gap-2 group whitespace-nowrap overflow-hidden">
                         <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full flex-shrink-0" />
                         <motion.span
                             animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }}
@@ -35,7 +35,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                         >
                             VibePost
                         </motion.span>
-                    </div>
+                    </Link>
                 </div>
 
                 <div className={cn("py-4 text-xs font-semibold text-zinc-500 tracking-wider transition-all whitespace-nowrap overflow-hidden", open ? "px-6 block" : "px-0 text-center text-[10px] hidden")}>
@@ -132,7 +132,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {/* Mobile brand (hidden on desktop) */}
                         <div className="flex lg:hidden items-center gap-4 group">
                             <SidebarMobileTrigger />
-                            <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
+                            <Link href="/">
+                                <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
+                            </Link>
                         </div>
 
                         <div className="flex-1 max-w-xl hidden md:flex items-center">

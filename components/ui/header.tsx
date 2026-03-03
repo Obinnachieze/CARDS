@@ -14,6 +14,7 @@ export function Header() {
     const [open, setOpen] = React.useState(false);
     const scrolled = useScroll(10);
     const [user, setUser] = useState<User | null>(null);
+    const [hasOrg, setHasOrg] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const supabase = React.useMemo(() => createClient(), []);
     const profileRef = React.useRef<HTMLDivElement>(null);
@@ -48,14 +49,28 @@ export function Header() {
     ];
 
     React.useEffect(() => {
+        const checkUserAndOrg = async (currentUser: User | null) => {
+            setUser(currentUser);
+            if (currentUser) {
+                const { data: org } = await supabase
+                    .from('organizations')
+                    .select('id')
+                    .eq('owner_id', currentUser.id)
+                    .maybeSingle();
+                setHasOrg(!!org);
+            } else {
+                setHasOrg(false);
+            }
+        };
+
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
+            checkUserAndOrg(user);
         };
         getUser();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
+            checkUserAndOrg(session?.user ?? null);
         });
 
         return () => subscription.unsubscribe();
@@ -71,6 +86,13 @@ export function Header() {
             document.body.style.overflow = '';
         };
     }, [open]);
+
+    const dynamicLinks = links.map(link => {
+        if (link.label === 'For Business' && user && hasOrg) {
+            return { label: 'Dashboard', href: '/dashboard' };
+        }
+        return link;
+    });
 
     const handleSignOut = async () => {
         try {
@@ -113,7 +135,7 @@ export function Header() {
 
                 {/* Desktop Nav */}
                 <div className="hidden items-center gap-2 md:flex">
-                    {links.map((link, i) => (
+                    {dynamicLinks.map((link, i) => (
                         <Link
                             key={i}
                             className={cn(
@@ -202,7 +224,7 @@ export function Header() {
                     >
                         <div className="px-6 py-6 space-y-4">
                             <div className="grid gap-y-2">
-                                {links.map((link) => (
+                                {dynamicLinks.map((link) => (
                                     <Link
                                         key={link.label}
                                         className={cn(
