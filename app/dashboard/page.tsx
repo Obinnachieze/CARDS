@@ -122,6 +122,14 @@ export default async function DashboardOverviewPage() {
     greeting = 'Good Afternoon';
   }
 
+  // Calculate percentage of members with upcoming birthdays for the progress ring
+  const totalMembers = membersCount || 1; // avoid division by zero
+  const upcomingPercentage = Math.round((upcomingCount / totalMembers) * 100);
+  // SVG circle math: circumference = 2 * Math.PI * r (where r=46) ≈ 289
+  // strokeDashoffset = circumference - (percentage / 100) * circumference
+  const circumference = 289;
+  const dashOffset = circumference - (upcomingPercentage / 100) * circumference;
+
   return (
     <div className="flex flex-col xl:flex-row gap-8 w-full">
       {/* Left Column (Main Content) */}
@@ -358,12 +366,12 @@ export default async function DashboardOverviewPage() {
               {/* Outer progress ring */}
               <svg className="absolute w-full h-full -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                <circle cx="50" cy="50" r="46" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="289" strokeDashoffset="196" strokeLinecap="round" />
+                <circle cx="50" cy="50" r="46" fill="none" stroke="#8b5cf6" strokeWidth="6" strokeDasharray="289" strokeDashoffset={dashOffset} strokeLinecap="round" />
               </svg>
 
               {/* Floating percentage badge */}
               <div className="absolute top-0 right-[-10px] px-2 py-0.5 bg-purple-500 text-white text-[10px] font-bold rounded-full border-2 border-[#130b1c]">
-                32%
+                {upcomingPercentage}%
               </div>
 
               <Avatar className="w-20 h-20 border-4 border-[#130b1c]">
