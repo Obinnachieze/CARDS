@@ -3,6 +3,7 @@ import { CsvImporter } from "@/components/dashboard/csv-importer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, Mail, Copy } from "lucide-react";
+import { DeleteMemberButton } from "@/components/dashboard/delete-member-button";
 
 import { redirect } from "next/navigation";
 
@@ -99,12 +100,13 @@ export default async function MembersPage({
                                 <th className="px-4 py-3 font-medium">Email</th>
                                 <th className="px-4 py-3 font-medium">Role</th>
                                 <th className="px-4 py-3 font-medium">Birthday</th>
+                                <th className="px-4 py-3 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {members?.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
+                                    <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                                         No members found. Import some to get started!
                                     </td>
                                 </tr>
@@ -126,6 +128,9 @@ export default async function MembersPage({
                                             <td className="px-4 py-3 text-muted-foreground">{member.role_title || "-"}</td>
                                             <td className="px-4 py-3">
                                                 {member.birth_month}/{member.birth_day}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <DeleteMemberButton memberId={member.id} memberName={member.full_name || member.email} />
                                             </td>
                                         </tr>
                                     );
