@@ -95,6 +95,7 @@ export const DesktopSidebar = ({
             animate={{
                 width: animate ? (open ? "280px" : "86px") : "280px",
             }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
             onMouseEnter={() => setOpen(true)}
             onMouseLeave={() => setOpen(false)}
             {...props}
@@ -108,52 +109,45 @@ export const MobileSidebar = ({
     className,
     children,
     ...props
-}: React.ComponentProps<"div">) => {
+}: React.ComponentProps<typeof motion.div>) => {
     const { open, setOpen } = useSidebar();
     return (
-        <>
-            <div
-                className={cn(
-                    "h-16 px-4 py-4 flex flex-row lg:hidden items-center justify-between bg-[#0c0c0e] w-full border-b border-white/10"
-                )}
-                {...props}
-            >
-                <div className="flex justify-between z-20 w-full items-center">
-                    <div className="flex items-center gap-2">
-                        <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
-                    </div>
-                    <Menu
-                        className="text-white cursor-pointer"
-                        onClick={() => setOpen(!open)}
-                    />
-                </div>
-                <AnimatePresence>
-                    {open && (
-                        <motion.div
-                            initial={{ x: "-100%", opacity: 0 }}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: "-100%", opacity: 0 }}
-                            transition={{
-                                duration: 0.3,
-                                ease: "easeInOut",
-                            }}
-                            className={cn(
-                                "fixed h-full w-full inset-0 bg-[#0c0c0e] p-10 z-[100] flex flex-col justify-between",
-                                className
-                            )}
-                        >
-                            <div
-                                className="absolute right-10 top-10 z-50 text-white cursor-pointer"
-                                onClick={() => setOpen(!open)}
-                            >
-                                <X />
-                            </div>
-                            {children}
-                        </motion.div>
+        <AnimatePresence>
+            {open && (
+                <motion.div
+                    initial={{ x: "-100%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: "-100%", opacity: 0 }}
+                    transition={{
+                        duration: 0.4,
+                        ease: "easeInOut",
+                    }}
+                    className={cn(
+                        "fixed h-full w-full inset-0 bg-[#0c0c0e] p-10 z-[100] flex flex-col justify-between lg:hidden",
+                        className
                     )}
-                </AnimatePresence>
-            </div>
-        </>
+                    {...props}
+                >
+                    <div
+                        className="absolute right-10 top-10 z-[105] text-white cursor-pointer"
+                        onClick={() => setOpen(!open)}
+                    >
+                        <X />
+                    </div>
+                    {children}
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+};
+
+export const SidebarMobileTrigger = ({ className }: { className?: string }) => {
+    const { open, setOpen } = useSidebar();
+    return (
+        <Menu
+            className={cn("text-white cursor-pointer", className)}
+            onClick={() => setOpen(!open)}
+        />
     );
 };
 

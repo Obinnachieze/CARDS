@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationModal } from "@/components/dashboard/notification-modal";
-import { Sidebar, SidebarBody, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarBody, useSidebar, SidebarMobileTrigger } from "@/components/ui/sidebar";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                         <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full flex-shrink-0" />
                         <motion.span
                             animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
                             className="font-bold text-xl tracking-tight text-white"
                         >
                             VibePost
@@ -56,7 +57,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                                         open ? "justify-start px-4" : "justify-center px-0"
                                     )}
                                 >
-                                    <div className="flex items-center justify-center w-5 h-5 flex-shrink-0 z-10">
+                                    <div className="flex items-center justify-center w-6 h-6 flex-shrink-0 z-20">
                                         <Icon className={cn("w-5 h-5", isActive ? "text-purple-400" : "text-zinc-500")} />
                                     </div>
                                     <motion.span
@@ -65,7 +66,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                                             x: animate ? (open ? 0 : -20) : 0,
                                             display: animate ? (open ? "inline-block" : "none") : "inline-block",
                                         }}
-                                        transition={{ duration: 0.2 }}
+                                        transition={{ duration: 0.4, ease: "easeInOut" }}
                                         className={cn("whitespace-nowrap absolute left-12")}
                                     >
                                         {item.name}
@@ -84,7 +85,11 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                 <Link href="/" className="w-full block">
                     <Button variant="ghost" className={cn(`w-full h-12 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors ${open ? "justify-start px-4" : "justify-center px-0"}`)}>
                         <LogOut className={cn("w-5 h-5 flex-shrink-0 group-hover:text-rose-400", open ? "mr-4 text-zinc-500" : "mr-0 text-zinc-500")} />
-                        <motion.span animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }} className="whitespace-nowrap">
+                        <motion.span
+                            animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="whitespace-nowrap"
+                        >
                             Logout
                         </motion.span>
                     </Button>
@@ -113,53 +118,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }, []);
 
     return (
-        <div className="flex h-screen overflow-hidden bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-500/30">
-            <Sidebar>
+        <Sidebar>
+            <div className="flex flex-1 w-full h-screen overflow-hidden bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-500/30">
                 <DashboardSidebarContent navItems={navItems} pathname={pathname} />
-            </Sidebar>
 
-            {/* Main Content Area */}
-            <main className="flex-1 flex flex-col relative overflow-hidden bg-gradient-to-br from-[#09090b] via-[#130b1c] to-[#09090b]">
-                {/* Subtle decorative glow */}
-                <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                {/* Main Content Area */}
+                <main className="flex-1 flex flex-col w-full h-full relative overflow-hidden bg-gradient-to-br from-[#09090b] via-[#130b1c] to-[#09090b]">
+                    {/* Subtle decorative glow */}
+                    <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
-                {/* Top Header */}
-                <header className="h-20 flex items-center justify-between px-8 lg:px-10 z-10">
-                    {/* Mobile brand (hidden on desktop) */}
-                    <div className="flex lg:hidden items-center gap-2 group">
-                        <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
-                    </div>
-
-                    <div className="flex-1 max-w-xl hidden md:flex items-center">
-                        <div className="relative w-full">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                            <Input
-                                placeholder="Search members or logs..."
-                                className="w-full pl-11 h-12 bg-white/5 border-white/10 rounded-full text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50"
-                            />
+                    {/* Top Header */}
+                    <header className="h-20 flex items-center justify-between px-8 lg:px-10 z-10 shrink-0 w-full">
+                        {/* Mobile brand (hidden on desktop) */}
+                        <div className="flex lg:hidden items-center gap-4 group">
+                            <SidebarMobileTrigger />
+                            <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-6 ml-auto pl-4">
-                        <NotificationModal />
-
-                        <div className="flex items-center gap-3 pl-2 border-l border-white/10">
-                            <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-purple-500/20">
-                                <AvatarFallback className="bg-purple-900 text-purple-200">{userInitials}</AvatarFallback>
-                            </Avatar>
-                            <div className="hidden sm:block">
-                                <p className="text-sm font-medium text-zinc-200">{userName}</p>
-                                <p className="text-xs text-zinc-500">Organization Owner</p>
+                        <div className="flex-1 max-w-xl hidden md:flex items-center">
+                            <div className="relative w-full">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                <Input
+                                    placeholder="Search members or logs..."
+                                    className="w-full pl-11 h-12 bg-white/5 border-white/10 rounded-full text-zinc-200 placeholder:text-zinc-500 focus-visible:ring-purple-500/50 focus-visible:border-purple-500/50"
+                                />
                             </div>
                         </div>
-                    </div>
-                </header>
 
-                {/* Page Content */}
-                <div className="flex-1 overflow-y-auto px-8 lg:px-10 pb-10 z-10 custom-scrollbar">
-                    {children}
-                </div>
-            </main>
-        </div>
+                        <div className="flex items-center gap-6 ml-auto pl-4">
+                            <NotificationModal />
+
+                            <div className="flex items-center gap-3 pl-2 border-l border-white/10">
+                                <Avatar className="h-10 w-10 border border-white/10 ring-2 ring-purple-500/20">
+                                    <AvatarFallback className="bg-purple-900 text-purple-200">{userInitials}</AvatarFallback>
+                                </Avatar>
+                                <div className="hidden sm:block">
+                                    <p className="text-sm font-medium text-zinc-200">{userName}</p>
+                                    <p className="text-xs text-zinc-500">Organization Owner</p>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Page Content */}
+                    <div className="flex-1 overflow-y-auto px-8 lg:px-10 pb-10 z-10 custom-scrollbar">
+                        {children}
+                    </div>
+                </main>
+            </div>
+        </Sidebar>
     );
 }
