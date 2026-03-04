@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { Mail, Lock, Eye, EyeClosed, ArrowRight, Zap } from 'lucide-react';
+import { Mail, Lock, Eye, EyeClosed, ArrowRight } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 import { cn } from "@/lib/utils"
 
@@ -49,10 +52,52 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
         mouseY.set(0);
     };
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const router = useRouter();
+    const supabase = createClient();
+
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setIsLoading(true);
-        setTimeout(() => setIsLoading(false), 2000);
+
+        try {
+            if (mode === "signup") {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                    },
+                });
+                if (error) throw error;
+                toast.success("Check your email for the confirmation link!");
+            } else {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+                if (error) throw error;
+                toast.success("Successfully signed in!");
+                router.push("/dashboard");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "An error occurred during authentication");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                },
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            toast.error(error.message || "An error occurred during Google sign in");
+        }
     };
 
     return (
@@ -332,8 +377,7 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                                     transition={{ type: "spring", duration: 0.8 }}
                                     className="mx-auto w-10 h-10 rounded-full border border-white/10 flex items-center justify-center relative overflow-hidden bg-white/5"
                                 >
-                                    {/* Used Lucide icon instead of text for a cleaner look */}
-                                    <Zap className="w-5 h-5 text-white/90" />
+                                    <img src="/logo.png" alt="VibePost Logo" className="w-8 h-8 rounded-full" />
 
                                     {/* Inner lighting effect */}
                                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50 pointer-events-none" />
@@ -345,7 +389,7 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                                     transition={{ delay: 0.2 }}
                                     className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80"
                                 >
-                                    Welcome Back
+                                    {mode === "login" ? "Welcome Back" : "Create Account"}
                                 </motion.h1>
 
                                 <motion.p
@@ -354,7 +398,9 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                                     transition={{ delay: 0.3 }}
                                     className="text-white/60 text-xs"
                                 >
-                                    Sign in to continue to Workspace
+                                    {mode === "login"
+                                        ? "Sign in to continue to Workspace"
+                                        : "Join VibePost today"}
                                 </motion.p>
                             </div>
 
@@ -533,7 +579,7 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                                                     exit={{ opacity: 0 }}
                                                     className="flex items-center justify-center gap-1 text-sm font-medium"
                                                 >
-                                                    Sign In
+                                                    {mode === "login" ? "Sign In" : "Sign Up"}
                                                     <ArrowRight className="w-3 h-3 group-hover/button:translate-x-1 transition-transform duration-300" />
                                                 </motion.span>
                                             )}
@@ -560,6 +606,7 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     type="button"
+                                    onClick={handleGoogleSignIn}
                                     className="w-full relative group/google"
                                 >
                                     <div className="absolute inset-0 bg-white/5 rounded-lg blur opacity-0 group-hover/google:opacity-70 transition-opacity duration-300 pointer-events-none" />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, Mail, Copy } from "lucide-react";
 import { DeleteMemberButton } from "@/components/dashboard/delete-member-button";
+import { InviteMemberButton } from "@/components/dashboard/invite-member-button";
 
 import { redirect } from "next/navigation";
 
@@ -82,10 +83,7 @@ export default async function MembersPage({
                             Generate a shareable link that allows employees to add themselves to the birthday roster.
                         </p>
                         {/* We would normally wire this up to a client component that calls the API we built */}
-                        <Button variant="secondary" className="w-full">
-                            <Copy className="w-4 h-4 mr-2" />
-                            Generate Invite Link
-                        </Button>
+                        <InviteMemberButton orgId={org.id} />
                     </div>
                 </section>
             </div>

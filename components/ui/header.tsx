@@ -6,9 +6,12 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
 import { useScroll } from '@/hooks/use-scroll';
+import { Mail, Lock, Eye, EyeClosed, ArrowRight, LogOut, Bell } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from '@supabase/supabase-js';
-import { LogOut } from 'lucide-react';
 
 export function Header() {
     const [open, setOpen] = React.useState(false);
@@ -150,45 +153,58 @@ export function Header() {
 
                     <div className="flex items-center gap-6 ml-8">
                         {user ? (
-                            <div className="relative" ref={profileRef}>
-                                <button
-                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                    aria-expanded={isProfileOpen}
-                                    aria-label="User profile menu"
-                                    className="w-9 h-9 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm border border-white/20 shadow-lg"
+                            <div className="flex items-center gap-4">
+                                <Link
+                                    href="/dashboard"
+                                    className="p-2 text-zinc-400 hover:text-zinc-200 transition-colors bg-white/5 rounded-full h-10 w-10 flex items-center justify-center border border-white/5 hover:bg-white/10 group"
+                                    title="Notifications"
                                 >
-                                    {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
-                                </button>
+                                    <Bell size={18} className="group-hover:scale-110 transition-transform" />
+                                </Link>
 
-                                <AnimatePresence>
-                                    {isProfileOpen && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                            className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden py-1"
-                                        >
-                                            <div className="px-4 py-2 border-b border-white/5">
-                                                <p className="text-sm font-medium text-white truncate">
-                                                    {user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || 'User'}
-                                                </p>
-                                                <p className="text-xs text-zinc-400 truncate">
-                                                    {user.email}
-                                                </p>
-                                            </div>
-                                            <button
-                                                onClick={handleSignOut}
-                                                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 flex items-center gap-2 transition-colors"
+                                <div className="relative" ref={profileRef}>
+                                    <button
+                                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                        className="flex items-center gap-2 focus:outline-none"
+                                    >
+                                        <Avatar className="h-9 w-9 border border-white/10 ring-2 ring-purple-500/20 hover:ring-purple-500/40 transition-all">
+                                            <AvatarImage src={user.user_metadata?.avatar_url} />
+                                            <AvatarFallback className="bg-purple-900 text-purple-200 font-bold">
+                                                {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {isProfileOpen && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden py-1"
                                             >
-                                                <LogOut size={14} />
-                                                Sign Out
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                                <div className="px-4 py-2 border-b border-white/5">
+                                                    <p className="text-sm font-medium text-white truncate">
+                                                        {user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || 'User'}
+                                                    </p>
+                                                    <p className="text-xs text-zinc-400 truncate">
+                                                        {user.email}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={handleSignOut}
+                                                    className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 flex items-center gap-2 transition-colors"
+                                                >
+                                                    <LogOut size={14} />
+                                                    Sign Out
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         ) : (
-                            <>
+                            <div className="flex items-center gap-4">
                                 <Link
                                     href="/login"
                                     className="text-sm font-medium text-white/70 hover:text-white transition-colors"
@@ -201,13 +217,13 @@ export function Header() {
                                 >
                                     Sign Up
                                 </Link>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Toggle mobile menu" aria-controls="mobile-menu" className="md:hidden text-white hover:bg-white/10">
+                <Button size="icon" variant="ghost" onClick={() => setOpen(!open)} className="md:hidden text-white hover:bg-white/10">
                     <MenuToggleIcon open={open} className="size-5" duration={300} />
                 </Button>
             </nav>
@@ -246,9 +262,12 @@ export function Header() {
                                 {user ? (
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl">
-                                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-rose-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
-                                                {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
-                                            </div>
+                                            <Avatar className="h-10 w-10 border border-white/10">
+                                                <AvatarImage src={user.user_metadata?.avatar_url} />
+                                                <AvatarFallback className="bg-purple-900 text-purple-200">
+                                                    {(user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || user.email || '?')?.[0]?.toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-white truncate">
                                                     {user.user_metadata?.full_name || user.user_metadata?.username || user.user_metadata?.name || 'User'}
