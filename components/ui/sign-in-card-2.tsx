@@ -22,7 +22,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     )
 }
 
-export function SignInCard() {
+export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

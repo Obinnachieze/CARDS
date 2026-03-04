@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
         for (const log of pendingLogs) {
             if (!log.members || Array.isArray(log.members)) continue; // Type guard
-            const member = log.members;
+            const member = log.members as any;
             const org = Array.isArray(log.organizations) ? log.organizations[0] : log.organizations;
 
             try {
@@ -57,7 +57,7 @@ export async function POST(req: Request) {
                         messages: [
                             {
                                 role: "user",
-                                content: `Write a warm, professional birthday message for: Name: ${member.full_name}, Role: ${member.role_title || "team member"}, Company: ${org?.name || "our company"}. Keep it under 2 sentences. Professional but heartfelt. No emojis.`,
+                                content: `Write a warm, professional birthday message for: Name: ${member.full_name}, Role: ${member.role_title || "team member"}, Company: ${(org as any)?.name || "our company"}. Keep it under 2 sentences. Professional but heartfelt. No emojis.`,
                             },
                         ],
                         model: "llama3-8b-8192", // Using Llama3 on Groq for blazing fast generation

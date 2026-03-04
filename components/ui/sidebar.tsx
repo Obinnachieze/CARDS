@@ -84,7 +84,7 @@ export const DesktopSidebar = ({
     className,
     children,
     ...props
-}: React.ComponentProps<typeof motion.div>) => {
+}: any) => {
     const { open, setOpen, animate } = useSidebar();
     return (
         <motion.div
@@ -109,7 +109,7 @@ export const MobileSidebar = ({
     className,
     children,
     ...props
-}: React.ComponentProps<typeof motion.div>) => {
+}: any) => {
     const { open, setOpen } = useSidebar();
     return (
         <AnimatePresence>

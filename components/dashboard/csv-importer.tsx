@@ -47,7 +47,7 @@ export function CsvImporter({ orgId, onSuccess }: { orgId: string; onSuccess?: (
                     } else {
                         invalid.push({
                             row,
-                            errors: parsed.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
+                            errors: parsed.error.issues.map((e: any) => String(`${e.path.join(".")}: ${e.message}`)),
                         });
                     }
                 });
