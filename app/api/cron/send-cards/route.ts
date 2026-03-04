@@ -1,17 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import { getResendClient } from "@/lib/resend";
 
 // Vercel Cron jobs must use standard web Edge / Serverless functions
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey && process.env.NODE_ENV === "production") {
-        return NextResponse.json({ error: "Resend API key not configured" }, { status: 500 });
-    }
-
-    const resend = new Resend(apiKey || "placeholder");
+    const resend = getResendClient();
 
     try {
         // Verify Cron authorization if Vercel header is present (optional security layer)

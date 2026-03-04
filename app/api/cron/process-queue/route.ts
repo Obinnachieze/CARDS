@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { Resend } from "resend";
-import { Groq } from "groq-sdk";
 import { BirthdayCardEmail } from "@/components/emails/BirthdayCardEmail";
 import { render } from "@react-email/render";
+import { getResendClient } from "@/lib/resend";
+import { getGroqClient } from "@/lib/groq";
 
-// Initialize external services
-const resend = new Resend(process.env.RESEND_API_KEY!);
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+
 
 export async function POST(req: Request) {
+    const resend = getResendClient();
+    const groq = getGroqClient();
     try {
         const authHeader = req.headers.get("authorization");
         const cronSecret = process.env.CRON_SECRET;
