@@ -12,7 +12,7 @@ import { LogOut } from "lucide-react";
 
 const navItems = [
     { name: "Home", link: "/" },
-    { name: "For Business", link: "/onboarding" },
+    { name: "For Business", link: "/dashboard" },
 ];
 
 export function Navbar({ className }: { className?: string }) {

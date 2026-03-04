@@ -36,7 +36,7 @@ export function Header() {
         },
         {
             label: 'For Business',
-            href: '/onboarding',
+            href: '/dashboard',
         },
         {
             label: 'Gallery',
