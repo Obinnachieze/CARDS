@@ -302,9 +302,10 @@ export const CardWrapper = ({
             <motion.div
                 className="relative transform-style-3d bg-transparent"
                 style={{ height }}
-                initial={{ width: 300 }}
+                initial={{ width: 300, x: 0 }}
                 animate={{
-                    width: isOpen ? 600 : 300
+                    width: isOpen ? 600 : 300,
+                    x: isOpen ? -150 : 0 // Keep the right panel centered (300px wide, moving container half its width left)
                 }}
                 transition={{ duration: 1.0, ease: [0.25, 0.1, 0.25, 1] }}
             >

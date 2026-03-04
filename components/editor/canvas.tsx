@@ -112,6 +112,47 @@ export const Canvas = () => {
 
     const currentCardIsOpen = isOpen(card.currentFace);
 
+    // Swipe logic for mobile card navigation
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+    // Minimum swipe distance (in px)
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null); // Reset the end distance
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe || isRightSwipe) {
+            const currentIndex = cards.findIndex(c => c.id === activeCardId);
+            if (currentIndex === -1) return;
+
+            if (isLeftSwipe) {
+                // Swipe Left -> Show Newer Card (Next index)
+                if (currentIndex < cards.length - 1) {
+                    activateCard(cards[currentIndex + 1].id);
+                }
+            } else if (isRightSwipe) {
+                // Swipe Right -> Show Older Card (Previous index)
+                if (currentIndex > 0) {
+                    activateCard(cards[currentIndex - 1].id);
+                }
+            }
+        }
+    };
+
     return (
         <div
             className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center pb-24"
@@ -123,10 +164,13 @@ export const Canvas = () => {
                     "w-full h-full flex flex-col items-center justify-center transition-all duration-300 transform-gpu scale-[0.85] md:scale-[0.9]",
                     activeTool ? "origin-top translate-y-4 md:translate-y-0" : ""
                 )}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
             >
                 <motion.div
                     key={card.id}
-                    className="relative group perspective-[2000px]"
+                    className="relative group perspective-[2000px] touch-pan-y"
                     style={{
                         transform: `scale(${zoom})`,
                         transformOrigin: 'center center'

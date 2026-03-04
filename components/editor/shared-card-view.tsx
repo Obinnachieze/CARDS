@@ -34,10 +34,8 @@ export const SharedCardView = ({ onEdit, canEdit }: SharedCardViewProps) => {
             const width = window.innerWidth;
 
             if (width < 640) { // Mobile
-                if (cardMode === "foldable" && cardIsOpen) {
-                    setScale(0.5); // Slightly larger for readability
-                } else if (cardMode === "foldable") {
-                    setScale(0.85); // Large closed card
+                if (cardMode === "foldable") {
+                    setScale(0.85); // Consistent scale, open or closed
                 } else {
                     setScale(0.72); // Standard card
                 }

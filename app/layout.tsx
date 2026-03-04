@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { DottedSurface } from "@/components/ui/dotted-surface";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function RootLayout({
           >
             <DottedSurface />
             {children}
+            <Toaster richColors position="top-center" />
           </ThemeProvider>
         </AuthProvider>
       </body>
