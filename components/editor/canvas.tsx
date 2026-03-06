@@ -12,6 +12,7 @@ import { CardWrapper } from "./card-wrapper";
 import confetti from "canvas-confetti";
 import { FloatingParticles } from "./floating-particles";
 import { FabricCanvas } from "./fabric-canvas";
+import { getCardDimensions } from "./utils";
 
 export const Canvas = () => {
     const {
@@ -19,10 +20,8 @@ export const Canvas = () => {
         updateElement, selectElement, selectedElementId, selectedElement,
         currentFace, setCurrentFace, isDrawing, zoom, setZoom,
         setCardFace, activeTool, brushColor, brushSize, brushType,
-        addElement, removeElement
+        addElement, removeElement, cardMode, cardOrientation
     } = useEditor();
-
-    const { cardMode } = useEditor(); // Get cardMode separately or add to above
 
     const activeCard = cards.find(c => c.id === activeCardId);
 
@@ -74,6 +73,8 @@ export const Canvas = () => {
 
 
 
+    const { width: canvasW, height: canvasH } = getCardDimensions(cardMode, cardOrientation);
+
     const getFaceContent = (face: CardFace, cardElements: EditorElement[]) => {
         const faceElements = cardElements.filter(el => el.face === face);
         const isActive = currentFace === face;
@@ -87,8 +88,8 @@ export const Canvas = () => {
                 }}
             >
                 <FabricCanvas
-                    width={300}
-                    height={400}
+                    width={canvasW}
+                    height={canvasH}
                     elements={faceElements}
                     readOnly={!isActive} // Only active face is interactive
                     onUpdate={updateElement}

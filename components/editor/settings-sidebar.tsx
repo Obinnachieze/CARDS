@@ -37,6 +37,8 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
         saveCurrentProject,
         cardMode,
         setCardMode,
+        cardOrientation,
+        setCardOrientation,
         setActiveTool,
         projectName,
         setProjectName,
@@ -225,30 +227,68 @@ export const SettingsSidebar = ({ isOpen, onClose, onSaveClick }: SettingsSideba
                                     )}
                                 </section>
 
-                                <section className="space-y-4 min-w-0 overflow-x-hidden">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Card Type</h3>
-                                    <div className="grid grid-cols-3 gap-2">
+                                <section className="space-y-4">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Select Card Format</h3>
+                                    <div className="space-y-3">
                                         {[
-                                            { id: "foldable", name: "Foldable", icon: <LayoutTemplate size={18} /> },
-                                            { id: "postcard", name: "Postcard", icon: <CreditCard size={18} /> },
-                                            { id: "envelope", name: "Envelope", icon: <Mail size={18} /> },
+                                            { id: "foldable", name: "Foldable Card", emoji: "💌", desc: "Classic 5x7 folded design" },
+                                            { id: "envelope", name: "Envelope Card", emoji: "✉️", desc: "Classic landscape envelope" },
+                                            { id: "postcard", name: "Flat Postcard", emoji: "🖼️", desc: "Front & back only" },
                                         ].map((mode) => (
                                             <button
                                                 key={mode.id}
                                                 onClick={() => setCardMode(mode.id as any)}
                                                 className={cn(
-                                                    "flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all gap-1.5",
+                                                    "relative flex items-center w-full p-4 rounded-2xl border-2 transition-all duration-200 group overflow-hidden text-left gap-4",
                                                     cardMode === mode.id
-                                                        ? "border-purple-600 bg-purple-50 text-purple-600 shadow-sm"
-                                                        : "border-gray-100 bg-white text-gray-400 hover:border-purple-200 hover:text-purple-400"
+                                                        ? "border-purple-600 bg-purple-50 shadow-md ring-4 ring-purple-500/10"
+                                                        : "border-gray-200 bg-white hover:border-purple-300 hover:bg-gray-50 hover:shadow-sm"
                                                 )}
                                             >
-                                                {mode.icon}
-                                                <span className="text-[10px] font-bold uppercase tracking-tight">{mode.name}</span>
+                                                <span className="text-3xl filter group-hover:scale-110 transition-transform duration-200 drop-shadow-sm shrink-0">{mode.emoji}</span>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className={cn(
+                                                        "text-sm font-bold tracking-tight",
+                                                        cardMode === mode.id ? "text-purple-900" : "text-gray-700"
+                                                    )}>{mode.name}</span>
+                                                    <span className="text-[10px] text-gray-400 font-medium leading-tight">{mode.desc}</span>
+                                                </div>
+
+                                                {cardMode === mode.id && (
+                                                    <div className="ml-auto bg-purple-600 rounded-full p-1 shadow-sm shrink-0">
+                                                        <Check size={12} className="text-white stroke-3" />
+                                                    </div>
+                                                )}
                                             </button>
                                         ))}
                                     </div>
                                 </section>
+
+                                {cardMode !== "envelope" && (
+                                    <section className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Orientation</h3>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {[
+                                                { id: "portrait", name: "Portrait", desc: "Tall" },
+                                                { id: "landscape", name: "Landscape", desc: "Wide" }
+                                            ].map((opt) => (
+                                                <button
+                                                    key={opt.id}
+                                                    onClick={() => setCardOrientation(opt.id as any)}
+                                                    className={cn(
+                                                        "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all",
+                                                        cardOrientation === opt.id
+                                                            ? "border-purple-600 bg-purple-50 text-purple-900 shadow-sm"
+                                                            : "border-gray-100 bg-white text-gray-400 hover:border-gray-200"
+                                                    )}
+                                                >
+                                                    <span className="text-sm font-bold">{opt.name}</span>
+                                                    <span className="text-[10px] opacity-70">{opt.desc}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
                             </div>
                         </ScrollArea>
                     </motion.div>

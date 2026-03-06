@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
-import { EditorElement, ElementType, CardFace, CardMode, DrawingTool, CardPage, Project, EditorTab } from "./types";
+import { EditorElement, ElementType, CardFace, CardMode, CardOrientation, DrawingTool, CardPage, Project, EditorTab } from "./types";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -39,6 +39,8 @@ interface EditorContextType {
     setCurrentFace: (face: CardFace) => void; // Proxies to active card
     cardMode: CardMode;
     setCardMode: (mode: CardMode) => void;
+    cardOrientation: CardOrientation;
+    setCardOrientation: (orientation: CardOrientation) => void;
     isDrawing: boolean;
     setIsDrawing: (isDrawing: boolean) => void;
     brushColor: string;
@@ -140,6 +142,7 @@ export const EditorProvider = ({
 
     // Global Settings
     const [cardMode, setCardMode] = useState<CardMode>(initialCardMode);
+    const [cardOrientation, setCardOrientation] = useState<CardOrientation>("portrait");
     const [isDrawing, setIsDrawing] = useState(false);
     const [brushColor, setBrushColor] = useState("#000000");
     const [brushSize, setBrushSize] = useState(5);
@@ -175,7 +178,7 @@ export const EditorProvider = ({
         if (isSwappingRef.current) {
             isSwappingRef.current = false;
         }
-    }, [activeWorkspaceIndex, cards, cardMode, currentProjectId, projectName]);
+    }, [activeWorkspaceIndex, cards, cardMode, cardOrientation, currentProjectId, projectName]);
 
     // Update workspace record whenever active project state changes
     useEffect(() => {
@@ -188,13 +191,14 @@ export const EditorProvider = ({
                     ...updated[activeWorkspaceIndex],
                     name: projectName,
                     cardMode: cardMode,
+                    cardOrientation: cardOrientation,
                     cards: cards,
                     updatedAt: Date.now()
                 };
             }
             return updated;
         });
-    }, [projectName, cardMode, cards, activeWorkspaceIndex]);
+    }, [projectName, cardMode, cardOrientation, cards, activeWorkspaceIndex]);
 
     // Initial Auth Load and Workspace Setup
     useEffect(() => {
@@ -239,6 +243,7 @@ export const EditorProvider = ({
                         if (project && project.id && project.cardMode && Array.isArray(project.cards) && project.cards.length > 0) {
                             setCards(project.cards);
                             setCardMode(project.cardMode);
+                            if (project.cardOrientation) setCardOrientation(project.cardOrientation);
                             setCurrentProjectId(project.id);
                             setProjectName(project.name || "");
                             setActiveCardId(project.cards[0].id);
@@ -271,6 +276,7 @@ export const EditorProvider = ({
         // Load the new project state
         setCards(newProject.cards);
         setCardMode(newProject.cardMode);
+        setCardOrientation("portrait");
         setCurrentProjectId(null);
         setProjectName("");
         setActiveCardId("card-1");
@@ -287,6 +293,7 @@ export const EditorProvider = ({
         setActiveWorkspaceIndex(index);
         setCards(project.cards);
         setCardMode(project.cardMode);
+        if (project.cardOrientation) setCardOrientation(project.cardOrientation);
         setCurrentProjectId(project.id.startsWith("local-") ? null : project.id);
         setProjectName(project.name || "");
         setActiveCardId(project.cards[0]?.id || null);
@@ -320,7 +327,8 @@ export const EditorProvider = ({
             name,
             updatedAt: Date.now(),
             cards,
-            cardMode
+            cardMode,
+            cardOrientation
         };
         const updatedProjects = [...projects, newProject];
         setProjects(updatedProjects);
@@ -337,6 +345,7 @@ export const EditorProvider = ({
                 name: name,
                 cards: cards,
                 card_mode: cardMode,
+                card_orientation: cardOrientation,
                 updated_at: new Date().toISOString(),
                 is_public: true // Default to public for sharing
             });
@@ -347,9 +356,9 @@ export const EditorProvider = ({
         }
 
         // Redirect to project URL
-        router.push(`/create/${cardMode}?project=${newId}`);
+        router.push(`/create/${cardMode}?project=${newId}${cardOrientation ? `&orientation=${cardOrientation}` : ""}`);
         return newId;
-    }, [cards, cardMode, projects, user, router]);
+    }, [cards, cardMode, cardOrientation, projects, user, router]);
 
     const saveCurrentProject = useCallback(async (): Promise<string | void> => {
         if (!currentProjectId) return;
@@ -359,7 +368,7 @@ export const EditorProvider = ({
 
         const updatedProjects = projects.map(p =>
             p.id === currentProjectId
-                ? { ...p, cards, cardMode, name: currentName, updatedAt: Date.now() }
+                ? { ...p, cards, cardMode, cardOrientation, name: currentName, updatedAt: Date.now() }
                 : p
         );
         setProjects(updatedProjects);
@@ -376,6 +385,7 @@ export const EditorProvider = ({
                 name: currentName,
                 cards: cards,
                 card_mode: cardMode,
+                card_orientation: cardOrientation,
                 updated_at: new Date().toISOString()
             });
             if (error) throw error;
@@ -393,7 +403,7 @@ export const EditorProvider = ({
             }
         }
         return currentProjectId;
-    }, [cards, cardMode, projects, currentProjectId, user, projectName, saveProjectAs]);
+    }, [cards, cardMode, cardOrientation, projects, currentProjectId, user, projectName, saveProjectAs]);
 
     // Auto-save logic
     useEffect(() => {
@@ -408,14 +418,15 @@ export const EditorProvider = ({
         return () => {
             if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
         };
-    }, [cards, cardMode, saveCurrentProject, currentProjectId, user]);
+    }, [cards, cardMode, cardOrientation, saveCurrentProject, currentProjectId, user]);
 
     const exportProjectAsJSON = useCallback(() => {
         const projectData = {
             version: "1.0",
             timestamp: Date.now(),
             cards,
-            cardMode
+            cardMode,
+            cardOrientation
         };
         const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -426,7 +437,7 @@ export const EditorProvider = ({
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-    }, [cards, cardMode]);
+    }, [cards, cardMode, cardOrientation]);
 
     const importProjectFromJSON = useCallback((file: File) => {
         const reader = new FileReader();
@@ -437,6 +448,7 @@ export const EditorProvider = ({
                     setCards(json.cards);
                     setCardMode(json.cardMode);
                     setCurrentProjectId(null); // Imported projects are "new"/unsaved until saved
+                    if (json.cardOrientation) setCardOrientation(json.cardOrientation);
                     setActiveCardId(json.cards[0]?.id || null);
                     setPast([]);
                     setFuture([]);
@@ -542,6 +554,7 @@ export const EditorProvider = ({
         // Reset Active State
         setCards(initialRoom.cards);
         setCardMode(initialRoom.cardMode);
+        setCardOrientation("portrait");
         setCurrentProjectId(null);
         setProjectName("");
         setActiveCardId("card-1");
@@ -753,6 +766,8 @@ export const EditorProvider = ({
             setCurrentFace,
             cardMode,
             setCardMode,
+            cardOrientation,
+            setCardOrientation,
             isDrawing,
             setIsDrawing,
             brushColor,

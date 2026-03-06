@@ -278,9 +278,11 @@ export function ShareDialog() {
                                         <QRCodeSVG
                                             id="share-qr-code"
                                             value={shareUrl}
-                                            size={160}
+                                            size={200}
                                             level="H"
                                             includeMargin={true}
+                                            fgColor="#000000"
+                                            bgColor="#ffffff"
                                             className="rounded-md"
                                         />
                                     </div>

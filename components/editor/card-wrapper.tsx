@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEditor } from "./editor-context";
 import { cn } from "@/lib/utils";
+import { getCardDimensions } from "./utils";
 
 interface CardWrapperProps {
     frontContent: React.ReactNode;
@@ -27,7 +28,7 @@ export const CardWrapper = ({
     audioSrc,
     onOpenChange
 }: CardWrapperProps & { backgroundColor: string }) => {
-    const { cardMode, setCurrentFace, currentFace } = useEditor();
+    const { cardMode, cardOrientation, setCurrentFace, currentFace } = useEditor();
 
     const isFoldable = cardMode === "foldable";
     const isEnvelope = cardMode === "envelope";
@@ -85,10 +86,6 @@ export const CardWrapper = ({
         };
     }, []);
 
-    // Dimensions
-    const width = 300;
-    const height = 400;
-
     const handleFaceClick = (targetFace: "front" | "inside-left" | "inside-right" | "back") => {
         if (!interactive) return;
         if (targetFace === "front") {
@@ -104,14 +101,17 @@ export const CardWrapper = ({
         }
     };
 
+    // Get Base Dimensions based on Mode
+    const { width: w, height: h } = getCardDimensions(cardMode, cardOrientation);
+
     if (cardMode === "postcard") {
         return (
             <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
                 <motion.div
                     className="relative bg-transparent"
                     style={{
-                        width: 480,
-                        height: 320,
+                        width: w,
+                        height: h,
                         transformStyle: "preserve-3d"
                     }}
                     animate={{ rotateY: (currentFace === "back" || isOpen) ? 180 : 0 }}
@@ -169,7 +169,7 @@ export const CardWrapper = ({
     if (cardMode === "envelope") {
         return (
             <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
-                <div className="relative w-[480px] h-[320px] bg-transparent group">
+                <div className="relative bg-transparent group" style={{ width: w, height: h }}>
                     {/* 1. Base (Back of Envelope) */}
                     <div
                         className="absolute inset-0 bg-white shadow-xl rounded-md"
@@ -178,7 +178,8 @@ export const CardWrapper = ({
 
                     {/* 2. Card Insert (Slides Up) */}
                     <motion.div
-                        className="absolute left-6 right-6 bottom-4 h-[280px] bg-white shadow-sm border border-gray-100 flex items-center justify-center p-8 text-center overflow-hidden"
+                        className="absolute left-4 right-4 bottom-3 bg-white shadow-sm border border-gray-100 flex items-center justify-center p-6 text-center overflow-hidden"
+                        style={{ height: h * 0.85 }}
                         initial={{ y: 0 }}
                         animate={{
                             y: isOpen ? -150 : 0,
@@ -280,13 +281,18 @@ export const CardWrapper = ({
         );
     }
 
-    if (!isFoldable) {
+    if (cardMode === "portrait" || cardMode === "landscape") {
         return (
-            <div className="relative flex items-center justify-center w-full h-full p-8">
-                <div className="relative w-[500px] h-[350px] bg-red-100 flex items-center justify-center shadow-md">
-                    <div className="absolute inset-0 bg-blue-100/50 flex items-center justify-center text-gray-400">
-                        Mode Not Supported: {cardMode}
-                    </div>
+            <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
+                <div
+                    className="relative bg-white shadow-lg overflow-hidden border border-gray-200 transition-all duration-500"
+                    style={{
+                        width: w,
+                        height: h,
+                        backgroundColor,
+                    }}
+                >
+                    {frontContent}
                 </div>
             </div>
         );
@@ -301,11 +307,11 @@ export const CardWrapper = ({
         <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
             <motion.div
                 className="relative transform-style-3d bg-transparent"
-                style={{ height }}
-                initial={{ width: 300, x: 0 }}
+                style={{ height: h }}
+                initial={{ width: w, x: 0 }}
                 animate={{
-                    width: isOpen ? 600 : 300,
-                    x: isOpen ? -150 : 0 // Keep the right panel centered (300px wide, moving container half its width left)
+                    width: isOpen ? w * 2 : w,
+                    x: isOpen ? -(w / 2) : 0 // Keep the right panel centered (300px wide, moving container half its width left)
                 }}
                 transition={{ duration: 1.0, ease: [0.25, 0.1, 0.25, 1] }}
             >
@@ -313,8 +319,8 @@ export const CardWrapper = ({
                 <div
                     className="absolute right-0 top-0 z-0 overflow-hidden border border-gray-200 rounded-r-md bg-white"
                     style={{
-                        width,
-                        height,
+                        width: w,
+                        height: h,
                         backgroundColor,
                         transform: "translateZ(-1px)"
                     }}
@@ -335,8 +341,8 @@ export const CardWrapper = ({
                 <motion.div
                     className="absolute right-0 top-0 z-10 origin-left"
                     style={{
-                        width,
-                        height,
+                        width: w,
+                        height: h,
                         transformStyle: "preserve-3d"
                     }}
                     animate={{

@@ -1,6 +1,7 @@
 export type ElementType = "text" | "image" | "emoji" | "draw" | "line" | "shape";
 export type CardFace = "front" | "inside-left" | "inside-right" | "back";
-export type CardMode = "foldable" | "envelope" | "postcard";
+export type CardMode = "foldable" | "envelope" | "postcard" | "portrait" | "landscape";
+export type CardOrientation = "portrait" | "landscape";
 export type DrawingTool = "pencil" | "marker" | "highlighter" | "eraser";
 
 export interface EditorElement {
@@ -53,6 +54,7 @@ export interface EditorState {
     backgroundColor: string;
     currentFace: CardFace;
     cardMode: CardMode;
+    cardOrientation: CardOrientation;
     isDrawing: boolean;
     brushColor: string;
     brushSize: number;
@@ -66,6 +68,7 @@ export interface Project {
     updatedAt: number;
     cards: CardPage[];
     cardMode: CardMode;
+    cardOrientation?: CardOrientation;
 }
 
 export type EditorTab = "templates" | "text" | "elements" | "uploads" | "draw" | "design" | "effects" | "music" | "stickers" | "projects";
