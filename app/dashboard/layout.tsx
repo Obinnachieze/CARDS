@@ -22,13 +22,13 @@ const navItems = [
 ];
 
 const DashboardSidebarContent = ({ navItems, pathname }: any) => {
-    const { open, animate } = useSidebar();
+    const { open, animate, setOpen } = useSidebar();
 
     return (
         <SidebarBody className="bg-[#0c0c0e] border-r border-white/10 p-0 justify-between h-full w-full">
             <div className="flex flex-col flex-1 overflow-x-hidden overflow-y-auto custom-scrollbar w-full">
                 <div className={cn("h-20 flex items-center transition-all min-h-20", open ? "px-8" : "px-0 justify-center")}>
-                    <Link href="/" className="flex items-center gap-2 group whitespace-nowrap overflow-hidden">
+                    <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2 group whitespace-nowrap overflow-hidden">
                         <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full flex-shrink-0" />
                         <motion.span
                             animate={{ display: animate ? (open ? "inline-block" : "none") : "inline-block", opacity: animate ? (open ? 1 : 0) : 1 }}
@@ -50,7 +50,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                         const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + "/"));
 
                         return (
-                            <Link key={item.name} href={item.href} className="block w-full">
+                            <Link key={item.name} href={item.href} onClick={() => setOpen(false)} className="block w-full">
                                 <Button
                                     variant="ghost"
                                     className={cn(`relative w-full h-12 rounded-xl transition-all flex items-center overflow-hidden`, isActive
@@ -84,7 +84,7 @@ const DashboardSidebarContent = ({ navItems, pathname }: any) => {
                 <div className={cn("text-xs font-semibold text-zinc-500 tracking-wider mb-4 whitespace-nowrap overflow-hidden", open ? "block" : "hidden")}>
                     SETTINGS
                 </div>
-                <Link href="/" className="w-full block">
+                <Link href="/" onClick={() => setOpen(false)} className="w-full block">
                     <Button variant="ghost" className={cn(`w-full h-12 rounded-xl text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors ${open ? "justify-start px-4" : "justify-center px-0"}`)}>
                         <LogOut className={cn("w-5 h-5 flex-shrink-0 group-hover:text-rose-400", open ? "mr-4 text-zinc-500" : "mr-0 text-zinc-500")} />
                         <motion.span
@@ -134,9 +134,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {/* Mobile brand (hidden on desktop) */}
                         <div className="flex lg:hidden items-center gap-4 group">
                             <SidebarMobileTrigger />
-                            <Link href="/">
-                                <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
-                            </Link>
+                            <Suspense fallback={<div className="w-5 h-5 shrink-0" />}>
+                                <DashboardSearch variant="mobile" />
+                            </Suspense>
                         </div>
 
                         <div className="flex-1 max-w-xl hidden md:flex items-center">
