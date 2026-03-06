@@ -631,22 +631,22 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                                     </div>
                                 </motion.button>
 
-                                {/* Sign up link */}
+                                {/* Sign up / Log in link */}
                                 <motion.p
                                     className="text-center text-xs text-white/60 mt-4"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.5 }}
                                 >
-                                    Don&apos;t have an account?{' '}
+                                    {mode === "login" ? "Don't have an account? " : "Already have an account? "}
                                     <Link
-                                        href="/signup"
-                                        className="relative inline-block group/signup"
+                                        href={mode === "login" ? "/signup" : "/login"}
+                                        className="relative inline-block group/auth-link"
                                     >
-                                        <span className="relative z-10 text-white group-hover/signup:text-white/70 transition-colors duration-300 font-medium">
-                                            Sign up
+                                        <span className="relative z-10 text-white group-hover/auth-link:text-white/70 transition-colors duration-300 font-medium">
+                                            {mode === "login" ? "Sign up" : "Log in"}
                                         </span>
-                                        <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-white group-hover/signup:w-full transition-all duration-300" />
+                                        <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-white group-hover/auth-link:w-full transition-all duration-300" />
                                     </Link>
                                 </motion.p>
                             </form>

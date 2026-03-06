@@ -6,7 +6,7 @@ import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
 import { useScroll } from '@/hooks/use-scroll';
-import { Mail, Lock, Eye, EyeClosed, ArrowRight, LogOut, Bell } from 'lucide-react';
+import { Mail, Lock, Eye, EyeClosed, ArrowRight, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -113,7 +113,7 @@ export function Header() {
             className={cn(
                 'sticky top-0 z-50 mx-auto w-full max-w-5xl border-b border-white/10 md:rounded-full md:border md:transition-all md:ease-out mt-4 px-4',
                 {
-                    'bg-black/10 backdrop-blur-2xl border-white/15 md:top-6 md:max-w-2xl md:shadow-2xl shadow-black/50':
+                    'bg-black/10 backdrop-blur-2xl border-white/15 md:top-6 md:max-w-4xl md:shadow-2xl shadow-black/50':
                         scrolled && !open,
                     'bg-black/95 backdrop-blur-3xl': open,
                     'bg-transparent border-transparent': !scrolled && !open
@@ -154,13 +154,7 @@ export function Header() {
                     <div className="flex items-center gap-6 ml-8">
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <Link
-                                    href="/dashboard"
-                                    className="p-2 text-zinc-400 hover:text-zinc-200 transition-colors bg-white/5 rounded-full h-10 w-10 flex items-center justify-center border border-white/5 hover:bg-white/10 group"
-                                    title="Notifications"
-                                >
-                                    <Bell size={18} className="group-hover:scale-110 transition-transform" />
-                                </Link>
+
 
                                 <div className="relative" ref={profileRef}>
                                     <button
@@ -213,7 +207,7 @@ export function Header() {
                                 </Link>
                                 <Link
                                     href="/signup"
-                                    className="px-4 py-2 text-sm font-bold text-black bg-white rounded-xl hover:bg-white/90 transition-colors"
+                                    className="inline-flex h-9 items-center justify-center px-4 text-sm font-bold text-black bg-white rounded-full hover:bg-white/90 transition-colors"
                                 >
                                     Sign Up
                                 </Link>

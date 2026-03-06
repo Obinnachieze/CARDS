@@ -207,7 +207,7 @@ export const Canvas = () => {
                             size="sm"
                             className={cn(
                                 "rounded-full h-9 md:h-10 px-5 md:px-6 gap-2 font-semibold transition-all hover:scale-105 text-sm",
-                                currentCardIsOpen ? "bg-white text-gray-900 border hover:bg-gray-100" : "bg-purple-600 hover:bg-purple-700 text-white"
+                                currentCardIsOpen ? "bg-white text-gray-900 border hover:bg-gray-100" : "bg-linear-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-none"
                             )}
                             onClick={(e) => {
                                 e.stopPropagation();

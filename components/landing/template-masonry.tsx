@@ -64,7 +64,7 @@ const templates = [
         design: {
             bg: 'bg-gradient-to-br from-orange-400 via-rose-400 to-purple-500',
             text: 'Love You',
-            font: 'font-[cursive] text-5xl',
+            font: 'font-[cursive] text-3xl md:text-5xl',
             textColor: 'text-white drop-shadow-md',
             emojis: ['🌅', '💖', '💌']
         }
@@ -79,7 +79,7 @@ const templates = [
         design: {
             bg: 'bg-rose-50',
             text: 'Thank You',
-            font: 'font-[cursive] text-4xl',
+            font: 'font-[cursive] text-2xl md:text-4xl',
             textColor: 'text-rose-600',
             emojis: ['🌸', '🌿', '🎀']
         }
@@ -94,7 +94,7 @@ const templates = [
         design: {
             bg: 'bg-indigo-950',
             text: "Let's Party",
-            font: 'font-sans font-bold text-4xl',
+            font: 'font-sans font-bold text-2xl md:text-4xl',
             textColor: 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]',
             emojis: ['🪩', '🍸', '🥳']
         }
@@ -109,7 +109,7 @@ const templates = [
         design: {
             bg: 'bg-yellow-300',
             text: 'Smile!',
-            font: 'font-sans font-black text-5xl rotate-[-5deg]',
+            font: 'font-sans font-black text-3xl md:text-5xl rotate-[-5deg]',
             textColor: 'text-black',
             emojis: ['😊', '🎨', '🌈']
         }
@@ -124,7 +124,7 @@ const templates = [
         design: {
             bg: 'bg-gradient-to-b from-emerald-800 to-emerald-950',
             text: 'Thinking of you',
-            font: 'font-serif text-3xl',
+            font: 'font-serif text-xl md:text-3xl',
             textColor: 'text-emerald-100',
             emojis: ['🌲', '🦌', '🍃']
         }
@@ -139,7 +139,7 @@ const templates = [
         design: {
             bg: 'bg-cyan-50',
             text: 'Happy Holidays',
-            font: 'font-[cursive] text-4xl',
+            font: 'font-[cursive] text-2xl md:text-4xl',
             textColor: 'text-cyan-700',
             emojis: ['❄️', '⛄', '🎄']
         }
@@ -169,7 +169,7 @@ const templates = [
         design: {
             bg: 'bg-blue-950 border-4 border-yellow-500/80',
             text: 'Class of 2024',
-            font: 'font-serif font-bold text-3xl',
+            font: 'font-serif font-bold text-xl md:text-3xl',
             textColor: 'text-yellow-500',
             emojis: ['🎓', '📜', '🌟']
         }
@@ -184,7 +184,7 @@ const templates = [
         design: {
             bg: 'bg-gradient-to-b from-sky-100 to-white',
             text: 'Oh Baby!',
-            font: 'font-sans font-medium text-4xl',
+            font: 'font-sans font-medium text-2xl md:text-4xl',
             textColor: 'text-sky-400',
             emojis: ['☁️', '🍼', '🧸']
         }
@@ -221,31 +221,31 @@ export function TemplateMasonry() {
                         >
                             <Link href={template.href} className="block group relative rounded-2xl overflow-hidden border border-white/10 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-black/50 cursor-pointer">
                                 <div className={cn("relative overflow-hidden", template.aspect)}>
-                                    <div className={cn("w-full h-full flex flex-col items-center justify-center p-6 relative transition-transform duration-500 group-hover:scale-105", template.design.bg)}>
-                                        <div className="absolute top-6 right-6 text-2xl md:text-4xl animate-bounce" style={{ animationDuration: '3s' }}>
+                                    <div className={cn("w-full h-full flex flex-col items-center justify-center p-4 md:p-6 relative transition-transform duration-500 group-hover:scale-105", template.design.bg)}>
+                                        <div className="absolute top-4 right-4 md:top-6 md:right-6 text-xl md:text-4xl animate-bounce" style={{ animationDuration: '3s' }}>
                                             {template.design.emojis[0]}
                                         </div>
-                                        <div className="absolute bottom-20 left-6 text-3xl md:text-5xl rotate-12 opacity-80">
+                                        <div className="absolute bottom-12 left-4 md:bottom-20 md:left-6 text-2xl md:text-5xl rotate-12 opacity-80">
                                             {template.design.emojis[1]}
                                         </div>
-                                        <div className="absolute top-1/3 left-8 text-xl md:text-3xl -rotate-12 opacity-60">
+                                        <div className="absolute top-1/3 left-4 md:left-8 text-lg md:text-3xl -rotate-12 opacity-60">
                                             {template.design.emojis[2]}
                                         </div>
-                                        <span className={cn("text-center z-10 p-4 leading-tight wrap-break-word", template.design.font, template.design.textColor)}>
+                                        <span className={cn("text-center z-10 p-2 md:p-4 leading-tight wrap-break-word", template.design.font, template.design.textColor)}>
                                             {template.design.text}
                                         </span>
                                     </div>
-                                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-black/10 opacity-80 group-hover:opacity-90 transition-opacity" />
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/50 to-black/20 opacity-90 md:opacity-80 md:group-hover:opacity-100 transition-opacity" />
 
-                                    <div className="absolute inset-0 flex flex-col justify-end p-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                        <div className="space-y-2">
-                                            <span className="inline-block px-2 py-1 rounded-md bg-white/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
+                                    <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-6 md:translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                        <div className="space-y-1 md:space-y-2">
+                                            <span className="inline-block px-1.5 py-0.5 md:px-2 md:py-1 rounded-md bg-white/10 backdrop-blur-md text-[8px] md:text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
                                                 {template.category}
                                             </span>
-                                            <h3 className="text-xl font-bold text-white leading-tight">
+                                            <h3 className="text-sm md:text-xl font-bold text-white leading-tight">
                                                 {template.title}
                                             </h3>
-                                            <p className="text-sm text-white/70 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <p className="hidden md:block text-sm text-white/70 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                 {template.description}
                                             </p>
                                         </div>

@@ -59,7 +59,7 @@ function Hero() {
                             </span>
                         </h1>
 
-                        <p className="text-lg md:text-xl leading-relaxed tracking-tight text-neutral-600 dark:text-neutral-400 max-w-2xl text-center">
+                        <p className="text-lg md:text-xl leading-relaxed tracking-tight text-neutral-500 dark:text-neutral-300 max-w-2xl text-center">
                             Craft high-fidelity, interactive digital experiences that feel like a gift.
                             Avoid generic ecards—unwrap the moment with VibePost.
                         </p>

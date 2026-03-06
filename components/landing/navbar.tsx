@@ -77,9 +77,9 @@ export function Navbar({ className }: { className?: string }) {
             )}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+                <div className="flex items-center justify-between h-16 relative">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
+                    <Link href="/" className="flex items-center gap-2 group relative z-10">
                         <img src="/logo.png" alt="logo" className="w-8 h-8 rounded-full" />
                         <span className="font-bold text-xl tracking-tight text-white">
                             VibePost
@@ -87,7 +87,7 @@ export function Navbar({ className }: { className?: string }) {
                     </Link>
 
                     {/* Desktop Nav */}
-                    <div className="hidden md:flex items-center gap-6">
+                    <div className="hidden md:flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max">
                         {dynamicNavItems.map((item, idx) => (
                             <Link
                                 key={item.name}
@@ -114,7 +114,7 @@ export function Navbar({ className }: { className?: string }) {
                     </div>
 
                     {/* Actions */}
-                    <div className="hidden md:flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-4 relative z-10">
                         {user ? (
                             <div className="relative">
                                 <button
