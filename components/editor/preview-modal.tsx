@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CardWrapper } from "./card-wrapper";
 import { useEditor } from "./editor-context";
 import { EditorElement } from "./types";
@@ -198,6 +198,7 @@ export const PreviewModal = ({ isOpen, onClose }: PreviewModalProps) => {
                     WebkitBackdropFilter: "blur(24px)",
                 }}
             >
+                <DialogTitle className="sr-only">Card Preview</DialogTitle>
                 {/* Smooth gradient glow overlay */}
                 <div className="absolute inset-0 pointer-events-none" style={{
                     background: "radial-gradient(circle at 15% 15%, rgba(147, 51, 234, 0.1) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(126, 34, 206, 0.08) 0%, transparent 45%), radial-gradient(circle at 50% 50%, rgba(88, 28, 135, 0.04) 0%, transparent 60%)"
