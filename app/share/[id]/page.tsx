@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { ShareEditorWrapper } from "@/components/editor/share-editor-wrapper";
 import { CardPage, CardMode } from "@/components/editor/types";
@@ -15,10 +15,12 @@ interface ProjectData {
 
 export default async function SharedProjectPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const supabase = await createClient(); // Await strictly required in newer Next.js/Supabase versions if using cookies, though createClient might be sync depending on implementation. Usually await is safer for server actions. Wait, lib/supabase/server says "export const createClient = () => ..." usually. Let's assume it returns a client.
 
-    // Fetch project
-    const { data: project, error } = await supabase
+    // Use admin client to bypass RLS — this page does its own access control below
+    const adminSupabase = await createAdminClient();
+
+    // Fetch project using admin client (bypasses RLS so anonymous users can view shared cards)
+    const { data: project, error } = await adminSupabase
         .from("projects")
         .select("*")
         .eq("id", id)
@@ -31,8 +33,8 @@ export default async function SharedProjectPage({ params }: { params: Promise<{ 
 
     const projectData = project as ProjectData;
 
-    // Check visibility
-    // If not public, check ownership
+    // Check visibility — use normal client for auth
+    const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
