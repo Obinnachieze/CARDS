@@ -89,8 +89,12 @@ export async function GET(req: Request) {
 
         // Then trigger Phase 4 worker (could be a Next.js background API or synchronous call)
         if (queuedCount > 0) {
+            // Use a trusted base URL to avoid Host Header Injection or SSRF-like behavior
+            const baseUrl = process.env.NEXTAUTH_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://vibepost.com");
+            const processQueueUrl = `${baseUrl}/api/cron/process-queue`;
+
             // Fire-and-forget call to process the queue asynchronously so this request doesn't timeout
-            fetch(`${req.url.replace('/cron/birthdays', '/cron/process-queue')}`, {
+            fetch(processQueueUrl, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${cronSecret}` }
             }).catch(console.error);

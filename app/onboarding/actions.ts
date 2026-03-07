@@ -1,5 +1,5 @@
 "use server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -22,9 +22,7 @@ export async function createOrganization(formData: FormData) {
     // simplistic slug generation
     const slug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-    const supabaseAdmin = await createAdminClient();
-
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAuth
         .from("organizations")
         .insert([{
             name: companyName,

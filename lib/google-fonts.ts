@@ -9,14 +9,11 @@ const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY;
 const BASE_URL = "https://www.googleapis.com/webfonts/v1/webfonts";
 
 export const fetchGoogleFonts = async (): Promise<{ items: GoogleFont[], error?: string }> => {
-    if (!API_KEY) {
-        return { items: [], error: "API Key is missing from environment variables." };
-    }
     try {
-        const response = await fetch(`${BASE_URL}?key=${API_KEY}&sort=popularity`);
+        const response = await fetch("/api/fonts");
         if (!response.ok) {
             const text = await response.text();
-            return { items: [], error: `Google API Error (${response.status}): ${text}` };
+            return { items: [], error: `Proxy Error (${response.status}): ${text}` };
         }
         const data = await response.json();
         return { items: (data.items || []) as GoogleFont[] };

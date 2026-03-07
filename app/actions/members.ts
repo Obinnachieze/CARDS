@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function deleteMember(memberId: string) {
@@ -12,10 +12,8 @@ export async function deleteMember(memberId: string) {
             return { error: "Not authenticated" };
         }
 
-        const supabaseAdmin = await createAdminClient();
-
         // 1. Get the organization the user owns
-        const { data: orgData, error: orgError } = await supabaseAdmin
+        const { data: orgData, error: orgError } = await supabase
             .from("organizations")
             .select("id")
             .eq("owner_id", user.id)
@@ -28,7 +26,7 @@ export async function deleteMember(memberId: string) {
 
         // 2. Verify the member belongs to this organization before deleting
         // (This prevents users from deleting members in other organizations)
-        const { error: deleteError } = await supabaseAdmin
+        const { error: deleteError } = await supabase
             .from("members")
             .delete()
             .eq("id", memberId)

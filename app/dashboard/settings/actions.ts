@@ -1,5 +1,5 @@
 "use server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function saveTemplateSettings(templateJson: any) {
@@ -10,10 +10,8 @@ export async function saveTemplateSettings(templateJson: any) {
         return { error: "Not authorized" };
     }
 
-    const supabaseAdmin = await createAdminClient();
-
     // Get current settings first
-    const { data: org } = await supabaseAdmin
+    const { data: org } = await supabaseAuth
         .from("organizations")
         .select("id, settings")
         .eq("owner_id", user.id)
@@ -31,7 +29,7 @@ export async function saveTemplateSettings(templateJson: any) {
         template: templateJson
     };
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabaseAuth
         .from("organizations")
         .update({ settings: newSettings })
         .eq("id", org.id);

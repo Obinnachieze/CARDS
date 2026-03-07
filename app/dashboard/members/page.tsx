@@ -1,4 +1,4 @@
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { CsvImporter } from "@/components/dashboard/csv-importer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -14,8 +14,7 @@ async function getUserOrg() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login?callbackUrl=/dashboard/members");
 
-    const supabaseAdmin = await createAdminClient();
-    const { data } = await supabaseAdmin.from("organizations").select("id, name").eq("owner_id", user.id).limit(1).single();
+    const { data } = await supabase.from("organizations").select("id, name").eq("owner_id", user.id).limit(1).single();
     if (!data) redirect("/onboarding");
     return data;
 }
@@ -40,8 +39,7 @@ export default async function MembersPage({
     const { q } = await searchParams;
     const searchQuery = typeof q === 'string' ? q : '';
 
-    const supabaseAdmin = await createAdminClient();
-    let query = supabaseAdmin
+    let query = supabase
         .from("members")
         .select("*")
         .eq("org_id", org.id)

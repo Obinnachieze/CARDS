@@ -4,10 +4,30 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(req: Request) {
     try {
         const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { orgId, maxUses, expiresInDays = 7 } = await req.json();
 
         if (!orgId) {
             return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
+        }
+
+        // Verify the user owns or is a member of the organization
+        // Note: For simple security, we check if they are the owner in the organizations table.
+        // If a membership table exists, that should be checked for "Admin" permissions.
+        const { data: org, error: orgError } = await supabase
+            .from("organizations")
+            .select("id")
+            .eq("id", orgId)
+            .eq("owner_id", user.id)
+            .single();
+
+        if (orgError || !org) {
+            return NextResponse.json({ error: "Unauthorized: You do not have permission to invite to this organization" }, { status: 403 });
         }
 
         // Calculate expiry date

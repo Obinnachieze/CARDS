@@ -54,10 +54,9 @@ export async function GET(req: Request) {
         // Process each delivery
         for (const delivery of deliveries) {
             try {
-                // Determine origin dynamically or use an env var
-                const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-                const host = req.headers.get("host") || "vibepost.com";
-                const shareLink = `${protocol}://${host}/share/${delivery.project_id}`;
+                // Use a trusted base URL from environment variables to prevent Host Header Injection
+                const baseUrl = process.env.NEXTAUTH_URL || (process.env.NODE_ENV === "development" ? "http" : "https") + "://" + (req.headers.get("host") || "vibepost.com");
+                const shareLink = `${baseUrl}/share/${delivery.project_id}`;
 
                 const senderDisplay = delivery.sender_name || "A friend";
                 const projectName = (Array.isArray(delivery.projects) ? delivery.projects[0]?.name : (delivery.projects as any)?.name) || "A VibePost Card";

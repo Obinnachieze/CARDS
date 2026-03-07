@@ -1,4 +1,4 @@
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { Users, Mail, CheckCircle2, MoreVertical, Play, Heart, ChevronLeft, ChevronRight, Plus, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -13,8 +13,7 @@ async function getUserOrg() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?callbackUrl=/dashboard");
 
-  const supabaseAdmin = await createAdminClient();
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("organizations")
     .select("*")
     .eq("owner_id", user.id)
@@ -47,7 +46,7 @@ export default async function DashboardOverviewPage() {
   const thirtyDaysFromNow = new Date(today);
   thirtyDaysFromNow.setDate(today.getDate() + 30);
 
-  const supabaseAdmin = await createAdminClient();
+  const supabase = await createClient();
   const [
     { count: membersCount },
     { count: cardsSent },
@@ -55,16 +54,16 @@ export default async function DashboardOverviewPage() {
     { data: recentMembers },
     { data: recentDeliveries }
   ] = await Promise.all([
-    supabaseAdmin.from("members").select('*', { count: 'exact', head: true }).eq("org_id", org.id),
-    supabaseAdmin.from("delivery_logs").select('*', { count: 'exact', head: true }).eq("org_id", org.id).eq("status", "sent"),
-    supabaseAdmin.from("members").select("birth_month, birth_day").eq("org_id", org.id),
-    supabaseAdmin.from("members").select("id, full_name, email, department, role_title, birth_month, birth_day, created_at").eq("org_id", org.id).order("created_at", { ascending: false }).limit(3),
-    supabaseAdmin.from("delivery_logs").select("id, sent_at").eq("org_id", org.id).eq("status", "sent").order("sent_at", { ascending: false }).limit(100)
+    supabase.from("members").select('*', { count: 'exact', head: true }).eq("org_id", org.id),
+    supabase.from("delivery_logs").select('*', { count: 'exact', head: true }).eq("org_id", org.id).eq("status", "sent"),
+    supabase.from("members").select("birth_month, birth_day").eq("org_id", org.id),
+    supabase.from("members").select("id, full_name, email, department, role_title, birth_month, birth_day, created_at").eq("org_id", org.id).order("created_at", { ascending: false }).limit(3),
+    supabase.from("delivery_logs").select("id, sent_at").eq("org_id", org.id).eq("status", "sent").order("sent_at", { ascending: false }).limit(100)
   ]);
 
   let upcomingCount = 0;
   if (allMembers) {
-    allMembers.forEach(member => {
+    allMembers.forEach((member: any) => {
       if (member.birth_month && member.birth_day) {
         // Try current year
         let bday = new Date(today.getFullYear(), member.birth_month - 1, member.birth_day);
@@ -94,7 +93,7 @@ export default async function DashboardOverviewPage() {
   ];
 
   if (recentDeliveries) {
-    recentDeliveries.forEach(log => {
+    recentDeliveries.forEach((log: any) => {
       if (log.sent_at) {
         const d = new Date(log.sent_at);
         if (d.getMonth() === currentMonthDate.getMonth() && d.getFullYear() === currentMonthDate.getFullYear()) {
