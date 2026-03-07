@@ -419,6 +419,7 @@ export function OnboardingForm() {
                                                     />
                                                 )}
                                             </div>
+                                        </div>
                                     </motion.div>
 
                                     <p className="text-[10px] text-white/40 mt-1 ml-1 px-1">
