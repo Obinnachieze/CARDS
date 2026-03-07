@@ -63,8 +63,13 @@ export function Navbar({ className }: { className?: string }) {
     });
 
     const handleSignOut = async () => {
-        await supabase.auth.signOut();
-        setIsProfileOpen(false);
+        try {
+            await supabase.auth.signOut();
+            setIsProfileOpen(false);
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     };
 
     return (

@@ -10,8 +10,23 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
         }
 
-        // Since we don't have proper auth session checks set up yet, 
-        // ideally we would verify the user is an admin of the org here.
+        // 1. Verify Authentication
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // 2. Verify Organization Ownership
+        const { data: org, error: orgError } = await supabase
+            .from("organizations")
+            .select("id")
+            .eq("id", orgId)
+            .eq("owner_id", user.id)
+            .single();
+
+        if (orgError || !org) {
+            return NextResponse.json({ error: "Forbidden: You do not own this organization" }, { status: 403 });
+        }
 
         // Format members for bulk insert
         const formattedMembers = members.map((member: any) => ({

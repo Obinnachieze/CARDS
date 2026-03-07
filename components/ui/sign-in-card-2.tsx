@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { Mail, Lock, Eye, EyeClosed, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { cn } from "@/lib/utils"
 
@@ -53,6 +53,8 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
     };
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
     const supabase = createClient();
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -77,7 +79,7 @@ export function SignInCard({ mode = "login" }: { mode?: "login" | "signup" }) {
                 });
                 if (error) throw error;
                 toast.success("Successfully signed in!");
-                router.push("/dashboard");
+                router.push(callbackUrl);
             }
         } catch (error: any) {
             toast.error(error.message || "An error occurred during authentication");

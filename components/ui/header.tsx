@@ -15,6 +15,7 @@ import { User } from '@supabase/supabase-js';
 
 export function Header() {
     const [open, setOpen] = React.useState(false);
+    const router = useRouter();
     const scrolled = useScroll(10);
     const [user, setUser] = useState<User | null>(null);
     const [hasOrg, setHasOrg] = useState(false);
@@ -100,8 +101,12 @@ export function Header() {
     const handleSignOut = async () => {
         try {
             await supabase.auth.signOut();
+            toast.success('Signed out successfully');
+            router.push('/');
+            router.refresh();
         } catch (error) {
             console.error('Error signing out:', error);
+            toast.error('Failed to sign out');
         } finally {
             setIsProfileOpen(false);
             setOpen(false);

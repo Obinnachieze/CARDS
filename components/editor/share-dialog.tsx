@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEditor } from "./editor-context";
 import { useParams } from "next/navigation";
+import { LoginPromptModal } from "./login-prompt-modal";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -20,7 +21,7 @@ export function ShareDialog() {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const { currentProjectId, saveCurrentProject, saveProjectAs } = useEditor();
+    const { currentProjectId, saveCurrentProject, saveProjectAs, user } = useEditor();
     const params = useParams();
     const type = params?.type || "Untitled Design";
 
@@ -29,6 +30,7 @@ export function ShareDialog() {
     const [senderName, setSenderName] = useState("");
     const [date, setDate] = useState<Date>();
     const [isScheduling, setIsScheduling] = useState(false);
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
     const isSaved = !!currentProjectId;
 
@@ -72,6 +74,10 @@ export function ShareDialog() {
     };
 
     const handleSaveAndShare = async () => {
+        if (!user) {
+            setShowLoginPrompt(true);
+            return;
+        }
         setError(null);
         setSuccessMessage(null);
         setIsSaving(true);
@@ -104,6 +110,12 @@ export function ShareDialog() {
         setError(null);
         setSuccessMessage(null);
         setIsScheduling(true);
+
+        if (!user) {
+            setIsScheduling(false);
+            setShowLoginPrompt(true);
+            return;
+        }
 
         try {
             // Ensure project is saved
@@ -376,6 +388,11 @@ export function ShareDialog() {
                     </TabsContent>
                 </Tabs>
             </DialogContent>
+
+            <LoginPromptModal
+                open={showLoginPrompt}
+                onClose={() => setShowLoginPrompt(false)}
+            />
         </Dialog>
     );
 }

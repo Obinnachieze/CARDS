@@ -13,6 +13,7 @@ import { UserAvatar } from "./user-avatar";
 import { ShareDialog } from "./share-dialog";
 import { SaveModal } from "./save-modal";
 import { SettingsSidebar } from "./settings-sidebar";
+import { LoginPromptModal } from "./login-prompt-modal";
 
 export const Header = ({ onPreview }: { onPreview: () => void }) => {
     const params = useParams();
@@ -24,10 +25,12 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
         currentProjectId, projectName, createNewProject,
         cards, activeCardId, addCard, activateCard,
         workspaceProjects, activeWorkspaceIndex, switchToWorkspaceProject,
-        isSettingsOpen, setIsSettingsOpen
+        isSettingsOpen, setIsSettingsOpen,
+        user
     } = useEditor();
 
     const [showSaveModal, setShowSaveModal] = useState(false);
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const defaultTitle = typeof type === "string"
@@ -35,6 +38,10 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
         : "Untitled Card";
 
     const handleSave = () => {
+        if (!user) {
+            setShowLoginPrompt(true);
+            return;
+        }
         if (currentProjectId) {
             saveCurrentProject();
         } else {
@@ -168,7 +175,18 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
             <SettingsSidebar
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
-                onSaveClick={() => setShowSaveModal(true)}
+                onSaveClick={() => {
+                    if (!user) {
+                        setShowLoginPrompt(true);
+                    } else {
+                        setShowSaveModal(true);
+                    }
+                }}
+            />
+
+            <LoginPromptModal
+                open={showLoginPrompt}
+                onClose={() => setShowLoginPrompt(false)}
             />
         </header >
     );

@@ -1,50 +1,43 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createClient } from '@/lib/supabase/proxy'
 
 export async function proxy(request: NextRequest) {
-    // Skip if Supabase env vars are not configured
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const { supabase, response } = createClient(request)
 
-    if (!supabaseUrl || !supabaseAnonKey) {
-        return NextResponse.next()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    const isProtectedRoute =
+        request.nextUrl.pathname.startsWith('/dashboard') ||
+        request.nextUrl.pathname.startsWith('/onboarding')
+
+    if (isProtectedRoute && !user) {
+        return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    let supabaseResponse = NextResponse.next({
-        request,
-    })
+    // If user is logged in but trying to access login/signup, redirect to dashboard
+    const isAuthRoute =
+        request.nextUrl.pathname === '/login' ||
+        request.nextUrl.pathname === '/signup'
 
-    const supabase = createServerClient(
-        supabaseUrl,
-        supabaseAnonKey,
-        {
-            cookies: {
-                getAll() {
-                    return request.cookies.getAll()
-                },
-                setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value)
-                    )
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
-                    )
-                },
-            },
-        }
-    )
+    if (isAuthRoute && user) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
 
-    // Refresh the session - this is important for keeping sessions alive
-    await supabase.auth.getUser()
-
-    return supabaseResponse
+    return response
 }
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        /*
+         * Match all request paths except for the ones starting with:
+         * - api (API routes)
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - extension files (svg, png, etc.)
+         */
+        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
