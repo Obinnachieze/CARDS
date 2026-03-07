@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Sparkles, PartyPopper, Heart, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const EffectsSidebar = () => {
@@ -65,7 +65,7 @@ export const EffectsSidebar = () => {
                                     </button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-full p-0 border-none">
-                                    <EmojiPicker onEmojiClick={handleEmojiSelect} width="100%" height={300} />
+                                    <EmojiPicker onEmojiClick={handleEmojiSelect} width="100%" height={300} theme={Theme.DARK} />
                                 </PopoverContent>
                             </Popover>
                         )

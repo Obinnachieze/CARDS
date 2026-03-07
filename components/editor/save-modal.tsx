@@ -71,7 +71,7 @@ export const SaveModal = ({
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <motion.div
-                            className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-md bg-[#0c0c0e] rounded-2xl shadow-2xl overflow-hidden border border-white/10"
                             initial={{ scale: 0.9, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 20 }}
@@ -110,7 +110,7 @@ export const SaveModal = ({
                                 <div className="space-y-2">
                                     <Label
                                         htmlFor="save-card-title"
-                                        className="text-sm font-semibold text-gray-700"
+                                        className="text-sm font-semibold text-zinc-300"
                                     >
                                         Card Title <span className="text-red-400">*</span>
                                     </Label>
@@ -120,7 +120,7 @@ export const SaveModal = ({
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="My Amazing Card"
-                                        className="h-11 rounded-xl border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 transition-all text-sm"
+                                        className="h-11 rounded-xl bg-zinc-950 border-white/10 focus:border-purple-500 focus:ring-purple-500/20 transition-all text-sm text-white"
                                         required
                                         autoComplete="off"
                                     />
@@ -129,7 +129,7 @@ export const SaveModal = ({
                                 <div className="space-y-2">
                                     <Label
                                         htmlFor="save-creator-name"
-                                        className="text-sm font-semibold text-gray-700"
+                                        className="text-sm font-semibold text-zinc-300"
                                     >
                                         Creator Name
                                     </Label>
@@ -138,7 +138,7 @@ export const SaveModal = ({
                                         value={creatorName}
                                         onChange={(e) => setCreatorName(e.target.value)}
                                         placeholder="Your name (optional)"
-                                        className="h-11 rounded-xl border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 transition-all text-sm"
+                                        className="h-11 rounded-xl bg-zinc-950 border-white/10 focus:border-purple-500 focus:ring-purple-500/20 transition-all text-sm text-white"
                                         autoComplete="off"
                                     />
                                 </div>
@@ -148,7 +148,7 @@ export const SaveModal = ({
                                         type="button"
                                         variant="outline"
                                         onClick={onClose}
-                                        className="flex-1 h-11 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 font-medium"
+                                        className="flex-1 h-11 rounded-xl border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 font-medium"
                                     >
                                         Cancel
                                     </Button>

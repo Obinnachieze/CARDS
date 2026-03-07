@@ -109,7 +109,7 @@ export const Canvas = () => {
 
     // Only render the active card
     const card = activeCard;
-    if (!card) return <div className="flex-1 bg-[#f0f0f3]" />;
+    if (!card) return <div className="flex-1 bg-zinc-950" />;
 
     const currentCardIsOpen = isOpen(card.currentFace);
 
@@ -156,7 +156,7 @@ export const Canvas = () => {
 
     return (
         <div
-            className="flex-1 bg-[#f0f0f3] overflow-hidden relative flex flex-col items-center justify-center pb-24"
+            className="h-screen w-full bg-linear-to-br from-[#09090b] via-[#130b1c] to-[#09090b] bg-fixed overflow-hidden relative flex flex-col items-center justify-center pb-32 md:pb-36 touch-none"
             onClick={() => selectElement(null)}
         >
             <div
@@ -204,11 +204,12 @@ export const Canvas = () => {
                     {/* Open/Close Button - always visible below card */}
                     <div className="flex justify-center mt-4 md:mt-6">
                         <Button
+                            id="face-toggle"
                             variant="default"
                             size="sm"
                             className={cn(
                                 "rounded-full h-9 md:h-10 px-5 md:px-6 gap-2 font-semibold transition-all hover:scale-105 text-sm",
-                                currentCardIsOpen ? "bg-white text-gray-900 border hover:bg-gray-100" : "bg-linear-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white shadow-lg shadow-rose-500/20 border-none"
+                                currentCardIsOpen ? "bg-white/10 text-white border border-white/20 hover:bg-white/20" : "bg-purple-500 hover:bg-purple-600 text-white shadow-lg shadow-purple-500/20 border-none"
                             )}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -223,6 +224,38 @@ export const Canvas = () => {
                         </Button>
                     </div>
                 </motion.div>
+            </div>
+
+            {/* Floating Zoom Controls - Essential for Mobile - Lifted slightly */}
+            <div className="absolute right-4 bottom-32 md:bottom-16 z-50 flex flex-col gap-2">
+                <div className="bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 flex flex-col gap-1 shadow-2xl">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-11 w-11 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl"
+                        onClick={() => setZoom(Math.min(zoom + 0.1, 3))}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    </Button>
+                    <div className="h-px bg-white/5 mx-2" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-11 w-11 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl"
+                        onClick={() => setZoom(Math.max(zoom - 0.1, 0.5))}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    </Button>
+                    <div className="h-px bg-white/5 mx-2" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-11 w-11 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl"
+                        onClick={() => setZoom(1)}
+                    >
+                        <span className="text-[10px] font-bold">1:1</span>
+                    </Button>
+                </div>
             </div>
         </div>
     );

@@ -5,6 +5,7 @@ import { createOrganization } from "./actions";
 import { Building2, ArrowRight, Mail, Globe, Zap } from "lucide-react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
     return (
@@ -264,20 +265,25 @@ export function OnboardingForm() {
                                     >
                                         <div className="absolute -inset-[0.5px] bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
 
-                                        <div className="relative flex items-center overflow-hidden rounded-lg">
-                                            <Building2 className={`absolute left-3 w-4 h-4 transition-all duration-300 pointer-events-none ${focusedInput === "companyName" ? 'text-white' : 'text-white/40'}`} />
+                                        <div className="relative space-y-1.5 flex flex-col items-start overflow-hidden rounded-lg">
+                                            <Label htmlFor="companyName" className="text-white/70 text-[10px] uppercase tracking-wider font-semibold ml-1">
+                                                Company Name
+                                            </Label>
+                                            <div className="relative w-full flex items-center">
+                                                <Building2 className={`absolute left-3 w-4 h-4 transition-all duration-300 pointer-events-none ${focusedInput === "companyName" ? 'text-white' : 'text-white/40'}`} />
 
-                                            <Input
-                                                type="text"
-                                                id="companyName"
-                                                name="companyName"
-                                                required
-                                                disabled={isPending}
-                                                placeholder="Company Name (e.g. Acme Corp)"
-                                                onFocus={() => setFocusedInput("companyName")}
-                                                onBlur={() => setFocusedInput(null)}
-                                                className="w-full bg-white/5 border-transparent focus:border-white/20 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-3 focus:bg-white/10"
-                                            />
+                                                <Input
+                                                    type="text"
+                                                    id="companyName"
+                                                    name="companyName"
+                                                    required
+                                                    disabled={isPending}
+                                                    placeholder="e.g. Acme Corp"
+                                                    onFocus={() => setFocusedInput("companyName")}
+                                                    onBlur={() => setFocusedInput(null)}
+                                                    className="w-full bg-white/5 border-transparent focus:border-white/20 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-3 focus:bg-white/10"
+                                                />
+                                            </div>
 
                                             {focusedInput === "companyName" && (
                                                 <motion.div
@@ -301,20 +307,25 @@ export function OnboardingForm() {
                                     >
                                         <div className="absolute -inset-[0.5px] bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
 
-                                        <div className="relative flex items-center overflow-hidden rounded-lg">
-                                            <Mail className={`absolute left-3 w-4 h-4 transition-all duration-300 pointer-events-none ${focusedInput === "contactEmail" ? 'text-white' : 'text-white/40'}`} />
+                                        <div className="relative space-y-1.5 flex flex-col items-start overflow-hidden rounded-lg">
+                                            <Label htmlFor="contactEmail" className="text-white/70 text-[10px] uppercase tracking-wider font-semibold ml-1">
+                                                Contact Email
+                                            </Label>
+                                            <div className="relative w-full flex items-center">
+                                                <Mail className={`absolute left-3 w-4 h-4 transition-all duration-300 pointer-events-none ${focusedInput === "contactEmail" ? 'text-white' : 'text-white/40'}`} />
 
-                                            <Input
-                                                type="email"
-                                                id="contactEmail"
-                                                name="contactEmail"
-                                                required
-                                                disabled={isPending}
-                                                placeholder="Contact Email (hello@company.com)"
-                                                onFocus={() => setFocusedInput("contactEmail")}
-                                                onBlur={() => setFocusedInput(null)}
-                                                className="w-full bg-white/5 border-transparent focus:border-white/20 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-3 focus:bg-white/10"
-                                            />
+                                                <Input
+                                                    type="email"
+                                                    id="contactEmail"
+                                                    name="contactEmail"
+                                                    required
+                                                    disabled={isPending}
+                                                    placeholder="hello@company.com"
+                                                    onFocus={() => setFocusedInput("contactEmail")}
+                                                    onBlur={() => setFocusedInput(null)}
+                                                    className="w-full bg-white/5 border-transparent focus:border-white/20 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-3 focus:bg-white/10"
+                                                />
+                                            </div>
 
                                             {focusedInput === "contactEmail" && (
                                                 <motion.div
@@ -343,67 +354,71 @@ export function OnboardingForm() {
                                     >
                                         <div className="absolute -inset-[0.5px] bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none" />
 
-                                        <div className="relative flex items-center overflow-hidden rounded-lg">
-                                            <Globe className={`absolute left-3 w-4 h-4 transition-all duration-300 pointer-events-none ${focusedInput === "timezone" ? 'text-white' : 'text-white/40'}`} />
+                                        <div className="relative space-y-1.5 flex flex-col items-start overflow-hidden rounded-lg">
+                                            <Label htmlFor="timezone" className="text-white/70 text-[10px] uppercase tracking-wider font-semibold ml-1">
+                                                Business Timezone
+                                            </Label>
+                                            <div className="relative w-full flex items-center">
+                                                <Globe className={`absolute left-3 w-4 h-4 transition-all duration-300 pointer-events-none ${focusedInput === "timezone" ? 'text-white' : 'text-white/40'}`} />
 
-                                            <Select
-                                                id="timezone"
-                                                name="timezone"
-                                                required
-                                                disabled={isPending}
-                                                defaultValue={Intl.DateTimeFormat().resolvedOptions().timeZone}
-                                                onFocus={() => setFocusedInput("timezone")}
-                                                onBlur={() => setFocusedInput(null)}
-                                                className="w-full bg-white/5 border-transparent focus:border-white/20 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-10 focus:bg-white/10"
-                                            >
-                                                <option value="Pacific/Midway" className="bg-[#09090b] text-white">Midway Island, Samoa</option>
-                                                <option value="Pacific/Honolulu" className="bg-[#09090b] text-white">Hawaii</option>
-                                                <option value="America/Juneau" className="bg-[#09090b] text-white">Alaska</option>
-                                                <option value="America/Los_Angeles" className="bg-[#09090b] text-white">Pacific Time (US and Canada)</option>
-                                                <option value="America/Denver" className="bg-[#09090b] text-white">Mountain Time (US and Canada)</option>
-                                                <option value="America/Chicago" className="bg-[#09090b] text-white">Central Time (US and Canada)</option>
-                                                <option value="America/New_York" className="bg-[#09090b] text-white">Eastern Time (US and Canada)</option>
-                                                <option value="America/Caracas" className="bg-[#09090b] text-white">Caracas, La Paz</option>
-                                                <option value="America/Halifax" className="bg-[#09090b] text-white">Atlantic Time (Canada)</option>
-                                                <option value="America/Buenos_Aires" className="bg-[#09090b] text-white">Buenos Aires, Georgetown</option>
-                                                <option value="Atlantic/South_Georgia" className="bg-[#09090b] text-white">Mid-Atlantic</option>
-                                                <option value="Atlantic/Azores" className="bg-[#09090b] text-white">Azores</option>
-                                                <option value="Europe/London" className="bg-[#09090b] text-white">Greenwich Mean Time (London)</option>
-                                                <option value="Europe/Berlin" className="bg-[#09090b] text-white">Central European Time (Berlin)</option>
-                                                <option value="Africa/Lagos" className="bg-[#09090b] text-white">West Africa Time (Lagos)</option>
-                                                <option value="Africa/Johannesburg" className="bg-[#09090b] text-white">South Africa Standard Time (Johannesburg)</option>
-                                                <option value="Europe/Athens" className="bg-[#09090b] text-white">Eastern European Time (Athens)</option>
-                                                <option value="Europe/Moscow" className="bg-[#09090b] text-white">Moscow, St. Petersburg, Volgograd</option>
-                                                <option value="Asia/Dubai" className="bg-[#09090b] text-white">Abu Dhabi, Muscat</option>
-                                                <option value="Asia/Karachi" className="bg-[#09090b] text-white">Islamabad, Karachi</option>
-                                                <option value="Asia/Dhaka" className="bg-[#09090b] text-white">Astana, Dhaka</option>
-                                                <option value="Asia/Colombo" className="bg-[#09090b] text-white">Sri Jayawardenepura</option>
-                                                <option value="Asia/Bangkok" className="bg-[#09090b] text-white">Bangkok, Hanoi, Jakarta</option>
-                                                <option value="Asia/Singapore" className="bg-[#09090b] text-white">Beijing, Singapore, Taipei</option>
-                                                <option value="Asia/Tokyo" className="bg-[#09090b] text-white">Osaka, Sapporo, Tokyo</option>
-                                                <option value="Australia/Sydney" className="bg-[#09090b] text-white">Canberra, Melbourne, Sydney</option>
-                                                <option value="Asia/Vladivostok" className="bg-[#09090b] text-white">Vladivostok</option>
-                                                <option value="Pacific/Auckland" className="bg-[#09090b] text-white">Auckland, Wellington</option>
-                                                <option value="Pacific/Fiji" className="bg-[#09090b] text-white">Fiji, Kamchatka, Marshall Is.</option>
-                                            </Select>
+                                                <Select
+                                                    id="timezone"
+                                                    name="timezone"
+                                                    required
+                                                    disabled={isPending}
+                                                    defaultValue={Intl.DateTimeFormat().resolvedOptions().timeZone}
+                                                    onFocus={() => setFocusedInput("timezone")}
+                                                    onBlur={() => setFocusedInput(null)}
+                                                    className="w-full bg-white/5 border-transparent focus:border-white/20 text-white placeholder:text-white/30 h-10 transition-all duration-300 pl-10 pr-10 focus:bg-white/10"
+                                                >
+                                                    <option value="Pacific/Midway" className="bg-[#09090b] text-white">Midway Island, Samoa</option>
+                                                    <option value="Pacific/Honolulu" className="bg-[#09090b] text-white">Hawaii</option>
+                                                    <option value="America/Juneau" className="bg-[#09090b] text-white">Alaska</option>
+                                                    <option value="America/Los_Angeles" className="bg-[#09090b] text-white">Pacific Time (US and Canada)</option>
+                                                    <option value="America/Denver" className="bg-[#09090b] text-white">Mountain Time (US and Canada)</option>
+                                                    <option value="America/Chicago" className="bg-[#09090b] text-white">Central Time (US and Canada)</option>
+                                                    <option value="America/New_York" className="bg-[#09090b] text-white">Eastern Time (US and Canada)</option>
+                                                    <option value="America/Caracas" className="bg-[#09090b] text-white">Caracas, La Paz</option>
+                                                    <option value="America/Halifax" className="bg-[#09090b] text-white">Atlantic Time (Canada)</option>
+                                                    <option value="America/Buenos_Aires" className="bg-[#09090b] text-white">Buenos Aires, Georgetown</option>
+                                                    <option value="Atlantic/South_Georgia" className="bg-[#09090b] text-white">Mid-Atlantic</option>
+                                                    <option value="Atlantic/Azores" className="bg-[#09090b] text-white">Azores</option>
+                                                    <option value="Europe/London" className="bg-[#09090b] text-white">Greenwich Mean Time (London)</option>
+                                                    <option value="Europe/Berlin" className="bg-[#09090b] text-white">Central European Time (Berlin)</option>
+                                                    <option value="Africa/Lagos" className="bg-[#09090b] text-white">West Africa Time (Lagos)</option>
+                                                    <option value="Africa/Johannesburg" className="bg-[#09090b] text-white">South Africa Standard Time (Johannesburg)</option>
+                                                    <option value="Europe/Athens" className="bg-[#09090b] text-white">Eastern European Time (Athens)</option>
+                                                    <option value="Europe/Moscow" className="bg-[#09090b] text-white">Moscow, St. Petersburg, Volgograd</option>
+                                                    <option value="Asia/Dubai" className="bg-[#09090b] text-white">Abu Dhabi, Muscat</option>
+                                                    <option value="Asia/Karachi" className="bg-[#09090b] text-white">Islamabad, Karachi</option>
+                                                    <option value="Asia/Dhaka" className="bg-[#09090b] text-white">Astana, Dhaka</option>
+                                                    <option value="Asia/Colombo" className="bg-[#09090b] text-white">Sri Jayawardenepura</option>
+                                                    <option value="Asia/Bangkok" className="bg-[#09090b] text-white">Bangkok, Hanoi, Jakarta</option>
+                                                    <option value="Asia/Singapore" className="bg-[#09090b] text-white">Beijing, Singapore, Taipei</option>
+                                                    <option value="Asia/Tokyo" className="bg-[#09090b] text-white">Osaka, Sapporo, Tokyo</option>
+                                                    <option value="Australia/Sydney" className="bg-[#09090b] text-white">Canberra, Melbourne, Sydney</option>
+                                                    <option value="Asia/Vladivostok" className="bg-[#09090b] text-white">Vladivostok</option>
+                                                    <option value="Pacific/Auckland" className="bg-[#09090b] text-white">Auckland, Wellington</option>
+                                                    <option value="Pacific/Fiji" className="bg-[#09090b] text-white">Fiji, Kamchatka, Marshall Is.</option>
+                                                </Select>
 
-                                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                <svg className={`w-4 h-4 transition-all duration-300 ${focusedInput === "timezone" ? 'text-white' : 'text-white/40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                </svg>
+                                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                    <svg className={`w-4 h-4 transition-all duration-300 ${focusedInput === "timezone" ? 'text-white' : 'text-white/40'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </div>
+
+                                                {focusedInput === "timezone" && (
+                                                    <motion.div
+                                                        layoutId="input-highlight"
+                                                        className="absolute inset-0 bg-white/5 -z-10 pointer-events-none"
+                                                        initial={{ opacity: 0 }}
+                                                        animate={{ opacity: 1 }}
+                                                        exit={{ opacity: 0 }}
+                                                        transition={{ duration: 0.2 }}
+                                                    />
+                                                )}
                                             </div>
-
-                                            {focusedInput === "timezone" && (
-                                                <motion.div
-                                                    layoutId="input-highlight"
-                                                    className="absolute inset-0 bg-white/5 -z-10 pointer-events-none"
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    exit={{ opacity: 0 }}
-                                                    transition={{ duration: 0.2 }}
-                                                />
-                                            )}
-                                        </div>
                                     </motion.div>
 
                                     <p className="text-[10px] text-white/40 mt-1 ml-1 px-1">

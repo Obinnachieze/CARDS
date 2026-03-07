@@ -139,32 +139,32 @@ export function MusicSidebar() {
                             <p className="text-[9px] text-purple-400 mt-2 italic font-medium">This song will play automatically when the card is opened.</p>
                         </div>
                     ) : (
-                        <div className="p-4 border-2 border-dashed border-gray-100 rounded-xl flex flex-col items-center justify-center text-center gap-2 bg-gray-50/30">
-                            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
-                                <Music className="w-5 h-5 text-gray-300" />
+                        <div className="p-4 border-2 border-dashed border-white/5 rounded-xl flex flex-col items-center justify-center text-center gap-2 bg-white/5">
+                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                                <Music className="w-5 h-5 text-zinc-500" />
                             </div>
-                            <p className="text-[10px] text-gray-400 font-medium italic leading-relaxed">No music attached yet.<br />Upload or record audio below.</p>
+                            <p className="text-[10px] text-zinc-500 font-medium italic leading-relaxed">No music attached yet.<br />Upload or record audio below.</p>
                         </div>
                     )}
                 </div>
 
-                <div className="h-px bg-gray-100" />
+                <div className="h-px bg-white/5" />
 
 
                 {/* 3. Original Audio Section */}
                 <div className="space-y-4">
                     <div>
-                        <h3 className="font-bold text-gray-900 text-sm">Original Audio</h3>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Upload or Record voice</p>
+                        <h3 className="font-bold text-zinc-100 text-sm">Original Audio</h3>
+                        <p className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Upload or Record voice</p>
                     </div>
 
                     {!isRecording && !recordedUrl && (
                         <div className="grid grid-cols-2 gap-3">
-                            <label className="flex flex-col items-center justify-center gap-2 p-4 bg-gray-50 hover:bg-gray-100 border border-dashed border-gray-300 rounded-2xl cursor-pointer transition-all group">
-                                <div className="p-2 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
+                            <label className="flex flex-col items-center justify-center gap-2 p-4 bg-zinc-900 hover:bg-zinc-800 border border-dashed border-white/10 rounded-2xl cursor-pointer transition-all group">
+                                <div className="p-2 bg-zinc-950 rounded-full shadow-sm group-hover:scale-110 transition-transform">
                                     <Upload className="w-4 h-4 text-purple-500" />
                                 </div>
-                                <span className="text-[11px] font-bold text-gray-600">Upload</span>
+                                <span className="text-[11px] font-bold text-zinc-300">Upload</span>
                                 <input type="file" className="hidden" accept="audio/*" onChange={handleFileUpload} />
                             </label>
                             <button
@@ -194,13 +194,13 @@ export function MusicSidebar() {
                     )}
 
                     {!isRecording && recordedUrl && (
-                        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-4">
-                            <audio controls src={recordedUrl} className="h-8 w-full" />
+                        <div className="bg-zinc-900 rounded-2xl p-4 border border-white/5 shadow-sm space-y-4">
+                            <audio controls src={recordedUrl} className="h-8 w-full invert" />
                             <div className="flex gap-2">
                                 <Button
                                     variant="ghost"
                                     onClick={() => { setRecordedUrl(null); setRecordedBlob(null); }}
-                                    className="flex-1 text-gray-500 hover:bg-gray-100 rounded-xl text-xs"
+                                    className="flex-1 text-zinc-400 hover:bg-white/5 rounded-xl text-xs"
                                 >
                                     Discard
                                 </Button>

@@ -79,13 +79,13 @@ export function MagicWriterDialog({ onInsert, initialText = "", mode = "generate
                     <Wand2 size={16} />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-700">
+            <DialogContent className="sm:max-w-[425px] bg-[#0c0c0e] text-zinc-100 border-white/10 shadow-2xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-purple-400">
                         <Wand2 size={20} />
                         {mode === "rewrite" ? "AI Smart Assistant" : "AI Magic Writer"}
                     </DialogTitle>
-                    <DialogDescription className="text-gray-400">
+                    <DialogDescription className="text-zinc-500">
                         {mode === "rewrite"
                             ? "Rewriting your message into a different tone."
                             : "Describe what you want to say, and let AI write it for you."}
@@ -94,7 +94,7 @@ export function MagicWriterDialog({ onInsert, initialText = "", mode = "generate
 
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="prompt">
+                        <Label htmlFor="prompt" className="text-zinc-300">
                             {mode === "rewrite" ? "Your Message" : "What's the occasion?"}
                         </Label>
                         <Textarea
@@ -102,17 +102,17 @@ export function MagicWriterDialog({ onInsert, initialText = "", mode = "generate
                             placeholder={mode === "rewrite" ? "Your current text..." : "e.g. A funny birthday wish for my brother who loves pizza..."}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
-                            className="bg-gray-800 border-gray-700 text-white min-h-[80px]"
+                            className="bg-zinc-950 border-white/10 text-zinc-100 min-h-[80px] focus-visible:ring-purple-500 placeholder:text-zinc-600"
                         />
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Tone</Label>
+                        <Label className="text-zinc-300">Tone</Label>
                         <Select value={tone} onValueChange={setTone}>
-                            <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
+                            <SelectTrigger className="bg-zinc-950 border-white/10 text-zinc-100">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                            <SelectContent className="bg-zinc-900 border-white/10 text-white">
                                 <SelectItem value="fun and witty">Fun & Witty</SelectItem>
                                 <SelectItem value="heartfelt and emotional">Heartfelt & Emotional</SelectItem>
                                 <SelectItem value="professional and formal">Professional & Formal</SelectItem>
@@ -129,8 +129,8 @@ export function MagicWriterDialog({ onInsert, initialText = "", mode = "generate
                     )}
 
                     {generatedText && (
-                        <div className="p-3 bg-purple-900/20 border border-purple-500/30 rounded-md">
-                            <p className="text-sm italic text-gray-200">"{generatedText}"</p>
+                        <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-md">
+                            <p className="text-sm italic text-zinc-200">"{generatedText}"</p>
                         </div>
                     )}
                 </div>
@@ -155,7 +155,7 @@ export function MagicWriterDialog({ onInsert, initialText = "", mode = "generate
                         <div className="flex gap-2 w-full">
                             <Button
                                 variant="outline"
-                                className="flex-1 border-gray-600 hover:bg-gray-800 hover:text-white text-gray-300"
+                                className="flex-1 border-white/10 hover:bg-white/5 hover:text-white text-zinc-400"
                                 onClick={handleGenerate}
                                 disabled={isLoading}
                             >

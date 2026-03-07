@@ -55,15 +55,15 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
     };
 
     return (
-        <header className="h-14 bg-gradient-to-r from-slate-900 to-slate-900 border-b border-white/10 flex items-center justify-between px-3 md:px-4 text-white z-50 relative">
+        <header className="h-14 bg-[#0c0c0e] border-b border-white/5 flex items-center justify-between px-3 md:px-4 text-white z-50 relative">
             <div className="flex items-center gap-1 md:gap-3 min-w-0">
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-white/10 text-white w-8 h-8 md:w-9 md:h-9 shrink-0"
+                    className="hover:bg-white/10 text-white w-8 h-8 md:w-9 md:h-9 shrink-0 rounded-xl"
                     onClick={() => router.push("/")}
                 >
-                    <Home size={18} />
+                    <Home size={20} />
                 </Button>
 
                 <div className="flex items-center gap-1 p-0.5">
@@ -120,16 +120,16 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-3">
+            <div id="editor-header-actions" className="flex items-center gap-2 md:gap-3">
                 <div />
 
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-white/10 text-white border-0 md:border md:border-white/20 h-9 w-9 md:w-auto md:px-4 rounded-[5px] transition-all"
+                    className="hover:bg-white/10 text-white border-0 md:border md:border-white/20 h-9 w-9 md:w-auto md:px-4 rounded-xl transition-all"
                     onClick={onPreview}
                 >
-                    <Eye size={16} className="md:mr-2" />
+                    <Eye size={20} className="md:mr-2" />
                     <span className="hidden md:inline">Preview</span>
                 </Button>
 
@@ -153,7 +153,7 @@ export const Header = ({ onPreview }: { onPreview: () => void }) => {
                     title="Settings"
                     onClick={() => setIsSettingsOpen(true)}
                 >
-                    <Settings size={22} />
+                    <Settings size={20} />
                 </Button>
             </div>
 

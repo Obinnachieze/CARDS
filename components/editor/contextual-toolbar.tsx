@@ -55,21 +55,21 @@ export const ContextualToolbar = () => {
                 transformOrigin: "bottom center"
             }}
         >
-            <div className="bg-white rounded-xl shadow-xl p-2 flex items-center gap-2 animate-in fade-in zoom-in duration-200">
+            <div className="bg-zinc-950/90 backdrop-blur-md rounded-xl shadow-2xl p-2 flex items-center gap-2 animate-in fade-in zoom-in duration-200 border border-white/10">
                 {/* Common Actions */}
-                <div className="flex items-center gap-1 border-r pr-2 mr-2">
+                <div className="flex items-center gap-1 border-r border-white/5 pr-2 mr-2">
                     <ColorPicker
                         color={selectedElement.color || "#000000"}
                         onChange={(c: string) => updateElement(selectedElement.id, { color: c })}
-                        className="w-8 h-8 rounded-xl shadow-sm ring-1 ring-gray-100"
+                        className="w-8 h-8 rounded-xl shadow-sm ring-1 ring-white/10"
                     />
                 </div>
 
                 {/* Text Specific */}
                 {selectedElement.type === "text" && (
-                    <div className="flex items-center gap-2 border-r pr-2 mr-2">
+                    <div className="flex items-center gap-2 border-r border-white/5 pr-2 mr-2">
                         <div className="flex flex-col w-20">
-                            <Label className="text-[8px] text-gray-500 uppercase font-bold">Size</Label>
+                            <Label className="text-[8px] text-zinc-500 uppercase font-bold">Size</Label>
                             <Slider
                                 value={[selectedElement.fontSize || 16]}
                                 min={8}
@@ -84,9 +84,9 @@ export const ContextualToolbar = () => {
 
                 {/* Line Specific */}
                 {selectedElement.type === "line" && (
-                    <div className="flex items-center gap-2 border-r pr-2 mr-2">
+                    <div className="flex items-center gap-2 border-r border-white/5 pr-2 mr-2">
                         <div className="flex flex-col w-24">
-                            <Label className="text-[8px] text-gray-500 uppercase font-bold">Thickness</Label>
+                            <Label className="text-[8px] text-zinc-500 uppercase font-bold">Thickness</Label>
                             <Slider
                                 value={[selectedElement.height || 4]}
                                 min={1}
@@ -101,8 +101,8 @@ export const ContextualToolbar = () => {
                                 <button
                                     key={s}
                                     className={cn(
-                                        "w-6 h-6 rounded flex items-center justify-center hover:bg-gray-100 shadow-sm",
-                                        selectedElement.lineStyle === s ? "bg-purple-100 ring-1 ring-purple-400" : "bg-white"
+                                        "w-6 h-6 rounded flex items-center justify-center hover:bg-white/5 shadow-sm",
+                                        selectedElement.lineStyle === s ? "bg-purple-500/20 ring-1 ring-purple-400" : "bg-zinc-900"
                                     )}
                                     onClick={() => updateElement(selectedElement.id, { lineStyle: s as any })}
                                     title={s}
@@ -120,9 +120,9 @@ export const ContextualToolbar = () => {
 
                 {/* Shape/Image/Draw Specific */}
                 {(selectedElement.type === "shape" || selectedElement.type === "image" || selectedElement.type === "draw") && (
-                    <div className="flex items-center gap-2 border-r pr-2 mr-2">
+                    <div className="flex items-center gap-2 border-r border-white/5 pr-2 mr-2">
                         <div className="flex flex-col w-20">
-                            <Label className="text-[8px] text-gray-500 uppercase font-bold">Size</Label>
+                            <Label className="text-[8px] text-zinc-500 uppercase font-bold">Size</Label>
                             <Slider
                                 value={[selectedElement.width || 100]}
                                 min={10}
@@ -137,17 +137,17 @@ export const ContextualToolbar = () => {
 
                 {/* Image Specific - Filters */}
                 {selectedElement.type === "image" && (
-                    <div className="flex items-center gap-2 border-r pr-2 mr-2">
+                    <div className="flex items-center gap-2 border-r border-white/5 pr-2 mr-2">
                         <div className="flex flex-col w-24">
-                            <Label className="text-[8px] text-gray-500 uppercase font-bold">Filter</Label>
+                            <Label className="text-[8px] text-zinc-500 uppercase font-bold">Filter</Label>
                             <Select
                                 value={selectedElement.filter || "none"}
                                 onValueChange={(val) => updateElement(selectedElement.id, { filter: val })}
                             >
-                                <SelectTrigger className="h-7 text-xs w-full">
+                                <SelectTrigger className="h-7 text-xs w-full bg-zinc-950 border-white/5 text-zinc-100">
                                     <SelectValue placeholder="None" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="bg-zinc-900 border-white/10 text-white">
                                     {FILTER_PRESETS.map(f => (
                                         <SelectItem key={f.value} value={f.value}>{f.name}</SelectItem>
                                     ))}
@@ -159,17 +159,17 @@ export const ContextualToolbar = () => {
 
 
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-purple-600 hover:bg-purple-50" onClick={handleDuplicate} title="Duplicate">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-purple-400 hover:bg-purple-500/10" onClick={handleDuplicate} title="Duplicate">
                         <Copy size={16} />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-red-600 hover:bg-red-50" onClick={handleDelete} title="Delete">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-red-500/10" onClick={handleDelete} title="Delete">
                         <Trash2 size={16} />
                     </Button>
                 </div>
             </div>
 
             {/* Visual connector/arrow pointing down to element */}
-            <div className="w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-white filter drop-shadow-sm" />
+            <div className="w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-zinc-950/90 filter drop-shadow-sm" />
         </div>
     );
 };

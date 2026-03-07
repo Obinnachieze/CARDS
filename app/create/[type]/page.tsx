@@ -216,7 +216,7 @@ function SwipeNavigationWrapper({ onPreview }: { onPreview: () => void }) {
     const exitX = delta >= 0 ? -300 : 300;
 
     return (
-        <div className="flex flex-col h-screen bg-gray-100 text-black">
+        <div className="flex flex-col h-screen bg-zinc-950 text-white">
             <Header onPreview={onPreview} />
             <motion.div
                 className="flex flex-1 overflow-hidden relative flex-col-reverse md:flex-row"

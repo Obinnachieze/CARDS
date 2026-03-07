@@ -25,11 +25,11 @@ import { MagicWriterDialog } from "./magic-writer-dialog";
 
 const ShapeButton = ({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) => (
     <button
-        className="aspect-square bg-gray-50 hover:bg-gray-100 shadow-sm rounded-lg flex items-center justify-center p-2 transition-colors group"
+        className="aspect-square bg-white/5 hover:bg-white/10 border border-white/5 shadow-sm rounded-lg flex items-center justify-center p-2 transition-colors group"
         onClick={onClick}
         title={title}
     >
-        <div className="w-full h-full text-gray-800 group-hover:text-black transition-colors">
+        <div className="w-full h-full text-white/70 group-hover:text-white transition-colors">
             {children}
         </div>
     </button>
@@ -52,14 +52,14 @@ const SidebarTab = ({ icon, label, active, onClick, onMouseEnter }: { icon: Reac
         className={cn(
             "flex flex-col items-center justify-center min-w-[48px] md:w-14 h-12 md:h-14 transition-all duration-300 relative group rounded-xl md:rounded-2xl",
             active
-                ? "text-purple-600 bg-purple-50/80 scale-105"
-                : "text-zinc-500 hover:text-purple-600 hover:bg-purple-50/40 hover:scale-105 active:scale-95"
+                ? "text-purple-400 bg-purple-500/10 scale-105"
+                : "text-zinc-500 hover:text-purple-400 hover:bg-white/5 hover:scale-105 active:scale-95"
         )}
         title={label}
     >
-        <div className={cn("transition-transform duration-300 group-hover:-translate-y-1 scale-100 md:scale-110", active ? "text-purple-600" : "")}>{icon}</div>
-        <span className="hidden md:block text-[9px] font-bold opacity-0 group-hover:opacity-100 absolute bottom-1 transition-opacity text-purple-600 tracking-wide">{label}</span>
-        {active && <div className="absolute -bottom-0.5 md:bottom-auto md:left-0 md:top-1/2 md:-translate-y-1/2 left-1/2 -translate-x-1/2 md:translate-x-0 w-1 md:w-1 md:h-6 h-1 bg-purple-600 rounded-full shadow-[0_0_8px_rgba(147,51,234,0.5)]" />}
+        <div className={cn("transition-transform duration-300 group-hover:-translate-y-1 scale-100 md:scale-110", active ? "text-purple-400" : "")}>{icon}</div>
+        <span className="hidden md:block text-[9px] font-bold opacity-0 group-hover:opacity-100 absolute bottom-1 transition-opacity text-purple-400 tracking-wide">{label}</span>
+        {active && <div className="absolute -bottom-0.5 md:bottom-auto md:left-0 md:top-1/2 md:-translate-y-1/2 left-1/2 -translate-x-1/2 md:translate-x-0 w-1 md:w-1 md:h-6 h-1 bg-purple-400 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />}
     </button>
 );
 
@@ -259,9 +259,9 @@ export const Toolbar = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-col z-40 relative shrink-0 md:w-20 bg-white/95 md:bg-zinc-50 md:border-r border-zinc-200">
+        <div id="editor-toolbar" className="flex flex-col md:flex-col z-40 relative shrink-0 md:w-20 bg-[#0c0c0e] md:border-r border-white/10 text-white">
             {/* Universal Bottom Dock / Left Sidebar */}
-            <div className="fixed bottom-0 left-0 w-full md:static md:w-full md:h-full md:flex border-t md:border-t-0 border-white/20 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] md:shadow-none bg-white/95 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none transition-all dock-container">
+            <div className="fixed bottom-0 left-0 w-full md:static md:w-full md:h-full md:flex border-t md:border-t-0 border-white/5 z-50 shadow-[0_-8px_30px_rgba(0,0,0,0.3)] md:shadow-none bg-[#0c0c0e] md:bg-transparent backdrop-blur-xl md:backdrop-blur-none transition-all dock-container">
                 <div className="flex w-full items-center justify-start overflow-x-auto scrollbar-hide px-2 md:px-0 md:py-6 md:flex-col md:items-center md:justify-start md:overflow-visible gap-1 md:gap-3 h-14 md:h-full mx-auto">
                     {/* New Card Button - Mobile Only */}
                     <div className="flex items-center md:hidden shrink-0">
@@ -271,7 +271,7 @@ export const Toolbar = () => {
                             active={false}
                             onClick={() => createNewProject()}
                         />
-                        <div className="w-px h-6 bg-zinc-200/50 mx-1" />
+                        <div className="w-px h-6 bg-white/10 mx-1" />
                     </div>
 
                     <SidebarTab icon={<Palette size={22} />} label="Color" active={activeTab === "design"} onClick={(e) => handleTabClick("design", e)} />
@@ -298,7 +298,7 @@ export const Toolbar = () => {
             {/* Sliding Panel */}
             <div
                 className={cn(
-                    "fixed bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-t-3xl md:rounded-3xl border border-white/20 md:border-zinc-200 sliding-panel",
+                    "fixed bg-[#130b1c]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 ease-out z-40 overflow-hidden flex flex-col rounded-t-3xl md:rounded-3xl border border-white/10 sliding-panel text-white",
                     // Mobile: Pops up from bottom. Desktop: Floats next to left sidebar
                     "bottom-14 max-h-[50vh]",
                     "md:bottom-auto md:left-[90px] md:h-auto md:max-h-[min(800px,calc(100vh-100px))] md:min-h-[200px]",
@@ -344,7 +344,7 @@ export const Toolbar = () => {
                         {/* Content Layout */}
                         <div className="flex overflow-hidden h-full">
 
-                            <ScrollArea className="p-4 bg-white max-h-[inherit] w-full h-full">
+                            <ScrollArea className="p-4 bg-transparent max-h-[inherit] w-full h-full">
                                 {/* Panel Content Based on Tab */}
 
                                 {activeTab === "text" && (
@@ -357,7 +357,7 @@ export const Toolbar = () => {
                                                 {isLoadingFonts && <Loader2 className="animate-spin text-purple-600" size={14} />}
                                             </div>
 
-                                            <div className="bg-gray-100 p-2 rounded-md flex flex-col gap-2 sticky top-0 z-10">
+                                            <div className="bg-white/5 p-2 rounded-xl flex flex-col gap-2 sticky top-0 z-10 border border-white/10 backdrop-blur-md">
                                                 <div className="flex gap-2 items-center">
                                                     <Search size={16} className="text-gray-400" />
                                                     <input
@@ -387,10 +387,10 @@ export const Toolbar = () => {
                                                                     <Button
                                                                         key={familyName}
                                                                         variant="outline"
-                                                                        className={cn("h-12 justify-start px-3 overflow-hidden bg-white shadow-sm border-0 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-50 text-purple-700 font-bold" : "hover:bg-gray-50 text-gray-700")}
+                                                                        className={cn("h-12 justify-start px-3 overflow-hidden bg-white/5 hover:bg-white/10 shadow-sm border-white/5 w-full text-left font-normal group relative transition-colors", isActive ? "bg-purple-500/20 text-purple-400 font-bold border-purple-500/30" : "text-white/70")}
                                                                         onClick={() => handleFontSelect(familyName)}
                                                                     >
-                                                                        <span className={cn("truncate text-xl transition-colors", isActive ? "font-bold text-purple-700" : "group-hover:text-purple-600")} style={{ fontFamily: familyName }}>{familyName}</span>
+                                                                        <span className={cn("truncate text-xl transition-colors", isActive ? "font-bold text-purple-400" : "group-hover:text-purple-300")} style={{ fontFamily: familyName }}>{familyName}</span>
                                                                     </Button>
                                                                 );
                                                             })}
@@ -443,8 +443,8 @@ export const Toolbar = () => {
                                             </div>
                                         </Button>
 
-                                        <div className="text-center py-10 text-zinc-400 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                                            <ImageIcon size={48} className="mx-auto mb-2 opacity-10" />
+                                        <div className="text-center py-10 text-white/20 border-2 border-dashed border-white/5 rounded-3xl">
+                                            <ImageIcon size={48} className="mx-auto mb-2 opacity-5" />
                                             <p className="text-[10px] uppercase font-bold tracking-widest">No uploads yet</p>
                                         </div>
                                     </div>
@@ -456,35 +456,35 @@ export const Toolbar = () => {
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 p-2">
                                             <button
-                                                className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                className={cn("p-3 rounded-xl transition-all", !isDrawing ? "bg-purple-500 text-white shadow-md shadow-purple-500/20" : "bg-white/5 text-white/50 hover:bg-white/10")}
                                                 onClick={() => setIsDrawing(false)}
                                                 title="Select / Move"
                                             >
                                                 <MousePointer2 size={20} />
                                             </button>
                                             <button
-                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "pencil" ? "bg-red-500 text-white shadow-md shadow-red-500/20" : "bg-white/5 text-white/50 hover:bg-white/10")}
                                                 onClick={() => { setBrushType("pencil"); setIsDrawing(true); }}
                                                 title="Pencil"
                                             >
                                                 <Pencil size={20} />
                                             </button>
                                             <button
-                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "marker" ? "bg-blue-500 text-white shadow-md shadow-blue-500/20" : "bg-white/5 text-white/50 hover:bg-white/10")}
                                                 onClick={() => { setBrushType("marker"); setIsDrawing(true); }}
                                                 title="Marker"
                                             >
                                                 <PenTool size={20} />
                                             </button>
                                             <button
-                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "highlighter" ? "bg-yellow-500 text-white shadow-md shadow-yellow-500/20" : "bg-white/5 text-white/50 hover:bg-white/10")}
                                                 onClick={() => { setBrushType("highlighter"); setIsDrawing(true); }}
                                                 title="Highlighter"
                                             >
                                                 <Highlighter size={20} />
                                             </button>
                                             <button
-                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-gray-600 text-white shadow-md" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}
+                                                className={cn("p-3 rounded-xl transition-all", isDrawing && brushType === "eraser" ? "bg-zinc-700 text-white shadow-md" : "bg-white/5 text-white/50 hover:bg-white/10")}
                                                 onClick={() => { setBrushType("eraser"); setIsDrawing(true); }}
                                                 title="Eraser"
                                             >

@@ -127,10 +127,10 @@ export const CardWrapper = ({
                             currentFace === "front" ? "z-10 pointer-events-auto" : "z-0 pointer-events-none"
                         )}
                         style={{
-                            backgroundColor,
+                            backgroundColor: backgroundColor || "white",
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
-                            transform: "translateZ(1px)" // Push forward slightly to avoid z-fighting
+                            transform: "translateZ(1px)"
                         }}
                         onClick={() => { if (interactive) { setCurrentFace("back"); onOpenChange?.(true); } }}
                     >
@@ -147,8 +147,8 @@ export const CardWrapper = ({
                             currentFace === "back" ? "z-10 pointer-events-auto" : "z-0 pointer-events-none"
                         )}
                         style={{
-                            backgroundColor,
-                            transform: "rotateY(180deg) translateZ(1px)", // Push 'forward' relative to its own face direction
+                            backgroundColor: backgroundColor || "white",
+                            transform: "rotateY(180deg) translateZ(1px)",
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden",
                         }}
@@ -157,7 +157,7 @@ export const CardWrapper = ({
                         {/* Optional Postcard Dividers/Stamp Area */}
                         <div className="absolute inset-0 pointer-events-none opacity-20">
                             <div className="absolute top-8 right-8 w-20 h-24 border-2 border-gray-400" />
-                            <div className="absolute top-[50%] left-[50%] w-[1px] h-[80%] bg-gray-400 -translate-x-1/2 -translate-y-1/2" />
+                            <div className="absolute top-[50%] left-[50%] w-px h-[80%] bg-gray-400 -translate-x-1/2 -translate-y-1/2" />
                         </div>
                         {backContent}
                     </div>
@@ -178,8 +178,8 @@ export const CardWrapper = ({
 
                     {/* 2. Card Insert (Slides Up) */}
                     <motion.div
-                        className="absolute left-4 right-4 bottom-3 bg-white shadow-sm border border-gray-100 flex items-center justify-center p-6 text-center overflow-hidden"
-                        style={{ height: h * 0.85 }}
+                        className="absolute left-4 right-4 bottom-3 shadow-sm border border-gray-100 flex items-center justify-center p-6 text-center overflow-hidden"
+                        style={{ height: h * 0.85, backgroundColor: backgroundColor || "white" }}
                         initial={{ y: 0 }}
                         animate={{
                             y: isOpen ? -150 : 0,
@@ -285,11 +285,11 @@ export const CardWrapper = ({
         return (
             <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
                 <div
-                    className="relative bg-white shadow-lg overflow-hidden border border-gray-200 transition-all duration-500"
+                    className="relative shadow-lg overflow-hidden border border-gray-200 transition-all duration-500"
                     style={{
                         width: w,
                         height: h,
-                        backgroundColor,
+                        backgroundColor: backgroundColor || "white",
                     }}
                 >
                     {frontContent}
@@ -331,7 +331,7 @@ export const CardWrapper = ({
                         <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Inside Right</div>
                     )}
                     <motion.div
-                        className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/20 pointer-events-none"
+                        className="absolute inset-0 bg-linear-to-l from-transparent via-transparent to-black/20 pointer-events-none"
                         animate={{ opacity: isOpen ? 0.6 : 0 }}
                     />
                 </div>
@@ -375,7 +375,7 @@ export const CardWrapper = ({
                     >
                         {frontContent}
                         <motion.div
-                            className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/40 to-white/0 pointer-events-none"
+                            className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/40 to-white/0 pointer-events-none"
                             animate={{ opacity: isOpen ? 0 : 0 }}
                         />
                         <motion.div
@@ -399,7 +399,7 @@ export const CardWrapper = ({
                         onClick={() => handleFaceClick("inside-left")}
                     >
                         {insideLeftContent}
-                        <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-black/10 to-transparent pointer-events-none" />
+                        <div className="absolute inset-y-0 right-0 w-12 bg-linear-to-l from-black/10 to-transparent pointer-events-none" />
                         {!interactive && isOpen && (
                             <div className="absolute top-2 left-2 text-xs text-gray-300 pointer-events-none">Inside Left</div>
                         )}

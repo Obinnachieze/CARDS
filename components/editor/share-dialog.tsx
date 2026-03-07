@@ -191,7 +191,7 @@ export function ShareDialog() {
                     <span className="hidden sm:inline">Share</span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-white text-black border-gray-200">
+            <DialogContent className="sm:max-w-md bg-[#0c0c0e] text-zinc-100 border-white/10 shadow-2xl">
                 <DialogHeader>
                     <DialogTitle>Share design</DialogTitle>
                     <DialogDescription>
@@ -212,17 +212,17 @@ export function ShareDialog() {
                 )}
 
                 <Tabs defaultValue="link" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-4 bg-gray-100">
-                        <TabsTrigger value="link">Share Link</TabsTrigger>
-                        <TabsTrigger value="schedule">Schedule Delivery</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mb-4 bg-white/5 border border-white/5">
+                        <TabsTrigger value="link" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">Share Link</TabsTrigger>
+                        <TabsTrigger value="schedule" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">Schedule Delivery</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="link" className="space-y-4 outline-none">
                         {!isSaved ? (
                             <div className="space-y-3 mt-4">
-                                <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                                    <AlertCircle size={18} className="text-amber-600 shrink-0" />
-                                    <p className="text-sm text-amber-800">
+                                <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
+                                    <AlertCircle size={18} className="text-amber-400 shrink-0" />
+                                    <p className="text-sm text-amber-200/80">
                                         Your project needs to be saved before you can share it.
                                     </p>
                                 </div>
@@ -246,7 +246,7 @@ export function ShareDialog() {
                                             id="link"
                                             value={shareUrl}
                                             readOnly
-                                            className="bg-gray-50 border-gray-300 text-gray-900"
+                                            className="bg-zinc-950 border-white/10 text-white focus-visible:ring-purple-500"
                                         />
                                     </div>
                                     <Button
@@ -268,13 +268,13 @@ export function ShareDialog() {
                                 </div>
 
                                 {/* QR Code Display */}
-                                <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col items-center space-y-4">
+                                <div className="mt-6 pt-6 border-t border-white/5 flex flex-col items-center space-y-4">
                                     <div className="text-center">
-                                        <h4 className="text-sm font-semibold text-gray-900">Scan to View</h4>
-                                        <p className="text-xs text-gray-500 mt-1">Perfect for printing or sharing on screens</p>
+                                        <h4 className="text-sm font-semibold text-zinc-100">Scan to View</h4>
+                                        <p className="text-xs text-zinc-500 mt-1">Perfect for printing or sharing on screens</p>
                                     </div>
 
-                                    <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-center">
+                                    <div className="bg-white p-4 rounded-xl border border-white/10 shadow-sm flex items-center justify-center">
                                         <QRCodeSVG
                                             id="share-qr-code"
                                             value={shareUrl}
@@ -290,7 +290,7 @@ export function ShareDialog() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="w-full max-w-[200px] border-gray-300 gap-2"
+                                        className="w-full max-w-[200px] border-white/10 bg-white/5 hover:bg-white/10 text-zinc-300 gap-2"
                                         onClick={handleDownloadQRCode}
                                     >
                                         <Download size={16} />
@@ -311,44 +311,44 @@ export function ShareDialog() {
                     <TabsContent value="schedule" className="space-y-4 outline-none mt-4">
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="recipient">Recipient Email</Label>
+                                <Label htmlFor="recipient" className="text-zinc-300">Recipient Email</Label>
                                 <Input
                                     id="recipient"
                                     type="email"
                                     placeholder="friend@example.com"
-                                    className="border-gray-300"
+                                    className="bg-zinc-950 border-white/10 text-white focus-visible:ring-purple-500"
                                     value={recipientEmail}
                                     onChange={(e) => setRecipientEmail(e.target.value)}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="sender">Your Name (Optional)</Label>
+                                <Label htmlFor="sender" className="text-zinc-300">Your Name (Optional)</Label>
                                 <Input
                                     id="sender"
                                     placeholder="John Doe"
-                                    className="border-gray-300"
+                                    className="bg-zinc-950 border-white/10 text-white focus-visible:ring-purple-500"
                                     value={senderName}
                                     onChange={(e) => setSenderName(e.target.value)}
                                 />
                             </div>
 
                             <div className="space-y-2 flex flex-col">
-                                <Label>Delivery Date</Label>
+                                <Label className="text-zinc-300">Delivery Date</Label>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant={"outline"}
                                             className={cn(
-                                                "w-full justify-start text-left font-normal border-gray-300",
-                                                !date && "text-muted-foreground"
+                                                "w-full justify-start text-left font-normal bg-zinc-950 border-white/10 text-zinc-300 hover:bg-zinc-900",
+                                                !date && "text-zinc-600"
                                             )}
                                         >
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {date ? format(date, "PPP") : <span>Pick a date</span>}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 bg-white" align="start">
+                                    <PopoverContent className="w-auto p-0 bg-zinc-900 border-white/10" align="start">
                                         <Calendar
                                             mode="single"
                                             selected={date}
