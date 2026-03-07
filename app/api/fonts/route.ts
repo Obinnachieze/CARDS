@@ -11,7 +11,7 @@ export async function GET() {
 
     try {
         const response = await fetch(`${BASE_URL}?key=${API_KEY}&sort=popularity`, {
-            next: { revalidate: 3600 } // Cache for 1 hour
+            cache: "no-store" // Response exceeds Next.js 2MB cache limit
         });
 
         if (!response.ok) {
@@ -19,7 +19,11 @@ export async function GET() {
         }
 
         const data = await response.json();
-        return NextResponse.json(data);
+        return NextResponse.json(data, {
+            headers: {
+                "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200"
+            }
+        });
     } catch (error) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
