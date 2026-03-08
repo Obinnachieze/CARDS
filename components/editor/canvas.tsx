@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { useEditor } from "./editor-context";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -154,6 +154,46 @@ export const Canvas = () => {
         }
     };
 
+    // Pinch-to-zoom for mobile
+    const pinchStartDistance = useRef<number | null>(null);
+    const pinchStartZoom = useRef<number>(1);
+
+    const getTouchDistance = (touches: React.TouchList) => {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (e.touches.length === 2) {
+            // Pinch start
+            pinchStartDistance.current = getTouchDistance(e.touches);
+            pinchStartZoom.current = zoom;
+        } else if (e.touches.length === 1) {
+            onTouchStart(e);
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (e.touches.length === 2 && pinchStartDistance.current !== null) {
+            const currentDistance = getTouchDistance(e.touches);
+            const scaleFactor = currentDistance / pinchStartDistance.current;
+            const newZoom = Math.min(Math.max(pinchStartZoom.current * scaleFactor, 0.5), 3);
+            setZoom(newZoom);
+        } else if (e.touches.length === 1) {
+            onTouchMove(e);
+        }
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (pinchStartDistance.current !== null && e.touches.length < 2) {
+            pinchStartDistance.current = null;
+        }
+        if (e.touches.length === 0) {
+            onTouchEnd();
+        }
+    };
+
     return (
         <div
             className="h-screen w-full bg-linear-to-br from-[#09090b] via-[#130b1c] to-[#09090b] bg-fixed overflow-hidden relative flex flex-col items-center justify-center pb-32 md:pb-36 touch-none"
@@ -165,9 +205,9 @@ export const Canvas = () => {
                     "w-full h-full flex flex-col items-center justify-center transition-all duration-300 transform-gpu scale-[0.85] md:scale-[0.9]",
                     activeTool ? "origin-top translate-y-4 md:translate-y-0" : ""
                 )}
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
             >
                 <motion.div
                     key={card.id}
@@ -227,7 +267,8 @@ export const Canvas = () => {
             </div>
 
             {/* Floating Zoom Controls - Essential for Mobile - Lifted slightly */}
-            <div className="absolute right-4 bottom-32 md:bottom-16 z-50 flex flex-col gap-2">
+            {/* Zoom controls - hidden on mobile, use pinch-to-zoom instead */}
+            <div className="absolute right-4 bottom-32 md:bottom-16 z-50 hidden md:flex flex-col gap-2">
                 <div className="bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 flex flex-col gap-1 shadow-2xl">
                     <Button
                         variant="ghost"
