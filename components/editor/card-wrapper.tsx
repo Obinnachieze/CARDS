@@ -298,29 +298,19 @@ export const CardWrapper = ({
         );
     }
 
-    // FOLDABLE MODE - Centered Expansion
-    // Wrapper animates Width: 450 -> 900.
-    // Content is pinned to Right.
-    // Front Cover rotates -180deg (Left) to reveal Inside Left.
+    // FOLDABLE MODE - Card stays centered, only the flap folds open
+    // The inside-right panel stays in place, the front cover folds to the left.
 
     return (
         <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
-            <motion.div
+            <div
                 className="relative transform-style-3d bg-transparent"
-                style={{ height: h }}
-                initial={{ width: w, x: 0 }}
-                animate={{
-                    width: isOpen ? w * 2 : w,
-                    x: isOpen ? -(w / 2) : 0 // Keep the right panel centered (300px wide, moving container half its width left)
-                }}
-                transition={{ duration: 1.0, ease: [0.25, 0.1, 0.25, 1] }}
+                style={{ width: w, height: h }}
             >
-                {/* RIGHT SIDE (Inside Right) - Pinned to Right */}
+                {/* Inside Right - Always visible behind the front cover, stays centered */}
                 <div
-                    className="absolute right-0 top-0 z-0 overflow-hidden border border-gray-200 rounded-r-md bg-white"
+                    className="absolute inset-0 z-0 overflow-hidden border border-gray-200 rounded-md bg-white"
                     style={{
-                        width: w,
-                        height: h,
                         backgroundColor,
                         transform: "translateZ(-1px)"
                     }}
@@ -336,10 +326,9 @@ export const CardWrapper = ({
                     />
                 </div>
 
-                {/* LEFT SIDE (Front Cover) - Pinned to Right, Rotates Left */}
-                {/* LEFT SIDE (Front Cover) - Pinned to Right, Rotates Left */}
+                {/* Front Cover - Folds open to the left, hinged on its LEFT edge */}
                 <motion.div
-                    className="absolute right-0 top-0 z-10 origin-left"
+                    className="absolute inset-0 z-10 origin-left"
                     style={{
                         width: w,
                         height: h,
@@ -355,16 +344,15 @@ export const CardWrapper = ({
                         className="absolute left-0 top-0 bottom-0"
                         style={{
                             width: "4px",
-                            backgroundColor: backgroundColor, // Match card color
-                            filter: "brightness(0.85)", // Darken for 3D effect
-                            transform: "rotateY(90deg) translateZ(-2px)", // Center on the edge
-                            // Removed backfaceVisibility: hidden so it's visible from both sides of the fold
+                            backgroundColor: backgroundColor,
+                            filter: "brightness(0.85)",
+                            transform: "rotateY(90deg) translateZ(-2px)",
                         }}
                     />
 
                     {/* FRONT FACE (Visible when Closed/0deg) */}
                     <div
-                        className="absolute inset-0 bg-white cursor-pointer rounded-r-md overflow-hidden border border-gray-200"
+                        className="absolute inset-0 bg-white cursor-pointer rounded-md overflow-hidden border border-gray-200"
                         style={{
                             backgroundColor,
                             backfaceVisibility: "hidden",
@@ -389,7 +377,7 @@ export const CardWrapper = ({
 
                     {/* INSIDE LEFT FACE (Visible when Open/-180deg) */}
                     <div
-                        className="absolute inset-0 bg-white cursor-pointer rounded-l-md overflow-hidden border border-gray-200"
+                        className="absolute inset-0 bg-white cursor-pointer rounded-md overflow-hidden border border-gray-200"
                         style={{
                             backgroundColor,
                             transform: "rotateY(180deg) translateZ(1px)",
@@ -406,7 +394,7 @@ export const CardWrapper = ({
                     </div>
                 </motion.div>
 
-            </motion.div>
+            </div>
         </div>
     );
 };
