@@ -1,5 +1,5 @@
-import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { notFound, redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
 import { ShareEditorWrapper } from "@/components/editor/share-editor-wrapper";
 import { CardPage, CardMode } from "@/components/editor/types";
 
@@ -15,36 +15,29 @@ interface ProjectData {
 
 export default async function SharedProjectPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    const supabase = await createClient();
 
-    // Use admin client to bypass RLS — this page does its own access control below
-    const adminSupabase = await createAdminClient();
-
-    // Fetch project using admin client (bypasses RLS so anonymous users can view shared cards)
-    const { data: project, error } = await adminSupabase
+    // Fetch project - use regular client
+    const { data: project, error } = await supabase
         .from("projects")
         .select("*")
         .eq("id", id)
+        .eq("is_public", true)
         .single();
 
     if (error || !project) {
-        console.error("Project not found or error:", error);
+        console.error("Shared project not found or not public:", error?.message);
         notFound();
     }
 
     const projectData = project as ProjectData;
 
-    // Check visibility — use normal client for auth
-    const supabase = await createClient();
+    // Check if the viewer is the owner
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
     const isOwner = user && user.id === projectData.user_id;
-
-    if (!projectData.is_public && !isOwner) {
-        // If private and not owner, 404
-        notFound();
-    }
 
     // If owner, we pass the ID so they can edit directly (updates the DB)
     // If not owner, we pass null so it acts as "Save As" (Fork)
