@@ -299,7 +299,9 @@ export const CardWrapper = ({
     }
 
     // FOLDABLE MODE - Card stays centered, only the flap folds open
-    // The inside-right panel stays in place, the front cover folds to the left.
+    // Portrait: flap opens to the LEFT (rotateY, origin-left)
+    // Landscape: flap opens UPWARD (rotateX, origin-top)
+    const isLandscape = cardOrientation === "landscape";
 
     return (
         <div className="perspective-1000 flex items-center justify-center w-full h-full p-10">
@@ -318,35 +320,54 @@ export const CardWrapper = ({
                 >
                     {insideRightContent}
                     {!interactive && isOpen && (
-                        <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Inside Right</div>
+                        <div className="absolute top-2 right-2 text-xs text-gray-300 pointer-events-none">Inside</div>
                     )}
                     <motion.div
-                        className="absolute inset-0 bg-linear-to-l from-transparent via-transparent to-black/20 pointer-events-none"
+                        className={cn(
+                            "absolute inset-0 pointer-events-none",
+                            isLandscape
+                                ? "bg-linear-to-b from-black/20 via-transparent to-transparent"
+                                : "bg-linear-to-l from-transparent via-transparent to-black/20"
+                        )}
                         animate={{ opacity: isOpen ? 0.6 : 0 }}
                     />
                 </div>
 
-                {/* Front Cover - Folds open to the left, hinged on its LEFT edge */}
+                {/* Front Cover - Folds open based on orientation */}
                 <motion.div
-                    className="absolute inset-0 z-10 origin-left"
+                    className={cn(
+                        "absolute inset-0 z-10",
+                        isLandscape ? "origin-top" : "origin-left"
+                    )}
                     style={{
                         width: w,
                         height: h,
                         transformStyle: "preserve-3d"
                     }}
-                    animate={{
-                        rotateY: isOpen ? -180 : 0,
-                    }}
+                    animate={
+                        isLandscape
+                            ? { rotateX: isOpen ? 180 : 0 }
+                            : { rotateY: isOpen ? -180 : 0 }
+                    }
                     transition={{ duration: 1.0, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                     {/* SPINE (Thickness at the hinge) */}
                     <div
-                        className="absolute left-0 top-0 bottom-0"
+                        className={cn(
+                            "absolute",
+                            isLandscape
+                                ? "top-0 left-0 right-0"
+                                : "left-0 top-0 bottom-0"
+                        )}
                         style={{
-                            width: "4px",
+                            ...(isLandscape
+                                ? { height: "4px", width: "100%" }
+                                : { width: "4px", height: "100%" }),
                             backgroundColor: backgroundColor,
                             filter: "brightness(0.85)",
-                            transform: "rotateY(90deg) translateZ(-2px)",
+                            transform: isLandscape
+                                ? "rotateX(-90deg) translateZ(-2px)"
+                                : "rotateY(90deg) translateZ(-2px)",
                         }}
                     />
 
@@ -363,10 +384,6 @@ export const CardWrapper = ({
                     >
                         {frontContent}
                         <motion.div
-                            className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/40 to-white/0 pointer-events-none"
-                            animate={{ opacity: isOpen ? 0 : 0 }}
-                        />
-                        <motion.div
                             className="absolute inset-0 bg-black/20 pointer-events-none"
                             animate={{ opacity: isOpen ? 0.3 : 0 }}
                         />
@@ -375,19 +392,28 @@ export const CardWrapper = ({
                         )}
                     </div>
 
-                    {/* INSIDE LEFT FACE (Visible when Open/-180deg) */}
+                    {/* INSIDE LEFT FACE (Visible when Open) */}
                     <div
                         className="absolute inset-0 bg-white cursor-pointer rounded-md overflow-hidden border border-gray-200"
                         style={{
                             backgroundColor,
-                            transform: "rotateY(180deg) translateZ(1px)",
+                            transform: isLandscape
+                                ? "rotateX(-180deg) translateZ(1px)"
+                                : "rotateY(180deg) translateZ(1px)",
                             backfaceVisibility: "hidden",
                             WebkitBackfaceVisibility: "hidden"
                         }}
                         onClick={() => handleFaceClick("inside-left")}
                     >
                         {insideLeftContent}
-                        <div className="absolute inset-y-0 right-0 w-12 bg-linear-to-l from-black/10 to-transparent pointer-events-none" />
+                        <div
+                            className={cn(
+                                "absolute pointer-events-none",
+                                isLandscape
+                                    ? "inset-x-0 bottom-0 h-12 bg-linear-to-t from-black/10 to-transparent"
+                                    : "inset-y-0 right-0 w-12 bg-linear-to-l from-black/10 to-transparent"
+                            )}
+                        />
                         {!interactive && isOpen && (
                             <div className="absolute top-2 left-2 text-xs text-gray-300 pointer-events-none">Inside Left</div>
                         )}
